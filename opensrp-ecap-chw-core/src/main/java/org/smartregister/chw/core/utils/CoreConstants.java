@@ -751,6 +751,7 @@ public class CoreConstants {
         public static final String UPDATES = "Updates";
         public static final String IDENTIFICATION = "Identification";
         public static final String PMTCT = "Pmtct";
+        public static final String CHIMWEMWE = "Chimwemwe Groups";
 
     }
 
@@ -992,6 +993,7 @@ public class CoreConstants {
         public static final String DASHBOARD_ACTIVITY = "DASHBOARD_ACTIVITY";
         public static final String HTS_ACTIVITY = "HTS";
         public static final String PMTCT = "PMTCT_ACTIVITY";
+        public static final String CHIMWEMWE_REGISTER_ACTIVITY = "CHIMWEMWE_REGISTER_ACTIVITY";
 
     }
 

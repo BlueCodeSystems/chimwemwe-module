@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F0F4F8">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/chimwemwe_header_bg"
+        app:elevation="0dp">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:title="Add Participant"
+            app:titleTextColor="#FFFFFF"
+            app:navigationIconTint="#FFFFFF"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="14dp"
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="#FFFFFF">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <!-- CAREGIVER -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="CAREGIVER"
+                        android:textSize="10sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/chimwemwe_primary"
+                        android:letterSpacing="0.12" />
+
+                    <EditText
+                        android:id="@+id/et_caregiver_first_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:hint="Caregiver First Name"
+                        android:inputType="textCapWords"
+                        android:textSize="15sp"
+                        android:textColor="@color/chimwemwe_text_primary"
+                        android:background="@drawable/rounded_corner_edit_text_bg"
+                        android:padding="10dp" />
+
+                    <EditText
+                        android:id="@+id/et_caregiver_surname"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:hint="Caregiver Surname"
+                        android:inputType="textCapWords"
+                        android:textSize="15sp"
+                        android:textColor="@color/chimwemwe_text_primary"
+                        android:background="@drawable/rounded_corner_edit_text_bg"
+                        android:padding="10dp" />
+
+                    <EditText
+                        android:id="@+id/et_caregiver_id"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:hint="Caregiver ID"
+                        android:inputType="text"
+                        android:textSize="15sp"
+                        android:textColor="@color/chimwemwe_text_primary"
+                        android:background="@drawable/rounded_corner_edit_text_bg"
+                        android:padding="10dp" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="16dp"
+                        android:background="#F0F0F0" />
+
+                    <!-- CHILD -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="CHILD / VCA"
+                        android:textSize="10sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/chimwemwe_primary"
+                        android:letterSpacing="0.12" />
+
+                    <EditText
+                        android:id="@+id/et_child_first_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:hint="Child First Name"
+                        android:inputType="textCapWords"
+                        android:textSize="15sp"
+                        android:textColor="@color/chimwemwe_text_primary"
+                        android:background="@drawable/rounded_corner_edit_text_bg"
+                        android:padding="10dp" />
+
+                    <EditText
+                        android:id="@+id/et_child_surname"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:hint="Child Surname"
+                        android:inputType="textCapWords"
+                        android:textSize="15sp"
+                        android:textColor="@color/chimwemwe_text_primary"
+                        android:background="@drawable/rounded_corner_edit_text_bg"
+                        android:padding="10dp" />
+
+                    <EditText
+                        android:id="@+id/et_child_dob"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:hint="Date of Birth (DD/MM/YY)"
+                        android:inputType="text"
+                        android:textSize="15sp"
+                        android:textColor="@color/chimwemwe_text_primary"
+                        android:background="@drawable/rounded_corner_edit_text_bg"
+                        android:padding="10dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:text="Sex of Child"
+                        android:textSize="12sp"
+                        android:textColor="@color/chimwemwe_text_secondary" />
+
+                    <Spinner
+                        android:id="@+id/spinner_child_sex"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_marginTop="4dp"
+                        android:background="@drawable/rounded_corner_edit_text_bg"
+                        android:padding="4dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:text="Enrolled in OVC Comprehensive Program?"
+                        android:textSize="12sp"
+                        android:textColor="@color/chimwemwe_text_secondary" />
+
+                    <Spinner
+                        android:id="@+id/spinner_enrolled_ovc"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_marginTop="4dp"
+                        android:background="@drawable/rounded_corner_edit_text_bg"
+                        android:padding="4dp" />
+
+                    <EditText
+                        android:id="@+id/et_vca_id"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:hint="VCA ID (if enrolled)"
+                        android:inputType="text"
+                        android:textSize="15sp"
+                        android:textColor="@color/chimwemwe_text_primary"
+                        android:background="@drawable/rounded_corner_edit_text_bg"
+                        android:padding="10dp" />
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <Button
+                android:id="@+id/btn_save_participant"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="20dp"
+                android:text="Save Participant"
+                android:textAllCaps="false"
+                android:textSize="16sp"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="@color/chimwemwe_primary" />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</LinearLayout>

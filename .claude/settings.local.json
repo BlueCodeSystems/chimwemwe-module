@@ -1,8 +1,20 @@
 {
   "permissions": {
     "allow": [
-      "Bash(.gradlew:*)",
-      "Bash(C:UsersBluecodeDocumentsopensrp-client-ecap-chwgradlew.bat :opensrp-ecap-chw:assembleEcapDebug)"
+      "Bash(find . -name \"*.java\" -exec grep -l \"class DashboardViewModel\" {} \\\\;)",
+      "Bash(grep -v \"//.*@\")",
+      "Bash(ic_children)",
+      "Bash(ic_household)",
+      "Bash(ic_calender)",
+      "Bash(ic_mother)",
+      "Bash(btn_blue\")",
+      "Bash(findstr /i \"chimwemwe\")",
+      "Bash(./gradlew --stop)",
+      "Bash(find C:\\\\Users\\\\Bluecode\\\\Documents\\\\Chimwemwe App\\\\opensrp-ecap-chw\\\\src\\\\main\\\\java:*)",
+      "Bash(find:*)",
+      "Bash(xargs grep:*)",
+      "Bash(grep -v \":0$\")",
+      "Bash(grep:*)"
     ]
   }
 }

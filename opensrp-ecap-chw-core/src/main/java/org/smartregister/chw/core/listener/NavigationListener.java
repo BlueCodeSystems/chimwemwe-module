@@ -72,6 +72,9 @@ public class NavigationListener implements View.OnClickListener {
                 case CoreConstants.DrawerMenu.UPDATES:
                     startRegisterActivity(getActivity(CoreConstants.REGISTERED_ACTIVITIES.UPDATES_REGISTER_ACTIVITY));
                     break;
+                case CoreConstants.DrawerMenu.CHIMWEMWE:
+                    startRegisterActivity(getActivity(CoreConstants.REGISTERED_ACTIVITIES.CHIMWEMWE_REGISTER_ACTIVITY));
+                    break;
                 default:
                     Utils.showShortToast(activity.getApplicationContext(), "Unspecified navigation action");
                     break;

@@ -1,0 +1,96 @@
+{
+  "count": "1",
+  "encounter_type": "Chimwemwe Group Registration",
+  "entity_id": "",
+  "metadata": {
+    "start": {
+      "openmrs_entity_parent": "",
+      "openmrs_entity": "person_attribute",
+      "openmrs_data_type": "start",
+      "openmrs_entity_id": "163137AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    },
+    "end": {
+      "openmrs_entity_parent": "",
+      "openmrs_entity": "person_attribute",
+      "openmrs_data_type": "end",
+      "openmrs_entity_id": "163138AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    },
+    "today": {
+      "openmrs_entity_parent": "",
+      "openmrs_entity": "encounter",
+      "openmrs_entity_id": "encounter_date"
+    },
+    "deviceid": {
+      "openmrs_entity_parent": "",
+      "openmrs_entity": "person_attribute",
+      "openmrs_data_type": "deviceid",
+      "openmrs_entity_id": "163149AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    },
+    "subscriberid": {
+      "openmrs_entity_parent": "",
+      "openmrs_entity": "person_attribute",
+      "openmrs_data_type": "subscriberid",
+      "openmrs_entity_id": "163150AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    },
+    "simserial": {
+      "openmrs_entity_parent": "",
+      "openmrs_entity": "person_attribute",
+      "openmrs_data_type": "simserial",
+      "openmrs_entity_id": "163151AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    },
+    "phonenumber": {
+      "openmrs_entity_parent": "",
+      "openmrs_entity": "person_attribute",
+      "openmrs_data_type": "phonenumber",
+      "openmrs_entity_id": "163152AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    },
+    "encounter_location": ""
+  },
+  "step1": {
+    "title": "Chimwemwe Group Details",
+    "display_back_button": "true",
+    "fields": [
+      {
+        "key": "group_name",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "group_name",
+        "type": "edit_text",
+        "hint": "Group Name",
+        "edit_type": "name",
+        "v_required": {
+          "value": "true",
+          "err": "Please enter the group name"
+        }
+      },
+      {
+        "key": "hotspot_name",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "hotspot_name",
+        "type": "edit_text",
+        "hint": "Hotspot Name",
+        "edit_type": "name",
+        "v_required": {
+          "value": "true",
+          "err": "Please enter the hotspot name"
+        }
+      },
+      {
+        "key": "created_date",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "created_date",
+        "type": "date_picker",
+        "hint": "Date Created",
+        "expanded": false,
+        "min_date": "today-10y",
+        "max_date": "today",
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
+      }
+    ]
+  }
+}

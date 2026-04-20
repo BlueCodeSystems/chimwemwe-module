@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.bluecodeltd.ecap.chw.BuildConfig;
 import com.bluecodeltd.ecap.chw.application.ChwApplication;
+import com.bluecodeltd.ecap.chw.dao.ChimwemweIndexDao;
 import com.bluecodeltd.ecap.chw.util.ChildDBConstants;
 import com.bluecodeltd.ecap.chw.util.ChwDBConstants;
 import com.bluecodeltd.ecap.chw.util.RepositoryUtils;
@@ -110,6 +111,24 @@ public class ChwRepositoryFlv {
                     break;
                 case 26:
                     upgradeToVersion26(db);
+                    break;
+                case 27:
+                    upgradeToVersion27(db);
+                    break;
+                case 28:
+                    upgradeToVersion28(db);
+                    break;
+                case 29:
+                    upgradeToVersion29(db);
+                    break;
+                case 30:
+                    upgradeToVersion30(db);
+                    break;
+                case 31:
+                    upgradeToVersion31(db);
+                    break;
+                case 32:
+                    upgradeToVersion32(db);
                     break;
                 default:
                     break;
@@ -1141,6 +1160,67 @@ public class ChwRepositoryFlv {
             db.execSQL("ALTER TABLE ec_household_service_report ADD COLUMN pregnant_breastfeeding TEXT");
         } catch (Exception e) {
             Timber.e(e, "upgradeToVersion26");
+        }
+    }
+
+    private static void upgradeToVersion27(SQLiteDatabase db) {
+        try {
+            // Create Chimwemwe index table — stores records from remote search & CSV import
+            ChimwemweIndexDao.createTable(db);
+        } catch (Exception e) {
+            Timber.e(e, "upgradeToVersion27");
+        }
+    }
+
+    private static void upgradeToVersion28(SQLiteDatabase db) {
+        try {
+            com.bluecodeltd.ecap.chw.dao.HotspotGroupDao.createTable(db);
+            com.bluecodeltd.ecap.chw.dao.ParticipantDao.createTable(db);
+            com.bluecodeltd.ecap.chw.dao.AttendanceDao.createTable(db);
+        } catch (Exception e) {
+            Timber.e(e, "upgradeToVersion28");
+        }
+    }
+
+    private static void upgradeToVersion29(SQLiteDatabase db) {
+        try {
+            com.bluecodeltd.ecap.chw.dao.MonthlyReviewDao.createTable(db);
+        } catch (Exception e) {
+            Timber.e(e, "upgradeToVersion29");
+        }
+    }
+
+    private static void upgradeToVersion30(SQLiteDatabase db) {
+        try {
+            // Add the 21 new columns to ec_chimwemwe_group (location, GPS, health facility,
+            // facilitators, and planned session dates 1–14)
+            com.bluecodeltd.ecap.chw.dao.HotspotGroupDao.migrateToV30(db);
+        } catch (Exception e) {
+            Timber.e(e, "upgradeToVersion30");
+        }
+    }
+
+    private static void upgradeToVersion31(SQLiteDatabase db) {
+        try {
+            // Add province + district to ec_chimwemwe_group
+            com.bluecodeltd.ecap.chw.dao.HotspotGroupDao.migrateToV31(db);
+            // Add referral columns to ec_chimwemwe_participant
+            com.bluecodeltd.ecap.chw.dao.ParticipantDao.migrateToV31(db);
+            // Add review_quarter to ec_chimwemwe_review
+            com.bluecodeltd.ecap.chw.dao.MonthlyReviewDao.migrateToV31(db);
+        } catch (Exception e) {
+            Timber.e(e, "upgradeToVersion31");
+        }
+    }
+
+    private static void upgradeToVersion32(SQLiteDatabase db) {
+        try {
+            // Add system-generated UUID column to ec_chimwemwe_group
+            com.bluecodeltd.ecap.chw.dao.HotspotGroupDao.migrateToV32(db);
+            // Add system-generated UUID column to ec_chimwemwe_participant
+            com.bluecodeltd.ecap.chw.dao.ParticipantDao.migrateToV32(db);
+        } catch (Exception e) {
+            Timber.e(e, "upgradeToVersion32");
         }
     }
 

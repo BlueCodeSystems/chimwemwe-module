@@ -1,0 +1,141 @@
+{
+  "count": "3",
+  "encounter_type": "Chimwemwe Participant Registration",
+  "entity_id": "",
+  "metadata": {
+    "start": {
+      "openmrs_entity_parent": "",
+      "openmrs_entity": "person_attribute",
+      "openmrs_data_type": "start",
+      "openmrs_entity_id": "163137AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    },
+    "end": {
+      "openmrs_entity_parent": "",
+      "openmrs_entity": "person_attribute",
+      "openmrs_data_type": "end",
+      "openmrs_entity_id": "163138AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    },
+    "today": {
+      "openmrs_entity_parent": "",
+      "openmrs_entity": "encounter",
+      "openmrs_entity_id": "encounter_date"
+    },
+    "deviceid": {
+      "openmrs_entity_parent": "",
+      "openmrs_entity": "person_attribute",
+      "openmrs_data_type": "deviceid",
+      "openmrs_entity_id": "163149AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    },
+    "subscriberid": {
+      "openmrs_entity_parent": "",
+      "openmrs_entity": "person_attribute",
+      "openmrs_data_type": "subscriberid",
+      "openmrs_entity_id": "163150AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    },
+    "simserial": {
+      "openmrs_entity_parent": "",
+      "openmrs_entity": "person_attribute",
+      "openmrs_data_type": "simserial",
+      "openmrs_entity_id": "163151AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    },
+    "phonenumber": {
+      "openmrs_entity_parent": "",
+      "openmrs_entity": "person_attribute",
+      "openmrs_data_type": "phonenumber",
+      "openmrs_entity_id": "163152AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    },
+    "encounter_location": ""
+  },
+
+  "step1": {
+    "title": "Referral Details",
+    "display_back_button": "true",
+    "fields": [
+      {
+        "key": "referral_note",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "referral_note",
+        "type": "toaster_notes",
+        "text": "Complete this section if the participant is being referred for a service. Leave blank if no referral.",
+        "toaster_type": "info"
+      },
+      {
+        "key": "who_referred",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "who_referred",
+        "type": "spinner",
+        "hint": "Who is being referred for services?",
+        "values": ["-- Select --", "Caregiver", "Child", "Both"],
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
+      },
+      {
+        "key": "service_referred_for",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "service_referred_for",
+        "type": "edit_text",
+        "hint": "Indicate the service(s) being referred for",
+        "edit_type": "name",
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
+      },
+      {
+        "key": "referral_date",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "referral_date",
+        "type": "date_picker",
+        "hint": "Date of Referral (DD/MM/YY)",
+        "expanded": false,
+        "min_date": "today-3y",
+        "max_date": "today+1y",
+        "v_required": { "value": "false", "err": "" }
+      },
+      {
+        "key": "receiving_org",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "receiving_org",
+        "type": "edit_text",
+        "hint": "Name of receiving organization",
+        "edit_type": "name",
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
+      },
+      {
+        "key": "job_title",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "job_title",
+        "type": "edit_text",
+        "hint": "Job title of individual providing services",
+        "edit_type": "name",
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
+      },
+      {
+        "key": "service_date",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "service_date",
+        "type": "date_picker",
+        "hint": "Date service was provided (DD/MM/YY)",
+        "expanded": false,
+        "min_date": "today-3y",
+        "max_date": "today+1y",
+        "v_required": { "value": "false", "err": "" }
+      }
+    ]
+  }
+}

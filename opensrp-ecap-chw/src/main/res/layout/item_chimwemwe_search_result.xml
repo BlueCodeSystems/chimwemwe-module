@@ -1,0 +1,151 @@
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/card_result"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="12dp"
+    android:layout_marginEnd="12dp"
+    android:layout_marginTop="4dp"
+    android:layout_marginBottom="4dp"
+    android:clickable="false"
+    android:focusable="false"
+    app:cardCornerRadius="10dp"
+    app:cardElevation="1dp"
+    app:cardMaxElevation="2dp"
+    app:cardUseCompatPadding="true"
+    app:cardPreventCornerOverlap="true"
+    app:cardBackgroundColor="@android:color/white">
+
+    <LinearLayout
+        android:id="@+id/layout_root"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="12dp"
+        android:paddingEnd="10dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:baselineAligned="false">
+
+        <!-- Avatar -->
+        <FrameLayout
+            android:id="@+id/avatar_container"
+            android:layout_width="38dp"
+            android:layout_height="38dp"
+            android:layout_marginEnd="10dp"
+            android:foregroundGravity="center"
+            android:background="@drawable/bg_avatar_circle"
+            android:clickable="false"
+            android:focusable="false">
+
+            <TextView
+                android:id="@+id/tv_avatar_initial"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="C"
+                android:textAllCaps="true"
+                android:textColor="@android:color/white"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif-medium"
+                android:includeFontPadding="false"
+                android:gravity="center" />
+        </FrameLayout>
+
+        <!-- Info Section -->
+        <LinearLayout
+            android:id="@+id/layout_info"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="start"
+            android:layout_marginEnd="8dp">
+
+            <!-- Name -->
+            <TextView
+                android:id="@+id/tv_result_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Chimwemwe Zulu"
+                android:textColor="@color/chimwemwe_text_primary"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif-medium"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:includeFontPadding="false" />
+
+            <!-- Meta (Gender + Age) -->
+            <TextView
+                android:id="@+id/tv_result_meta"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="Female • 12 years"
+                android:textColor="@color/chimwemwe_text_secondary"
+                android:textSize="12sp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:includeFontPadding="false" />
+
+            <!-- Unique ID -->
+            <TextView
+                android:id="@+id/tv_result_id"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:textColor="@color/chimwemwe_text_secondary"
+                android:textSize="11sp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:includeFontPadding="false" />
+
+            <!-- Badge -->
+            <TextView
+                android:id="@+id/tv_result_subpop"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:text="VCA"
+                android:textAllCaps="true"
+                android:textColor="@android:color/white"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif-medium"
+                android:background="@drawable/bg_status_badge"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:paddingTop="3dp"
+                android:paddingBottom="3dp"
+                android:gravity="center"
+                android:includeFontPadding="false" />
+        </LinearLayout>
+
+        <!-- Save Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_save_result"
+            android:layout_width="wrap_content"
+            android:layout_height="34dp"
+            android:minWidth="0dp"
+            android:minHeight="34dp"
+            android:text="Save"
+            android:textAllCaps="false"
+            android:textColor="@android:color/white"
+            android:textSize="12sp"
+            android:fontFamily="sans-serif-medium"
+            android:gravity="center"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:elevation="0dp"
+            android:stateListAnimator="@null"
+            android:backgroundTint="@color/chimwemwe_primary"
+            app:cornerRadius="8dp"
+            app:rippleColor="@color/chimwemwe_primary_light" />
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

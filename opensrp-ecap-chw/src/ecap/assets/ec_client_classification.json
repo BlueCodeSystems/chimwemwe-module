@@ -758,6 +758,48 @@
             "creates_case": [
               "ec_household_visitation_for_vca_0_20_years"
             ]
+          },
+          {
+            "field": "eventType",
+            "field_value": "Chimwemwe Group Registration",
+            "creates_case": [
+              "ec_chimwemwe_group"
+            ]
+          },
+          {
+            "field": "eventType",
+            "field_value": "Chimwemwe Participant Registration",
+            "creates_case": [
+              "ec_chimwemwe_participant"
+            ]
+          },
+          {
+            "field": "eventType",
+            "field_value": "Chimwemwe Participant Registration OVC Enrolled",
+            "creates_case": [
+              "ec_chimwemwe_participant"
+            ]
+          },
+          {
+            "field": "eventType",
+            "field_value": "Chimwemwe Monthly Review",
+            "creates_case": [
+              "ec_chimwemwe_monthly_review"
+            ]
+          },
+          {
+            "field": "eventType",
+            "field_value": "Chimwemwe Session Attendance",
+            "creates_case": [
+              "ec_chimwemwe_session_attendance"
+            ]
+          },
+          {
+            "field": "eventType",
+            "field_value": "Chimwemwe Enrollment",
+            "creates_case": [
+              "ec_chimwemwe_enrollment"
+            ]
           }
         ]
       }

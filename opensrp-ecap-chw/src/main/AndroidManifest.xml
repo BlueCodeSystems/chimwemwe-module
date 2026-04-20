@@ -91,6 +91,36 @@
             android:label="Reports"
             android:theme="@style/ChwTheme.NoActionBar" />
         <activity
+            android:name=".activity.ChimwemweSearchActivity"
+            android:exported="false"
+            android:label="Advanced Search"
+            android:theme="@style/ChwTheme.Material" />
+        <activity
+            android:name=".activity.HotspotGroupListActivity"
+            android:exported="false"
+            android:label="Chimwemwe Groups"
+            android:theme="@style/ChwTheme.NoActionBar" />
+        <activity
+            android:name=".activity.HotspotGroupDetailActivity"
+            android:exported="false"
+            android:label="Group Details"
+            android:theme="@style/ChwTheme.NoActionBar" />
+        <activity
+            android:name=".activity.AddParticipantActivity"
+            android:exported="false"
+            android:label="Add Participant"
+            android:theme="@style/ChwTheme.NoActionBar" />
+        <activity
+            android:name=".activity.RecordAttendanceActivity"
+            android:exported="false"
+            android:label="Record Attendance"
+            android:theme="@style/ChwTheme.NoActionBar" />
+        <activity
+            android:name=".activity.ChimwemweRegisterActivity"
+            android:exported="false"
+            android:label="Chimwemwe Groups"
+            android:theme="@style/ChwTheme.NoActionBar" />
+        <activity
             android:name="com.bluecodeltd.ecap.chw.activity.SignatureActivity"
             android:theme="@style/ChwTheme.NoActionBar" />
         <activity

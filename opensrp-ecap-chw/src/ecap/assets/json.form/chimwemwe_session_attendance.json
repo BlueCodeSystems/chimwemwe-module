@@ -1,0 +1,705 @@
+{
+  "count": "3",
+  "encounter_type": "Chimwemwe Session Attendance",
+  "entity_id": "",
+  "metadata": {
+    "start": {
+      "openmrs_entity_parent": "",
+      "openmrs_entity": "person_attribute",
+      "openmrs_data_type": "start",
+      "openmrs_entity_id": "163137AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    },
+    "end": {
+      "openmrs_entity_parent": "",
+      "openmrs_entity": "person_attribute",
+      "openmrs_data_type": "end",
+      "openmrs_entity_id": "163138AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    },
+    "today": {
+      "openmrs_entity_parent": "",
+      "openmrs_entity": "encounter",
+      "openmrs_entity_id": "encounter_date"
+    },
+    "deviceid": {
+      "openmrs_entity_parent": "",
+      "openmrs_entity": "person_attribute",
+      "openmrs_data_type": "deviceid",
+      "openmrs_entity_id": "163149AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    },
+    "subscriberid": {
+      "openmrs_entity_parent": "",
+      "openmrs_entity": "person_attribute",
+      "openmrs_data_type": "subscriberid",
+      "openmrs_entity_id": "163150AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    },
+    "simserial": {
+      "openmrs_entity_parent": "",
+      "openmrs_entity": "person_attribute",
+      "openmrs_data_type": "simserial",
+      "openmrs_entity_id": "163151AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    },
+    "phonenumber": {
+      "openmrs_entity_parent": "",
+      "openmrs_entity": "person_attribute",
+      "openmrs_data_type": "phonenumber",
+      "openmrs_entity_id": "163152AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    },
+    "encounter_location": ""
+  },
+
+  "step1": {
+    "title": "Session Information",
+    "display_back_button": "true",
+    "fields": [
+      {
+        "key": "session_number",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "session_number",
+        "type": "spinner",
+        "hint": "Session Number",
+        "values": [
+          "-- Select --",
+          "Session 1", "Session 2", "Session 3", "Session 4", "Session 5",
+          "Session 6", "Session 7", "Session 8", "Session 9", "Session 10",
+          "Session 11", "Session 12", "Session 13", "Session 14"
+        ],
+        "v_required": {
+          "value": "true",
+          "err": "Please select the session number"
+        }
+      },
+      {
+        "key": "session_date",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "session_date",
+        "type": "date_picker",
+        "hint": "Date of Session (DD/MM/YY)",
+        "expanded": false,
+        "min_date": "today-3y",
+        "max_date": "today",
+        "v_required": {
+          "value": "true",
+          "err": "Please enter the date of this session"
+        }
+      },
+      {
+        "key": "session_type",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "session_type",
+        "type": "spinner",
+        "hint": "Type of Session",
+        "values": ["-- Select --", "Group Session", "Home Visit"],
+        "v_required": {
+          "value": "true",
+          "err": "Please select the type of session"
+        }
+      }
+    ]
+  },
+
+  "step2": {
+    "title": "Attendance — Participants 1 to 10",
+    "display_back_button": "true",
+    "fields": [
+      {
+        "key": "attendance_note",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "attendance_note",
+        "type": "toaster_notes",
+        "text": "For each participant, record whether the Caregiver (CG) and Child attended. Select 'Absent' if they did not attend.",
+        "toaster_type": "info"
+      },
+      {
+        "key": "p1_label",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p1_label",
+        "type": "toaster_notes",
+        "text": "SN 1",
+        "toaster_type": "info"
+      },
+      {
+        "key": "p1_cg_attendance",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p1_cg_attendance",
+        "type": "spinner",
+        "hint": "Participant 1 — Caregiver Attendance",
+        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
+        "v_required": { "value": "false", "err": "" }
+      },
+      {
+        "key": "p1_child_attendance",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p1_child_attendance",
+        "type": "spinner",
+        "hint": "Participant 1 — Child Attendance",
+        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
+        "v_required": { "value": "false", "err": "" }
+      },
+      {
+        "key": "p2_label",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p2_label",
+        "type": "toaster_notes",
+        "text": "SN 2",
+        "toaster_type": "info"
+      },
+      {
+        "key": "p2_cg_attendance",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p2_cg_attendance",
+        "type": "spinner",
+        "hint": "Participant 2 — Caregiver Attendance",
+        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
+        "v_required": { "value": "false", "err": "" }
+      },
+      {
+        "key": "p2_child_attendance",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p2_child_attendance",
+        "type": "spinner",
+        "hint": "Participant 2 — Child Attendance",
+        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
+        "v_required": { "value": "false", "err": "" }
+      },
+      {
+        "key": "p3_label",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p3_label",
+        "type": "toaster_notes",
+        "text": "SN 3",
+        "toaster_type": "info"
+      },
+      {
+        "key": "p3_cg_attendance",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p3_cg_attendance",
+        "type": "spinner",
+        "hint": "Participant 3 — Caregiver Attendance",
+        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
+        "v_required": { "value": "false", "err": "" }
+      },
+      {
+        "key": "p3_child_attendance",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p3_child_attendance",
+        "type": "spinner",
+        "hint": "Participant 3 — Child Attendance",
+        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
+        "v_required": { "value": "false", "err": "" }
+      },
+      {
+        "key": "p4_label",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p4_label",
+        "type": "toaster_notes",
+        "text": "SN 4",
+        "toaster_type": "info"
+      },
+      {
+        "key": "p4_cg_attendance",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p4_cg_attendance",
+        "type": "spinner",
+        "hint": "Participant 4 — Caregiver Attendance",
+        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
+        "v_required": { "value": "false", "err": "" }
+      },
+      {
+        "key": "p4_child_attendance",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p4_child_attendance",
+        "type": "spinner",
+        "hint": "Participant 4 — Child Attendance",
+        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
+        "v_required": { "value": "false", "err": "" }
+      },
+      {
+        "key": "p5_label",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p5_label",
+        "type": "toaster_notes",
+        "text": "SN 5",
+        "toaster_type": "info"
+      },
+      {
+        "key": "p5_cg_attendance",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p5_cg_attendance",
+        "type": "spinner",
+        "hint": "Participant 5 — Caregiver Attendance",
+        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
+        "v_required": { "value": "false", "err": "" }
+      },
+      {
+        "key": "p5_child_attendance",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p5_child_attendance",
+        "type": "spinner",
+        "hint": "Participant 5 — Child Attendance",
+        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
+        "v_required": { "value": "false", "err": "" }
+      },
+      {
+        "key": "p6_label",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p6_label",
+        "type": "toaster_notes",
+        "text": "SN 6",
+        "toaster_type": "info"
+      },
+      {
+        "key": "p6_cg_attendance",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p6_cg_attendance",
+        "type": "spinner",
+        "hint": "Participant 6 — Caregiver Attendance",
+        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
+        "v_required": { "value": "false", "err": "" }
+      },
+      {
+        "key": "p6_child_attendance",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p6_child_attendance",
+        "type": "spinner",
+        "hint": "Participant 6 — Child Attendance",
+        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
+        "v_required": { "value": "false", "err": "" }
+      },
+      {
+        "key": "p7_label",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p7_label",
+        "type": "toaster_notes",
+        "text": "SN 7",
+        "toaster_type": "info"
+      },
+      {
+        "key": "p7_cg_attendance",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p7_cg_attendance",
+        "type": "spinner",
+        "hint": "Participant 7 — Caregiver Attendance",
+        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
+        "v_required": { "value": "false", "err": "" }
+      },
+      {
+        "key": "p7_child_attendance",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p7_child_attendance",
+        "type": "spinner",
+        "hint": "Participant 7 — Child Attendance",
+        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
+        "v_required": { "value": "false", "err": "" }
+      },
+      {
+        "key": "p8_label",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p8_label",
+        "type": "toaster_notes",
+        "text": "SN 8",
+        "toaster_type": "info"
+      },
+      {
+        "key": "p8_cg_attendance",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p8_cg_attendance",
+        "type": "spinner",
+        "hint": "Participant 8 — Caregiver Attendance",
+        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
+        "v_required": { "value": "false", "err": "" }
+      },
+      {
+        "key": "p8_child_attendance",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p8_child_attendance",
+        "type": "spinner",
+        "hint": "Participant 8 — Child Attendance",
+        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
+        "v_required": { "value": "false", "err": "" }
+      },
+      {
+        "key": "p9_label",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p9_label",
+        "type": "toaster_notes",
+        "text": "SN 9",
+        "toaster_type": "info"
+      },
+      {
+        "key": "p9_cg_attendance",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p9_cg_attendance",
+        "type": "spinner",
+        "hint": "Participant 9 — Caregiver Attendance",
+        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
+        "v_required": { "value": "false", "err": "" }
+      },
+      {
+        "key": "p9_child_attendance",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p9_child_attendance",
+        "type": "spinner",
+        "hint": "Participant 9 — Child Attendance",
+        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
+        "v_required": { "value": "false", "err": "" }
+      },
+      {
+        "key": "p10_label",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p10_label",
+        "type": "toaster_notes",
+        "text": "SN 10",
+        "toaster_type": "info"
+      },
+      {
+        "key": "p10_cg_attendance",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p10_cg_attendance",
+        "type": "spinner",
+        "hint": "Participant 10 — Caregiver Attendance",
+        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
+        "v_required": { "value": "false", "err": "" }
+      },
+      {
+        "key": "p10_child_attendance",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p10_child_attendance",
+        "type": "spinner",
+        "hint": "Participant 10 — Child Attendance",
+        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
+        "v_required": { "value": "false", "err": "" }
+      }
+    ]
+  },
+
+  "step3": {
+    "title": "Attendance — Participants 11 to 20",
+    "display_back_button": "true",
+    "fields": [
+      {
+        "key": "p11_label",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p11_label",
+        "type": "toaster_notes",
+        "text": "SN 11",
+        "toaster_type": "info"
+      },
+      {
+        "key": "p11_cg_attendance",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p11_cg_attendance",
+        "type": "spinner",
+        "hint": "Participant 11 — Caregiver Attendance",
+        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
+        "v_required": { "value": "false", "err": "" }
+      },
+      {
+        "key": "p11_child_attendance",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p11_child_attendance",
+        "type": "spinner",
+        "hint": "Participant 11 — Child Attendance",
+        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
+        "v_required": { "value": "false", "err": "" }
+      },
+      {
+        "key": "p12_label",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p12_label",
+        "type": "toaster_notes",
+        "text": "SN 12",
+        "toaster_type": "info"
+      },
+      {
+        "key": "p12_cg_attendance",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p12_cg_attendance",
+        "type": "spinner",
+        "hint": "Participant 12 — Caregiver Attendance",
+        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
+        "v_required": { "value": "false", "err": "" }
+      },
+      {
+        "key": "p12_child_attendance",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p12_child_attendance",
+        "type": "spinner",
+        "hint": "Participant 12 — Child Attendance",
+        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
+        "v_required": { "value": "false", "err": "" }
+      },
+      {
+        "key": "p13_label",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p13_label",
+        "type": "toaster_notes",
+        "text": "SN 13",
+        "toaster_type": "info"
+      },
+      {
+        "key": "p13_cg_attendance",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p13_cg_attendance",
+        "type": "spinner",
+        "hint": "Participant 13 — Caregiver Attendance",
+        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
+        "v_required": { "value": "false", "err": "" }
+      },
+      {
+        "key": "p13_child_attendance",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p13_child_attendance",
+        "type": "spinner",
+        "hint": "Participant 13 — Child Attendance",
+        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
+        "v_required": { "value": "false", "err": "" }
+      },
+      {
+        "key": "p14_label",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p14_label",
+        "type": "toaster_notes",
+        "text": "SN 14",
+        "toaster_type": "info"
+      },
+      {
+        "key": "p14_cg_attendance",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p14_cg_attendance",
+        "type": "spinner",
+        "hint": "Participant 14 — Caregiver Attendance",
+        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
+        "v_required": { "value": "false", "err": "" }
+      },
+      {
+        "key": "p14_child_attendance",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p14_child_attendance",
+        "type": "spinner",
+        "hint": "Participant 14 — Child Attendance",
+        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
+        "v_required": { "value": "false", "err": "" }
+      },
+      {
+        "key": "p15_label",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p15_label",
+        "type": "toaster_notes",
+        "text": "SN 15",
+        "toaster_type": "info"
+      },
+      {
+        "key": "p15_cg_attendance",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p15_cg_attendance",
+        "type": "spinner",
+        "hint": "Participant 15 — Caregiver Attendance",
+        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
+        "v_required": { "value": "false", "err": "" }
+      },
+      {
+        "key": "p15_child_attendance",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p15_child_attendance",
+        "type": "spinner",
+        "hint": "Participant 15 — Child Attendance",
+        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
+        "v_required": { "value": "false", "err": "" }
+      },
+      {
+        "key": "p16_label",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p16_label",
+        "type": "toaster_notes",
+        "text": "SN 16",
+        "toaster_type": "info"
+      },
+      {
+        "key": "p16_cg_attendance",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p16_cg_attendance",
+        "type": "spinner",
+        "hint": "Participant 16 — Caregiver Attendance",
+        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
+        "v_required": { "value": "false", "err": "" }
+      },
+      {
+        "key": "p16_child_attendance",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p16_child_attendance",
+        "type": "spinner",
+        "hint": "Participant 16 — Child Attendance",
+        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
+        "v_required": { "value": "false", "err": "" }
+      },
+      {
+        "key": "p17_label",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p17_label",
+        "type": "toaster_notes",
+        "text": "SN 17",
+        "toaster_type": "info"
+      },
+      {
+        "key": "p17_cg_attendance",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p17_cg_attendance",
+        "type": "spinner",
+        "hint": "Participant 17 — Caregiver Attendance",
+        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
+        "v_required": { "value": "false", "err": "" }
+      },
+      {
+        "key": "p17_child_attendance",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p17_child_attendance",
+        "type": "spinner",
+        "hint": "Participant 17 — Child Attendance",
+        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
+        "v_required": { "value": "false", "err": "" }
+      },
+      {
+        "key": "p18_label",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p18_label",
+        "type": "toaster_notes",
+        "text": "SN 18",
+        "toaster_type": "info"
+      },
+      {
+        "key": "p18_cg_attendance",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p18_cg_attendance",
+        "type": "spinner",
+        "hint": "Participant 18 — Caregiver Attendance",
+        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
+        "v_required": { "value": "false", "err": "" }
+      },
+      {
+        "key": "p18_child_attendance",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p18_child_attendance",
+        "type": "spinner",
+        "hint": "Participant 18 — Child Attendance",
+        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
+        "v_required": { "value": "false", "err": "" }
+      },
+      {
+        "key": "p19_label",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p19_label",
+        "type": "toaster_notes",
+        "text": "SN 19",
+        "toaster_type": "info"
+      },
+      {
+        "key": "p19_cg_attendance",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p19_cg_attendance",
+        "type": "spinner",
+        "hint": "Participant 19 — Caregiver Attendance",
+        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
+        "v_required": { "value": "false", "err": "" }
+      },
+      {
+        "key": "p19_child_attendance",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p19_child_attendance",
+        "type": "spinner",
+        "hint": "Participant 19 — Child Attendance",
+        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
+        "v_required": { "value": "false", "err": "" }
+      },
+      {
+        "key": "p20_label",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p20_label",
+        "type": "toaster_notes",
+        "text": "SN 20",
+        "toaster_type": "info"
+      },
+      {
+        "key": "p20_cg_attendance",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p20_cg_attendance",
+        "type": "spinner",
+        "hint": "Participant 20 — Caregiver Attendance",
+        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
+        "v_required": { "value": "false", "err": "" }
+      },
+      {
+        "key": "p20_child_attendance",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p20_child_attendance",
+        "type": "spinner",
+        "hint": "Participant 20 — Child Attendance",
+        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
+        "v_required": { "value": "false", "err": "" }
+      }
+    ]
+  }
+}

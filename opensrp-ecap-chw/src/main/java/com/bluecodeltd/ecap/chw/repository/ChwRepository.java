@@ -4,6 +4,10 @@ import android.content.Context;
 
 import com.bluecodeltd.ecap.chw.BuildConfig;
 import com.bluecodeltd.ecap.chw.application.ChwApplication;
+import com.bluecodeltd.ecap.chw.dao.AttendanceDao;
+import com.bluecodeltd.ecap.chw.dao.HotspotGroupDao;
+import com.bluecodeltd.ecap.chw.dao.MonthlyReviewDao;
+import com.bluecodeltd.ecap.chw.dao.ParticipantDao;
 
 import net.sqlcipher.database.SQLiteDatabase;
 
@@ -18,6 +22,15 @@ public class ChwRepository extends CoreChwRepository {
     public ChwRepository(Context context, org.smartregister.Context openSRPContext) {
         super(context, AllConstants.DATABASE_NAME, BuildConfig.DATABASE_VERSION, openSRPContext.session(), ChwApplication.getApplicationFlavor().chwAppInstance().getCommonFtsObject(), openSRPContext.sharedRepositoriesArray());
         this.context = context;
+    }
+
+    @Override
+    public void onCreate(SQLiteDatabase db) {
+        super.onCreate(db);
+        HotspotGroupDao.createTable(db);
+        ParticipantDao.createTable(db);
+        AttendanceDao.createTable(db);
+        MonthlyReviewDao.createTable(db);
     }
 
     @Override

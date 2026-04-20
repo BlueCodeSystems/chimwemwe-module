@@ -8,7 +8,6 @@ import org.smartregister.chw.core.model.NavigationOption;
 import org.smartregister.chw.core.utils.CoreConstants;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class NavigationModelFlv implements NavigationModel.Flavor {
@@ -19,14 +18,21 @@ public class NavigationModelFlv implements NavigationModel.Flavor {
     public List<NavigationOption> getNavigationItems() {
 
         if (navigationOptions.size() == 0) {
+            NavigationOption homeOption = new NavigationOption(
+                    R.mipmap.sidemenu_landd,
+                    R.mipmap.sidemenu_landd_active,
+                    R.string.nav_home,
+                    CoreConstants.DrawerMenu.REPORTS,
+                    0);
+            navigationOptions.add(homeOption);
 
-            NavigationOption indexesNavigationOption = new NavigationOption(R.mipmap.sidemenu_children, R.mipmap.sidemenu_children_active, R.string.facility_ovc_register, Constants.DrawerMenu.INDEX, 0);
-            NavigationOption motherNavigationOption = new NavigationOption(R.mipmap.sidemenu_pnc, R.mipmap.sidemenu_pnc_active, R.string.mother_index_register, Constants.DrawerMenu.MOTHER_REGISTER, 0);
-            NavigationOption allFamiliesNavigationOption = new NavigationOption(R.mipmap.sidemenu_families, R.mipmap.sidemenu_families_active, R.string.all_households, Constants.DrawerMenu.HOUSEHOLD_REGISTER, 0);
-            NavigationOption reportsNavigationOption = new NavigationOption(org.smartregister.family.R.mipmap.ic_home, org.smartregister.family.R.mipmap.ic_home_active, R.string.reports, Constants.DrawerMenu.REPORTS, 0);
-            NavigationOption refNavigationOption = new NavigationOption(org.smartregister.chw.core.R.mipmap.sidemenu_referrals, org.smartregister.chw.core.R.mipmap.sidemenu_referrals_active, R.string.hts, Constants.DrawerMenu.HTS, 0);
-            NavigationOption pmtctNavigationOption = new NavigationOption(R.mipmap.sidemenu_pnc, R.mipmap.sidemenu_pnc_active, R.string.pmtct_register, Constants.DrawerMenu.PMTCT, 0);
-            navigationOptions.addAll(Arrays.asList(reportsNavigationOption,indexesNavigationOption, motherNavigationOption, allFamiliesNavigationOption,refNavigationOption,pmtctNavigationOption));
+            NavigationOption chimwemweOption = new NavigationOption(
+                    R.mipmap.sidemenu_families,
+                    R.mipmap.sidemenu_families_active,
+                    R.string.chimwemwe_groups,
+                    Constants.DrawerMenu.CHIMWEMWE,
+                    0);
+            navigationOptions.add(chimwemweOption);
         }
 
         return navigationOptions;

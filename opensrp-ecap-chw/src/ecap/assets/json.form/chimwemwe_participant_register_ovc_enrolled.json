@@ -1,0 +1,203 @@
+{
+  "count": "1",
+  "encounter_type": "Chimwemwe Participant Registration OVC Enrolled",
+  "entity_id": "",
+  "metadata": {
+    "start": {
+      "openmrs_entity_parent": "",
+      "openmrs_entity": "person_attribute",
+      "openmrs_data_type": "start",
+      "openmrs_entity_id": "163137AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    },
+    "end": {
+      "openmrs_entity_parent": "",
+      "openmrs_entity": "person_attribute",
+      "openmrs_data_type": "end",
+      "openmrs_entity_id": "163138AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    },
+    "today": {
+      "openmrs_entity_parent": "",
+      "openmrs_entity": "encounter",
+      "openmrs_entity_id": "encounter_date"
+    },
+    "deviceid": {
+      "openmrs_entity_parent": "",
+      "openmrs_entity": "person_attribute",
+      "openmrs_data_type": "deviceid",
+      "openmrs_entity_id": "163149AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    },
+    "subscriberid": {
+      "openmrs_entity_parent": "",
+      "openmrs_entity": "person_attribute",
+      "openmrs_data_type": "subscriberid",
+      "openmrs_entity_id": "163150AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    },
+    "simserial": {
+      "openmrs_entity_parent": "",
+      "openmrs_entity": "person_attribute",
+      "openmrs_data_type": "simserial",
+      "openmrs_entity_id": "163151AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    },
+    "phonenumber": {
+      "openmrs_entity_parent": "",
+      "openmrs_entity": "person_attribute",
+      "openmrs_data_type": "phonenumber",
+      "openmrs_entity_id": "163152AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    },
+    "encounter_location": ""
+  },
+
+  "step1": {
+    "title": "Caregiver Details",
+    "display_back_button": "true",
+    "fields": [
+      {
+        "key": "caregiver_info_note",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "caregiver_info_note",
+        "type": "toaster_notes",
+        "text": "Enter the details of the caregiver who will attend sessions with the child.",
+        "toaster_type": "info"
+      },
+      {
+        "key": "caregiver_first_name",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "caregiver_first_name",
+        "type": "edit_text",
+        "hint": "Caregiver First Name",
+        "edit_type": "name",
+        "v_required": {
+          "value": "true",
+          "err": "Please enter the caregiver's first name"
+        }
+      },
+      {
+        "key": "caregiver_surname",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "caregiver_surname",
+        "type": "edit_text",
+        "hint": "Caregiver Surname",
+        "edit_type": "name",
+        "v_required": {
+          "value": "true",
+          "err": "Please enter the caregiver's surname"
+        }
+      },
+      {
+        "key": "child_info_note",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "child_info_note",
+        "type": "toaster_notes",
+        "text": "Child details have been pre-filled from the OVC register. Please verify and correct if needed.",
+        "toaster_type": "info"
+      },
+      {
+        "key": "child_first_name",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "child_first_name",
+        "type": "edit_text",
+        "hint": "Child First Name",
+        "edit_type": "name",
+        "v_required": {
+          "value": "true",
+          "err": "Please enter the child's first name"
+        }
+      },
+      {
+        "key": "child_surname",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "child_surname",
+        "type": "edit_text",
+        "hint": "Child Surname",
+        "edit_type": "name",
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
+      },
+      {
+        "key": "child_dob",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "child_dob",
+        "type": "date_picker",
+        "hint": "Date of Birth (DD/MM/YY)",
+        "expanded": false,
+        "min_date": "today-25y",
+        "max_date": "today",
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
+      },
+      {
+        "key": "child_sex",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "child_sex",
+        "type": "native_radio",
+        "label": "VCA Gender",
+        "options": [
+          {
+            "key": "male",
+            "text": "Male"
+          },
+          {
+            "key": "female",
+            "text": "Female"
+          }
+        ],
+        "v_required": {
+          "value": true,
+          "err": "This field is Required"
+        }
+      },
+      {
+        "key": "is_enrolled_ovc",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "is_enrolled_ovc",
+        "type": "spinner",
+        "hint": "Is Child Enrolled in the OVC Comprehensive Program?",
+        "values": ["-- Select --", "Yes", "No"],
+        "read_only": "true",
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
+      },
+      {
+        "key": "vca_id",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "vca_id",
+        "type": "edit_text",
+        "hint": "VCA ID",
+        "edit_type": "name",
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
+      },
+      {
+        "key": "caregiver_id",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "caregiver_id",
+        "type": "edit_text",
+        "hint": "Caregiver OVC ID",
+        "edit_type": "name",
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
+      }
+    ]
+  }
+}

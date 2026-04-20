@@ -143,5 +143,15 @@
     <color name="register_count_text">#546E7A</color>
     <color name="register_card_bg">#FFFFFF</color>
 
+    <!-- Chimwemwe feature colors (Advanced Search, CSV Import) -->
+    <color name="chimwemwe_primary">#0D5C73</color>
+    <color name="chimwemwe_primary_dark">#08384A</color>
+    <color name="chimwemwe_primary_light">#1A7A9A</color>
+    <color name="chimwemwe_header_start">#08384A</color>
+    <color name="chimwemwe_header_end">#1A7A9A</color>
+    <color name="chimwemwe_surface">#F4F6F8</color>
+    <color name="chimwemwe_text_primary">#1A2533</color>
+    <color name="chimwemwe_text_secondary">#5A6978</color>
+
 </resources>
 

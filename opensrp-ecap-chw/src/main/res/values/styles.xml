@@ -15,6 +15,13 @@
         <item name="windowNoTitle">true</item>
     </style>
 
+    <!-- Material Components theme for activities that use Material widgets (Chip, etc.) -->
+    <style name="ChwTheme.Material" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">@color/chw_primary</item>
+        <item name="colorPrimaryDark">@color/chw_primary_dark</item>
+        <item name="colorAccent">@color/chw_accent</item>
+    </style>
+
     <style name="DrawerArrowStyle" parent="Widget.AppCompat.DrawerArrowToggle">
         <item name="spinBars">true</item>
         <item name="color">@android:color/white</item>

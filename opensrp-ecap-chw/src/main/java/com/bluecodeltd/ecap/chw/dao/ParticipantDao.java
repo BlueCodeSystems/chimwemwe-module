@@ -1,0 +1,204 @@
+package com.bluecodeltd.ecap.chw.dao;
+
+import com.bluecodeltd.ecap.chw.model.ParticipantModel;
+
+import net.sqlcipher.database.SQLiteDatabase;
+
+import org.smartregister.dao.AbstractDao;
+
+import java.util.List;
+
+public class ParticipantDao extends AbstractDao {
+
+    public static final String TABLE = "ec_chimwemwe_participant";
+
+    private static final String CREATE_TABLE_SQL =
+            "CREATE TABLE IF NOT EXISTS " + TABLE + " (" +
+            "  id                   INTEGER PRIMARY KEY AUTOINCREMENT," +
+            "  participant_code     TEXT," +
+            "  group_id             INTEGER NOT NULL," +
+            "  sn                   INTEGER," +
+            "  caregiver_first_name TEXT," +
+            "  caregiver_surname    TEXT," +
+            "  child_first_name     TEXT," +
+            "  child_surname        TEXT," +
+            "  child_dob            TEXT," +
+            "  child_sex            TEXT," +
+            "  is_enrolled_ovc      TEXT," +
+            "  caregiver_id         TEXT," +
+            "  vca_id               TEXT," +
+            "  who_referred         TEXT," +
+            "  service_referred_for TEXT," +
+            "  referral_date        TEXT," +
+            "  receiving_org        TEXT," +
+            "  job_title            TEXT," +
+            "  service_date         TEXT" +
+            ")";
+
+    /** Column added in DB version 32 (system-generated UUID for the participant). */
+    public static void migrateToV32(SQLiteDatabase db) {
+        try {
+            db.execSQL("ALTER TABLE " + TABLE + " ADD COLUMN participant_code TEXT");
+        } catch (Exception ignored) {
+            // Column may already exist
+        }
+    }
+
+    /** Columns added in DB version 31 (referral fields). */
+    private static final String[] ALTER_V31 = {
+            "ALTER TABLE " + TABLE + " ADD COLUMN who_referred         TEXT",
+            "ALTER TABLE " + TABLE + " ADD COLUMN service_referred_for TEXT",
+            "ALTER TABLE " + TABLE + " ADD COLUMN referral_date        TEXT",
+            "ALTER TABLE " + TABLE + " ADD COLUMN receiving_org        TEXT",
+            "ALTER TABLE " + TABLE + " ADD COLUMN job_title            TEXT",
+            "ALTER TABLE " + TABLE + " ADD COLUMN service_date         TEXT"
+    };
+
+    /** Run ALTER TABLE statements to add referral columns on existing installs (DB v31). */
+    public static void migrateToV31(SQLiteDatabase db) {
+        for (String sql : ALTER_V31) {
+            try {
+                db.execSQL(sql);
+            } catch (Exception ignored) {
+                // Column may already exist
+            }
+        }
+    }
+
+    public static void createTable(SQLiteDatabase db) {
+        db.execSQL(CREATE_TABLE_SQL);
+    }
+
+    public static long insertParticipant(ParticipantModel m) {
+        String sql = "INSERT INTO " + TABLE +
+                " (participant_code, group_id, sn, caregiver_first_name, caregiver_surname," +
+                "  child_first_name, child_surname, child_dob, child_sex," +
+                "  is_enrolled_ovc, caregiver_id, vca_id," +
+                "  who_referred, service_referred_for, referral_date," +
+                "  receiving_org, job_title, service_date) VALUES (" +
+                q(m.getParticipantCode()) + "," +
+                m.getGroupId() + "," +
+                m.getSn() + "," +
+                q(m.getCaregiverFirstName()) + "," +
+                q(m.getCaregiverSurname()) + "," +
+                q(m.getChildFirstName()) + "," +
+                q(m.getChildSurname()) + "," +
+                q(m.getChildDob()) + "," +
+                q(m.getChildSex()) + "," +
+                q(m.getIsEnrolledOvc()) + "," +
+                q(m.getCaregiverId()) + "," +
+                q(m.getVcaId()) + "," +
+                q(m.getWhoReferred()) + "," +
+                q(m.getServiceReferredFor()) + "," +
+                q(m.getReferralDate()) + "," +
+                q(m.getReceivingOrg()) + "," +
+                q(m.getJobTitle()) + "," +
+                q(m.getServiceDate()) + ")";
+        AbstractDao.updateDB(sql);
+        List<Long> ids = AbstractDao.readData(
+                "SELECT id FROM " + TABLE + " WHERE group_id=" + m.getGroupId() +
+                " ORDER BY id DESC LIMIT 1",
+                cursor -> cursor.getLong(0));
+        return (ids != null && !ids.isEmpty()) ? ids.get(0) : -1L;
+    }
+
+    public static void updateParticipant(ParticipantModel m) {
+        String sql = "UPDATE " + TABLE + " SET " +
+                "caregiver_first_name=" + q(m.getCaregiverFirstName()) + "," +
+                "caregiver_surname="    + q(m.getCaregiverSurname()) + "," +
+                "child_first_name="     + q(m.getChildFirstName()) + "," +
+                "child_surname="        + q(m.getChildSurname()) + "," +
+                "child_dob="            + q(m.getChildDob()) + "," +
+                "child_sex="            + q(m.getChildSex()) + "," +
+                "is_enrolled_ovc="      + q(m.getIsEnrolledOvc()) + "," +
+                "caregiver_id="         + q(m.getCaregiverId()) + "," +
+                "vca_id="               + q(m.getVcaId()) + "," +
+                "who_referred="         + q(m.getWhoReferred()) + "," +
+                "service_referred_for=" + q(m.getServiceReferredFor()) + "," +
+                "referral_date="        + q(m.getReferralDate()) + "," +
+                "receiving_org="        + q(m.getReceivingOrg()) + "," +
+                "job_title="            + q(m.getJobTitle()) + "," +
+                "service_date="         + q(m.getServiceDate()) +
+                " WHERE id=" + m.getId();
+        AbstractDao.updateDB(sql);
+    }
+
+    /** Load all participants for a group, ordered by sn. Includes sessions_completed count. */
+    public static List<ParticipantModel> getParticipants(long groupId) {
+        String sql = "SELECT p.id, p.participant_code, p.group_id, p.sn, p.caregiver_first_name, p.caregiver_surname," +
+                "  p.child_first_name, p.child_surname, p.child_dob, p.child_sex," +
+                "  p.is_enrolled_ovc, p.caregiver_id, p.vca_id," +
+                "  p.who_referred, p.service_referred_for, p.referral_date," +
+                "  p.receiving_org, p.job_title, p.service_date," +
+                "  (SELECT COUNT(*) FROM ec_chimwemwe_attendance a" +
+                "   WHERE a.participant_id=p.id AND (a.caregiver_attendance!='' OR a.child_attendance!='')) AS sessions_done" +
+                " FROM " + TABLE + " p WHERE p.group_id=" + groupId + " ORDER BY p.sn ASC";
+        return AbstractDao.readData(sql, cursor -> {
+            ParticipantModel m = mapParticipant(cursor);
+            int done = cursor.getInt(19);
+            m.setSessionsCompleted(done);
+            m.setCompletedProgram(done >= 14);
+            return m;
+        });
+    }
+
+    public static ParticipantModel getParticipant(long id) {
+        String sql = "SELECT id, participant_code, group_id, sn, caregiver_first_name, caregiver_surname," +
+                " child_first_name, child_surname, child_dob, child_sex," +
+                " is_enrolled_ovc, caregiver_id, vca_id," +
+                " who_referred, service_referred_for, referral_date," +
+                " receiving_org, job_title, service_date FROM " + TABLE +
+                " WHERE id=" + id;
+        List<ParticipantModel> list = AbstractDao.readData(sql, ParticipantDao::mapParticipant);
+        return (list != null && !list.isEmpty()) ? list.get(0) : null;
+    }
+
+    private static ParticipantModel mapParticipant(android.database.Cursor cursor) {
+        ParticipantModel m = new ParticipantModel();
+        m.setId(cursor.getLong(0));
+        m.setParticipantCode(cursor.getString(1));
+        m.setGroupId(cursor.getLong(2));
+        m.setSn(cursor.getInt(3));
+        m.setCaregiverFirstName(cursor.getString(4));
+        m.setCaregiverSurname(cursor.getString(5));
+        m.setChildFirstName(cursor.getString(6));
+        m.setChildSurname(cursor.getString(7));
+        m.setChildDob(cursor.getString(8));
+        m.setChildSex(cursor.getString(9));
+        m.setIsEnrolledOvc(cursor.getString(10));
+        m.setCaregiverId(cursor.getString(11));
+        m.setVcaId(cursor.getString(12));
+        m.setWhoReferred(cursor.getString(13));
+        m.setServiceReferredFor(cursor.getString(14));
+        m.setReferralDate(cursor.getString(15));
+        m.setReceivingOrg(cursor.getString(16));
+        m.setJobTitle(cursor.getString(17));
+        m.setServiceDate(cursor.getString(18));
+        return m;
+    }
+
+    public static int countParticipants(long groupId) {
+        List<Integer> res = AbstractDao.readData(
+                "SELECT COUNT(*) FROM " + TABLE + " WHERE group_id=" + groupId,
+                cursor -> cursor.getInt(0));
+        return (res != null && !res.isEmpty()) ? res.get(0) : 0;
+    }
+
+    /** Returns MAX(sn)+1 for the group, safe against deletions creating duplicate S/N values. */
+    public static int nextSn(long groupId) {
+        List<Integer> res = AbstractDao.readData(
+                "SELECT COALESCE(MAX(sn), 0) + 1 FROM " + TABLE + " WHERE group_id=" + groupId,
+                cursor -> cursor.getInt(0));
+        return (res != null && !res.isEmpty()) ? res.get(0) : 1;
+    }
+
+    public static void deleteParticipant(long id) {
+        AbstractDao.updateDB("DELETE FROM ec_chimwemwe_attendance WHERE participant_id=" + id);
+        AbstractDao.updateDB("DELETE FROM " + TABLE + " WHERE id=" + id);
+    }
+
+    private static String q(String s) {
+        if (s == null) return "''";
+        return "'" + s.replace("'", "''") + "'";
+    }
+}

@@ -142,31 +142,15 @@ public class DashboardActivity extends AppCompatActivity  implements GenerateCSV
         loadingDataProgressBar = binding.dashProgressbar;
         facilityInformationSwitch = binding.informationSwitch;
         allHouseHoldsCount = binding.allHouseholdsNumber;
-        // Card taps: open respective registers
-        if (binding.cardView1 != null) {
-            binding.cardView1.setOnClickListener(v -> {
-                Intent intent = new Intent(DashboardActivity.this, IndexRegisterActivity.class);
-                startActivity(intent);
-            });
+        // Chimwemwe Groups register row
+        if (binding.registerRowGroups != null) {
+            binding.registerRowGroups.setOnClickListener(v ->
+                startActivity(new Intent(DashboardActivity.this, ChimwemweRegisterActivity.class)));
         }
-        if (binding.cardView2 != null) {
-            binding.cardView2.setOnClickListener(v -> {
-                Intent intent = new Intent(DashboardActivity.this, HouseholdIndexActivity.class);
-                startActivity(intent);
-            });
-        }
-        // Register row click listeners (Other Registers)
-        if (binding.registerRowMother != null) {
-            binding.registerRowMother.setOnClickListener(v ->
-                startActivity(new Intent(DashboardActivity.this, MotherIndexActivity.class)));
-        }
-        if (binding.registerRowHts != null) {
-            binding.registerRowHts.setOnClickListener(v ->
-                startActivity(new Intent(DashboardActivity.this, HivTestingServiceActivity.class)));
-        }
-        if (binding.registerRowPmtct != null) {
-            binding.registerRowPmtct.setOnClickListener(v ->
-                startActivity(new Intent(DashboardActivity.this, PMTCTRegisterActivity.class)));
+        // Advanced Search bar
+        if (binding.searchBarContainer != null) {
+            binding.searchBarContainer.setOnClickListener(v ->
+                startActivity(new Intent(DashboardActivity.this, ChimwemweSearchActivity.class)));
         }
         Bundle extras = getIntent().getExtras();
         String username = extras.getString("username");
@@ -690,6 +674,9 @@ public class DashboardActivity extends AppCompatActivity  implements GenerateCSV
                 break;
             case R.id.import_csv:
                 openCsvPicker();
+                break;
+            case R.id.advanced_search:
+                startActivity(new Intent(DashboardActivity.this, ChimwemweSearchActivity.class));
                 break;
         }
         return super.onOptionsItemSelected(item);

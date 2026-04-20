@@ -1,0 +1,385 @@
+{
+  "count": "3",
+  "encounter_type": "Chimwemwe Enrollment",
+  "entity_id": "",
+  "metadata": {
+    "start": {
+      "openmrs_entity_parent": "",
+      "openmrs_entity": "person_attribute",
+      "openmrs_data_type": "start",
+      "openmrs_entity_id": "163137AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    },
+    "end": {
+      "openmrs_entity_parent": "",
+      "openmrs_entity": "person_attribute",
+      "openmrs_data_type": "end",
+      "openmrs_entity_id": "163138AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    },
+    "today": {
+      "openmrs_entity_parent": "",
+      "openmrs_entity": "encounter",
+      "openmrs_entity_id": "encounter_date"
+    },
+    "deviceid": {
+      "openmrs_entity_parent": "",
+      "openmrs_entity": "person_attribute",
+      "openmrs_data_type": "deviceid",
+      "openmrs_entity_id": "163149AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    },
+    "subscriberid": {
+      "openmrs_entity_parent": "",
+      "openmrs_entity": "person_attribute",
+      "openmrs_data_type": "subscriberid",
+      "openmrs_entity_id": "163150AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    },
+    "simserial": {
+      "openmrs_entity_parent": "",
+      "openmrs_entity": "person_attribute",
+      "openmrs_data_type": "simserial",
+      "openmrs_entity_id": "163151AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    },
+    "phonenumber": {
+      "openmrs_entity_parent": "",
+      "openmrs_entity": "person_attribute",
+      "openmrs_data_type": "phonenumber",
+      "openmrs_entity_id": "163152AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    },
+    "encounter_location": ""
+  },
+
+  "step1": {
+    "title": "Group & Venue Details",
+    "display_back_button": "true",
+    "fields": [
+      {
+        "key": "province",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "province",
+        "type": "edit_text",
+        "hint": "Province",
+        "edit_type": "name",
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
+      },
+      {
+        "key": "district",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "district",
+        "type": "edit_text",
+        "hint": "District",
+        "edit_type": "name",
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
+      },
+      {
+        "key": "hotspot_name",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "hotspot_name",
+        "type": "edit_text",
+        "hint": "Name of Hotspot",
+        "edit_type": "name",
+        "v_required": {
+          "value": "true",
+          "err": "Please enter the name of the hotspot"
+        }
+      },
+      {
+        "key": "group_name",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "group_name",
+        "type": "edit_text",
+        "hint": "Group Name",
+        "edit_type": "name",
+        "v_required": {
+          "value": "true",
+          "err": "Please enter the group name"
+        }
+      },
+      {
+        "key": "location_of_session",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "location_of_session",
+        "type": "edit_text",
+        "hint": "Location of Group Session (venue name)",
+        "edit_type": "name",
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
+      },
+      {
+        "key": "location_gps",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "location_gps",
+        "openmrs_data_type": "text",
+        "type": "gps"
+      },
+      {
+        "key": "nearest_health_facility",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "nearest_health_facility",
+        "type": "edit_text",
+        "hint": "Nearest Health Facility",
+        "edit_type": "name",
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
+      }
+    ]
+  },
+
+  "step2": {
+    "title": "Facilitators",
+    "display_back_button": "true",
+    "fields": [
+      {
+        "key": "facilitator_1_first_name",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "facilitator_1_first_name",
+        "type": "edit_text",
+        "hint": "Facilitator 1 — First Name",
+        "edit_type": "name",
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
+      },
+      {
+        "key": "facilitator_1_surname",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "facilitator_1_surname",
+        "type": "edit_text",
+        "hint": "Facilitator 1 — Surname",
+        "edit_type": "name",
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
+      },
+      {
+        "key": "facilitator_2_first_name",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "facilitator_2_first_name",
+        "type": "edit_text",
+        "hint": "Facilitator 2 — First Name",
+        "edit_type": "name",
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
+      },
+      {
+        "key": "facilitator_2_surname",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "facilitator_2_surname",
+        "type": "edit_text",
+        "hint": "Facilitator 2 — Surname",
+        "edit_type": "name",
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
+      }
+    ]
+  },
+
+  "step3": {
+    "title": "Session Dates",
+    "display_back_button": "true",
+    "fields": [
+      {
+        "key": "session_note",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "session_note",
+        "type": "toaster_notes",
+        "text": "Enter the planned or actual date for each of the 14 sessions. Participant attendance is recorded separately per session after this form is saved.",
+        "toaster_type": "info"
+      },
+      {
+        "key": "session_1_date",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "session_1_date",
+        "type": "date_picker",
+        "hint": "Session 1 Date (DD/MM/YY)",
+        "expanded": false,
+        "min_date": "today-3y",
+        "max_date": "today+1y",
+        "v_required": { "value": "false", "err": "" }
+      },
+      {
+        "key": "session_2_date",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "session_2_date",
+        "type": "date_picker",
+        "hint": "Session 2 Date (DD/MM/YY)",
+        "expanded": false,
+        "min_date": "today-3y",
+        "max_date": "today+1y",
+        "v_required": { "value": "false", "err": "" }
+      },
+      {
+        "key": "session_3_date",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "session_3_date",
+        "type": "date_picker",
+        "hint": "Session 3 Date (DD/MM/YY)",
+        "expanded": false,
+        "min_date": "today-3y",
+        "max_date": "today+1y",
+        "v_required": { "value": "false", "err": "" }
+      },
+      {
+        "key": "session_4_date",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "session_4_date",
+        "type": "date_picker",
+        "hint": "Session 4 Date (DD/MM/YY)",
+        "expanded": false,
+        "min_date": "today-3y",
+        "max_date": "today+1y",
+        "v_required": { "value": "false", "err": "" }
+      },
+      {
+        "key": "session_5_date",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "session_5_date",
+        "type": "date_picker",
+        "hint": "Session 5 Date (DD/MM/YY)",
+        "expanded": false,
+        "min_date": "today-3y",
+        "max_date": "today+1y",
+        "v_required": { "value": "false", "err": "" }
+      },
+      {
+        "key": "session_6_date",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "session_6_date",
+        "type": "date_picker",
+        "hint": "Session 6 Date (DD/MM/YY)",
+        "expanded": false,
+        "min_date": "today-3y",
+        "max_date": "today+1y",
+        "v_required": { "value": "false", "err": "" }
+      },
+      {
+        "key": "session_7_date",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "session_7_date",
+        "type": "date_picker",
+        "hint": "Session 7 Date (DD/MM/YY)",
+        "expanded": false,
+        "min_date": "today-3y",
+        "max_date": "today+1y",
+        "v_required": { "value": "false", "err": "" }
+      },
+      {
+        "key": "session_8_date",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "session_8_date",
+        "type": "date_picker",
+        "hint": "Session 8 Date (DD/MM/YY)",
+        "expanded": false,
+        "min_date": "today-3y",
+        "max_date": "today+1y",
+        "v_required": { "value": "false", "err": "" }
+      },
+      {
+        "key": "session_9_date",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "session_9_date",
+        "type": "date_picker",
+        "hint": "Session 9 Date (DD/MM/YY)",
+        "expanded": false,
+        "min_date": "today-3y",
+        "max_date": "today+1y",
+        "v_required": { "value": "false", "err": "" }
+      },
+      {
+        "key": "session_10_date",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "session_10_date",
+        "type": "date_picker",
+        "hint": "Session 10 Date (DD/MM/YY)",
+        "expanded": false,
+        "min_date": "today-3y",
+        "max_date": "today+1y",
+        "v_required": { "value": "false", "err": "" }
+      },
+      {
+        "key": "session_11_date",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "session_11_date",
+        "type": "date_picker",
+        "hint": "Session 11 Date (DD/MM/YY)",
+        "expanded": false,
+        "min_date": "today-3y",
+        "max_date": "today+1y",
+        "v_required": { "value": "false", "err": "" }
+      },
+      {
+        "key": "session_12_date",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "session_12_date",
+        "type": "date_picker",
+        "hint": "Session 12 Date (DD/MM/YY)",
+        "expanded": false,
+        "min_date": "today-3y",
+        "max_date": "today+1y",
+        "v_required": { "value": "false", "err": "" }
+      },
+      {
+        "key": "session_13_date",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "session_13_date",
+        "type": "date_picker",
+        "hint": "Session 13 Date (DD/MM/YY)",
+        "expanded": false,
+        "min_date": "today-3y",
+        "max_date": "today+1y",
+        "v_required": { "value": "false", "err": "" }
+      },
+      {
+        "key": "session_14_date",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "session_14_date",
+        "type": "date_picker",
+        "hint": "Session 14 Date (DD/MM/YY)",
+        "expanded": false,
+        "min_date": "today-3y",
+        "max_date": "today+1y",
+        "v_required": { "value": "false", "err": "" }
+      }
+    ]
+  }
+}

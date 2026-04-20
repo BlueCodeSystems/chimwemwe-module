@@ -7,6 +7,7 @@ import android.view.MenuItem;
 import androidx.annotation.NonNull;
 
 import com.bluecodeltd.ecap.chw.R;
+import com.bluecodeltd.ecap.chw.activity.ChimwemweRegisterActivity;
 import com.bluecodeltd.ecap.chw.activity.DashboardActivity;
 import com.bluecodeltd.ecap.chw.activity.FamilyRegisterActivity;
 import com.bluecodeltd.ecap.chw.activity.HivTestingServiceActivity;
@@ -157,7 +158,16 @@ public class ChwBottomNavigationListener extends CoreBottomNavigationListener {
         }
 
         else if (item.getItemId() == R.id.action_identifcation) {
-            if ( context instanceof IndexRegisterActivity ) {
+            if (context instanceof ChimwemweRegisterActivity) {
+                ChimwemweRegisterActivity chimwemweActivity = (ChimwemweRegisterActivity) context;
+                try {
+                    FormUtils formUtils = new FormUtils(context);
+                    JSONObject enrollmentForm = formUtils.getFormJson("chimwemwe_enrollment");
+                    chimwemweActivity.startFormActivity(enrollmentForm);
+                } catch (Exception e) {
+                    Timber.e(e);
+                }
+            } else if ( context instanceof IndexRegisterActivity ) {
 
                 IndexRegisterActivity idRegisterActivity = (IndexRegisterActivity) context;
 

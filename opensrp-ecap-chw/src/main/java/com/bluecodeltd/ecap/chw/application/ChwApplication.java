@@ -20,6 +20,7 @@ import com.bluecodeltd.ecap.chw.activity.DashboardActivity;
 import com.bluecodeltd.ecap.chw.activity.FamilyProfileActivity;
 import com.bluecodeltd.ecap.chw.activity.FamilyRegisterActivity;
 import com.bluecodeltd.ecap.chw.activity.FpRegisterActivity;
+import com.bluecodeltd.ecap.chw.activity.ChimwemweRegisterActivity;
 import com.bluecodeltd.ecap.chw.activity.HivTestingServiceActivity;
 import com.bluecodeltd.ecap.chw.activity.HouseholdIndexActivity;
 import com.bluecodeltd.ecap.chw.activity.IdentificationRegisterActivity;
@@ -73,6 +74,8 @@ import org.smartregister.chw.malaria.MalariaLibrary;
 import org.smartregister.chw.pnc.PncLibrary;
 import org.smartregister.chw.referral.ReferralLibrary;
 import org.smartregister.commonregistry.CommonFtsObject;
+import org.smartregister.commonregistry.CommonRepositoryInformationHolder;
+import org.smartregister.domain.ColumnDetails;
 import org.smartregister.configurableviews.ConfigurableViewsLibrary;
 import org.smartregister.configurableviews.helper.JsonSpecHelper;
 import org.smartregister.domain.FetchStatus;
@@ -226,6 +229,22 @@ public class ChwApplication extends CoreChwApplication implements SyncStatusBroa
 
 
         initializeLibraries();
+
+        // Register ec_chimwemwe_group with CommonRepository (table is created by HotspotGroupDao,
+        // not via ec_client_fields.json, so we add it to bindtypes programmatically here — after
+        // assignbindtypes() has already run during ChwRepository construction inside initializeLibraries()).
+        if (Context.bindtypes != null) {
+            ColumnDetails[] groupCols = new ColumnDetails[]{
+                    ColumnDetails.builder().name("hotspot_name").dataType("VARCHAR").build(),
+                    ColumnDetails.builder().name("group_name").dataType("VARCHAR").build(),
+                    ColumnDetails.builder().name("created_date").dataType("VARCHAR").build(),
+                    ColumnDetails.builder().name("p_count").dataType("VARCHAR").build(),
+                    ColumnDetails.builder().name("s_count").dataType("VARCHAR").build(),
+                    ColumnDetails.builder().name("relationalid").dataType("VARCHAR").build(),
+                    ColumnDetails.builder().name("sync_status").dataType("VARCHAR").build()
+            };
+            Context.bindtypes.add(new CommonRepositoryInformationHolder("ec_chimwemwe_group", groupCols));
+        }
 
         // init json helper
         this.jsonSpecHelper = new JsonSpecHelper(this);
@@ -433,6 +452,7 @@ public class ChwApplication extends CoreChwApplication implements SyncStatusBroa
         }
         registeredActivities.put(CoreConstants.REGISTERED_ACTIVITIES.FP_REGISTER_ACTIVITY, FpRegisterActivity.class);
         registeredActivities.put(CoreConstants.REGISTERED_ACTIVITIES.UPDATES_REGISTER_ACTIVITY, UpdatesRegisterActivity.class);
+        registeredActivities.put(CoreConstants.REGISTERED_ACTIVITIES.CHIMWEMWE_REGISTER_ACTIVITY, ChimwemweRegisterActivity.class);
         return registeredActivities;
     }
 
