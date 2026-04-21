@@ -10,10 +10,18 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import com.bluecodeltd.ecap.chw.BuildConfig;
 import com.bluecodeltd.ecap.chw.R;
 import com.bluecodeltd.ecap.chw.dao.ParticipantDao;
 import com.bluecodeltd.ecap.chw.model.ParticipantModel;
 import com.bluecodeltd.ecap.chw.util.Threading;
+
+import org.smartregister.location.helper.LocationHelper;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
 
 public class AddParticipantActivity extends AppCompatActivity {
 
@@ -68,6 +76,9 @@ public class AddParticipantActivity extends AppCompatActivity {
         if (participantId != -1) {
             if (getSupportActionBar() != null) getSupportActionBar().setTitle("Edit Participant");
             loadExisting();
+        } else {
+            etVcaId.setText(generateVcaId());
+            etCaregiverId.setText(generateCaregiverId());
         }
 
         Button btnSave = findViewById(R.id.btn_save_participant);
@@ -90,6 +101,26 @@ public class AddParticipantActivity extends AppCompatActivity {
                 setSpinner(spinnerOvc, m.getIsEnrolledOvc());
             });
         });
+    }
+
+    private String generateVcaId() {
+        int num = 1000000 + new Random().nextInt(9000000);
+        return String.valueOf(num);
+    }
+
+    private String generateCaregiverId() {
+        String prefix = "";
+        try {
+            List<String> hierarchy = LocationHelper.getInstance()
+                    .generateDefaultLocationHierarchy(
+                            new ArrayList<>(Arrays.asList(BuildConfig.ALLOWED_LOCATION_LEVELS)));
+            if (hierarchy != null && hierarchy.size() > 2 && hierarchy.get(2) != null) {
+                String district = hierarchy.get(2).trim().replaceAll("\\s+", "");
+                prefix = district.substring(0, Math.min(3, district.length())).toUpperCase();
+            }
+        } catch (Exception ignored) {}
+        int num = 100000 + new Random().nextInt(900000);
+        return prefix + num;
     }
 
     private void setSpinner(Spinner spinner, String value) {

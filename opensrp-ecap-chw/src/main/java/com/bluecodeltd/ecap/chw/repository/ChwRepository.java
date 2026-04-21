@@ -31,6 +31,7 @@ public class ChwRepository extends CoreChwRepository {
         ParticipantDao.createTable(db);
         AttendanceDao.createTable(db);
         MonthlyReviewDao.createTable(db);
+        com.bluecodeltd.ecap.chw.dao.ChimwemweReferralDao.createTable(db);
     }
 
     @Override

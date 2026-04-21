@@ -13,7 +13,6 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.GridLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -22,28 +21,37 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.Fragment;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.bluecodeltd.ecap.chw.R;
+import com.bluecodeltd.ecap.chw.adapter.ViewPager2Adapter;
 import com.bluecodeltd.ecap.chw.dao.AttendanceDao;
 import com.bluecodeltd.ecap.chw.dao.HotspotGroupDao;
 import com.bluecodeltd.ecap.chw.dao.MonthlyReviewDao;
 import com.bluecodeltd.ecap.chw.dao.ParticipantDao;
+import com.bluecodeltd.ecap.chw.fragment.HotspotGroupOverviewFragment;
+import com.bluecodeltd.ecap.chw.fragment.HotspotGroupParticipantsFragment;
+import com.bluecodeltd.ecap.chw.fragment.HotspotGroupSessionsFragment;
 import com.bluecodeltd.ecap.chw.model.ChimwemweIndexModel;
 import com.bluecodeltd.ecap.chw.model.HotspotGroupModel;
 import com.bluecodeltd.ecap.chw.model.MonthlyReviewModel;
 import com.bluecodeltd.ecap.chw.model.ParticipantModel;
 import com.bluecodeltd.ecap.chw.util.Threading;
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.smartregister.opd.utils.OpdConstants;
 import org.smartregister.util.FormUtils;
 
-import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
+
+import androidx.preference.PreferenceManager;
 
 import timber.log.Timber;
 
@@ -54,13 +62,17 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
     private static final int REQUEST_CODE_PARTICIPANT_FORM = 2001;
     private static final int REQUEST_CODE_REVIEW_FORM     = 2002;
     private static final int REQUEST_CODE_OVC_SEARCH      = 2003;
+    private static final int REQUEST_CODE_GROUP_FORM      = 2004;
 
     private long         groupId = -1;
     private int          pendingNextSn = 1;
-    private EditText     etHotspotName, etGroupName;
-    private GridLayout   gridSessions;
-    private LinearLayout llParticipants;
-    private TextView     tvLastReview;
+    private HotspotGroupModel currentGroup;
+    private final String[] sessionDates = new String[14];
+    private List<ParticipantModel> participants = Collections.emptyList();
+    private List<MonthlyReviewModel> reviews = Collections.emptyList();
+    private TabLayout tabLayout;
+    private ViewPager2 viewPager;
+    private TabLayoutMediator tabMediator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,29 +84,26 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
         if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         toolbar.setNavigationOnClickListener(v -> finish());
 
-        groupId        = getIntent().getLongExtra(EXTRA_GROUP_ID, -1);
-        etHotspotName  = findViewById(R.id.et_hotspot_name);
-        etGroupName    = findViewById(R.id.et_group_name);
-        gridSessions   = findViewById(R.id.grid_sessions);
-        llParticipants = findViewById(R.id.ll_participants);
-        tvLastReview   = findViewById(R.id.tv_last_review);
-
-        Button btnSave = findViewById(R.id.btn_save_group);
-        btnSave.setOnClickListener(v -> saveGroup());
-
-        Button btnAddParticipant = findViewById(R.id.btn_add_participant);
-        btnAddParticipant.setOnClickListener(v -> openAddParticipant());
-
-        Button btnReview = findViewById(R.id.btn_monthly_review);
-        btnReview.setOnClickListener(v -> openMonthlyReview());
+        groupId = getIntent().getLongExtra(EXTRA_GROUP_ID, -1);
+        tabLayout = findViewById(R.id.tabs);
+        viewPager = findViewById(R.id.viewpager);
+        setupViewPager();
 
         if (groupId != -1) {
             if (getSupportActionBar() != null) getSupportActionBar().setTitle("Group Details");
             loadGroup();
         } else {
-            if (getSupportActionBar() != null) getSupportActionBar().setTitle("New Group");
-            buildSessionGrid(new String[14]);
+            notifySectionFragments();
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (tabMediator != null) {
+            tabMediator.detach();
+            tabMediator = null;
+        }
+        super.onDestroy();
     }
 
     @Override
@@ -106,27 +115,152 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
     private void loadGroup() {
         Threading.io(() -> {
             HotspotGroupModel group        = HotspotGroupDao.getGroup(groupId);
-            List<ParticipantModel> participants = ParticipantDao.getParticipants(groupId);
-            List<MonthlyReviewModel> reviews   = MonthlyReviewDao.getReviews(groupId);
-
-            String[] sessionDates = new String[14];
+            List<ParticipantModel> loadedParticipants = ParticipantDao.getParticipants(groupId);
+            List<MonthlyReviewModel> loadedReviews   = MonthlyReviewDao.getReviews(groupId);
+            String[] loadedSessionDates = new String[14];
             for (int i = 1; i <= 14; i++) {
-                sessionDates[i - 1] = AttendanceDao.getSessionDate(groupId, i);
+                loadedSessionDates[i - 1] = AttendanceDao.getSessionDate(groupId, i);
             }
 
             Threading.main(() -> {
-                if (group != null) {
-                    etHotspotName.setText(group.getHotspotName());
-                    etGroupName.setText(group.getGroupName());
-                }
-                buildSessionGrid(sessionDates);
-                buildParticipantList(participants);
-                updateLastReviewLabel(reviews);
+                currentGroup = group;
+                participants = loadedParticipants != null ? loadedParticipants : Collections.emptyList();
+                reviews = loadedReviews != null ? loadedReviews : Collections.emptyList();
+                System.arraycopy(loadedSessionDates, 0, sessionDates, 0, sessionDates.length);
+                bindHeader(group);
+                updateTabTitles();
+                notifySectionFragments();
             });
         });
     }
 
-    private void updateLastReviewLabel(List<MonthlyReviewModel> reviews) {
+    private void bindHeader(HotspotGroupModel g) {
+        TextView tvAvatar    = findViewById(R.id.tv_group_avatar);
+        TextView tvName      = findViewById(R.id.tv_header_group_name);
+        TextView tvHotspot   = findViewById(R.id.tv_header_hotspot);
+        TextView tvCode      = findViewById(R.id.tv_header_group_code);
+        if (g == null) return;
+        String name = g.getGroupName() != null ? g.getGroupName() : "";
+        tvAvatar.setText(initials(name));
+        tvName.setText(name.isEmpty() ? "—" : name);
+        tvHotspot.setText(g.getHotspotName() != null ? g.getHotspotName() : "");
+        tvCode.setText(g.getGroupCode() != null ? g.getGroupCode() : "");
+    }
+
+    private String initials(String name) {
+        if (name == null || name.isEmpty()) return "G";
+        String[] parts = name.trim().split("\\s+");
+        if (parts.length == 1) return String.valueOf(parts[0].charAt(0)).toUpperCase();
+        return (String.valueOf(parts[0].charAt(0)) + String.valueOf(parts[parts.length - 1].charAt(0))).toUpperCase();
+    }
+
+    private void setupViewPager() {
+        List<Fragment> fragments = java.util.Arrays.asList(
+                new HotspotGroupOverviewFragment(),
+                new HotspotGroupSessionsFragment(),
+                new HotspotGroupParticipantsFragment()
+        );
+        ViewPager2Adapter adapter = new ViewPager2Adapter(this, fragments);
+        viewPager.setAdapter(adapter);
+        viewPager.setOffscreenPageLimit(fragments.size());
+        tabMediator = new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
+            // titles set by updateTabTitles() after data loads; mediator just holds positions
+        });
+        tabMediator.attach();
+        // Show initial labels before async load
+        setTabTitle(0, "Overview",     -1);
+        setTabTitle(1, "Sessions",      0);
+        setTabTitle(2, "Participants",  0);
+    }
+
+    private void updateTabTitles() {
+        setTabTitle(0, "Overview",      -1);
+        int sessionsRecorded = 0;
+        for (String d : sessionDates) if (d != null) sessionsRecorded++;
+        setTabTitle(1, "Sessions",      sessionsRecorded);
+        setTabTitle(2, "Participants",  participants.size());
+    }
+
+    private void setTabTitle(int position, String title, int count) {
+        TabLayout.Tab tab = tabLayout.getTabAt(position);
+        if (tab == null) return;
+        android.view.View custom = LayoutInflater.from(this)
+                .inflate(R.layout.item_chimwemwe_group_tab, null);
+        ((TextView) custom.findViewById(R.id.tab_title)).setText(title);
+        TextView tvCount = custom.findViewById(R.id.tab_count);
+        if (count >= 0) {
+            tvCount.setText(String.valueOf(count));
+        } else {
+            tvCount.setVisibility(android.view.View.GONE);
+        }
+        tab.setCustomView(custom);
+    }
+
+    private void notifySectionFragments() {
+        for (Fragment fragment : getSupportFragmentManager().getFragments()) {
+            if (fragment instanceof HotspotGroupSectionFragment) {
+                ((HotspotGroupSectionFragment) fragment).refreshContent();
+            }
+        }
+    }
+
+    public void bindOverview(View root) {
+        if (root == null) return;
+
+        View btnEdit = root.findViewById(R.id.btn_edit_group);
+        if (btnEdit != null) btnEdit.setOnClickListener(v -> launchGroupEditForm());
+        View btnReview = root.findViewById(R.id.btn_monthly_review);
+        if (btnReview != null) btnReview.setOnClickListener(v -> openMonthlyReview());
+
+        TextView tvProvince        = root.findViewById(R.id.tv_province);
+        TextView tvDistrict        = root.findViewById(R.id.tv_district);
+        TextView tvSessionLocation = root.findViewById(R.id.tv_session_location);
+        TextView tvHealthFacility  = root.findViewById(R.id.tv_health_facility);
+        TextView tvFacilitators    = root.findViewById(R.id.tv_facilitators);
+        TextView tvLastReview      = root.findViewById(R.id.tv_last_review);
+        TextView tvCaseworkerName  = root.findViewById(R.id.tv_caseworker_name);
+        TextView tvCaseworkerPhone = root.findViewById(R.id.tv_caseworker_phone);
+
+        if (currentGroup != null) {
+            if (tvProvince != null)        tvProvince.setText(orDash(currentGroup.getProvince()));
+            if (tvDistrict != null)        tvDistrict.setText(orDash(currentGroup.getDistrict()));
+            if (tvSessionLocation != null) tvSessionLocation.setText(orDash(currentGroup.getLocationOfSession()));
+            if (tvHealthFacility != null)  tvHealthFacility.setText(orDash(currentGroup.getNearestHealthFacility()));
+            if (tvFacilitators != null) {
+                String f1 = combineName(currentGroup.getFacilitator1FirstName(), currentGroup.getFacilitator1Surname());
+                String f2 = combineName(currentGroup.getFacilitator2FirstName(), currentGroup.getFacilitator2Surname());
+                tvFacilitators.setText(orDash(f1.isEmpty() ? f2 : (f2.isEmpty() ? f1 : f1 + ", " + f2)));
+            }
+        } else {
+            if (tvProvince != null)        tvProvince.setText(orDash(""));
+            if (tvDistrict != null)        tvDistrict.setText(orDash(""));
+            if (tvSessionLocation != null) tvSessionLocation.setText(orDash(""));
+            if (tvHealthFacility != null)  tvHealthFacility.setText(orDash(""));
+            if (tvFacilitators != null)    tvFacilitators.setText(orDash(""));
+        }
+
+        android.content.SharedPreferences cp =
+                PreferenceManager.getDefaultSharedPreferences(this);
+        if (tvCaseworkerName != null)
+            tvCaseworkerName.setText(orDash(cp.getString("caseworker_name", null)));
+        if (tvCaseworkerPhone != null)
+            tvCaseworkerPhone.setText(orDash(cp.getString("phone", null)));
+
+        updateLastReviewLabel(tvLastReview, reviews);
+    }
+
+    public void bindSessions(View root) {
+        if (root == null) return;
+        buildSessionGrid(root.findViewById(R.id.grid_sessions), sessionDates);
+    }
+
+    public void bindParticipants(View root) {
+        if (root == null) return;
+        root.findViewById(R.id.btn_add_participant).setOnClickListener(v -> openAddParticipant());
+        buildParticipantList(root.findViewById(R.id.ll_participants), participants);
+    }
+
+    private void updateLastReviewLabel(TextView tvLastReview, List<MonthlyReviewModel> reviews) {
         if (tvLastReview == null) return;
         if (reviews == null || reviews.isEmpty()) {
             tvLastReview.setText("No reviews recorded");
@@ -137,37 +271,23 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
         }
     }
 
-    private void saveGroup() {
-        String hotspot   = etHotspotName.getText().toString().trim();
-        String groupName = etGroupName.getText().toString().trim();
-        if (hotspot.isEmpty() || groupName.isEmpty()) {
-            Toast.makeText(this, "Please fill in Hotspot Name and Group Name", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
+    private void launchGroupEditForm() {
+        if (currentGroup == null) return;
         Threading.io(() -> {
-            if (groupId == -1) {
-                HotspotGroupModel m = new HotspotGroupModel();
-                m.setHotspotName(hotspot);
-                m.setGroupName(groupName);
-                m.setCreatedDate(LocalDate.now().toString());
-                groupId = HotspotGroupDao.insertGroup(m);
-            } else {
-                HotspotGroupModel m = new HotspotGroupModel();
-                m.setId(groupId);
-                m.setHotspotName(hotspot);
-                m.setGroupName(groupName);
-                HotspotGroupDao.updateGroup(m);
+            try {
+                FormUtils formUtils = new FormUtils(this);
+                JSONObject form = formUtils.getFormJson("chimwemwe_enrollment");
+                if (form == null) return;
+                populateGroupEditForm(form);
+                launchJsonWizardForm(form, REQUEST_CODE_GROUP_FORM, true, "launchGroupEditForm intent");
+            } catch (Exception e) {
+                Timber.e(e, "launchGroupEditForm");
             }
-            Threading.main(() -> {
-                Toast.makeText(this, "Group saved", Toast.LENGTH_SHORT).show();
-                findViewById(R.id.btn_add_participant).setEnabled(true);
-                buildSessionGrid(new String[14]);
-            });
         });
     }
 
-    private void buildSessionGrid(String[] sessionDates) {
+    private void buildSessionGrid(GridLayout gridSessions, String[] sessionDates) {
+        if (gridSessions == null) return;
         gridSessions.removeAllViews();
         int cols = 4;
 
@@ -211,7 +331,8 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
         }
     }
 
-    private void buildParticipantList(List<ParticipantModel> participants) {
+    private void buildParticipantList(LinearLayout llParticipants, List<ParticipantModel> participants) {
+        if (llParticipants == null) return;
         llParticipants.removeAllViews();
         if (participants == null || participants.isEmpty()) {
             TextView tv = new TextView(this);
@@ -238,6 +359,12 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
                 tvDone.setTextColor(Color.parseColor("#2E7D32"));
             }
 
+            row.setOnClickListener(v -> {
+                Intent profileIntent = new Intent(this, ChimwemweParticipantProfileActivity.class);
+                profileIntent.putExtra(ChimwemweParticipantProfileActivity.EXTRA_PARTICIPANT_ID, p.getId());
+                startActivity(profileIntent);
+            });
+
             row.findViewById(R.id.btn_edit_participant).setOnClickListener(v ->
                     launchParticipantForm(p, p.getSn()));
 
@@ -258,7 +385,7 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
 
     // ── Participant form ──────────────────────────────────────
 
-    private void openAddParticipant() {
+    void openAddParticipant() {
         if (groupId == -1) {
             Toast.makeText(this, "Save the group first", Toast.LENGTH_SHORT).show();
             return;
@@ -348,60 +475,9 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
             try {
                 FormUtils formUtils = new FormUtils(this);
                 JSONObject form = formUtils.getFormJson("chimwemwe_participant_register");
-
-                boolean isEdit = existing != null && existing.getId() > 0;
-
-                if (existing != null) {
-                    setFieldValue(form, "step1", "caregiver_first_name", existing.getCaregiverFirstName());
-                    setFieldValue(form, "step1", "caregiver_surname",    existing.getCaregiverSurname());
-                    setFieldValue(form, "step2", "child_first_name",     existing.getChildFirstName());
-                    setFieldValue(form, "step2", "child_surname",        existing.getChildSurname());
-                    setFieldValue(form, "step2", "child_dob",            existing.getChildDob());
-                    setFieldValue(form, "step2", "child_sex",            existing.getChildSex());
-                    setFieldValue(form, "step2", "is_enrolled_ovc",      existing.getIsEnrolledOvc());
-                    setFieldValue(form, "step3", "who_referred",         existing.getWhoReferred());
-                    setFieldValue(form, "step3", "service_referred_for", existing.getServiceReferredFor());
-                    setFieldValue(form, "step3", "referral_date",        existing.getReferralDate());
-                    setFieldValue(form, "step3", "receiving_org",        existing.getReceivingOrg());
-                    setFieldValue(form, "step3", "job_title",            existing.getJobTitle());
-                    setFieldValue(form, "step3", "service_date",         existing.getServiceDate());
-                }
-
-                // Auto-generate IDs for new participants; preserve existing IDs in edit mode
-                if (isEdit) {
-                    setFieldValue(form, "step2", "vca_id",       existing.getVcaId());
-                    setFieldValue(form, "step2", "caregiver_id", existing.getCaregiverId());
-                } else {
-                    setFieldValue(form, "step2", "vca_id",       String.valueOf(new Random().nextInt(900_000_000)));
-                    setFieldValue(form, "step2", "caregiver_id", String.valueOf(new Random().nextInt(900_000_000)));
-                }
-
-                // Stash routing metadata in the form root so onActivityResult can retrieve them
-                form.put("_sn",             sn);
-                form.put("_participant_id", existing != null ? existing.getId() : -1L);
-
-                final JSONObject finalForm = form;
-                Threading.main(() -> {
-                    try {
-                        Intent intent = new Intent(
-                                this, org.smartregister.family.util.Utils.metadata().familyFormActivity);
-                        com.vijay.jsonwizard.domain.Form cfg = new com.vijay.jsonwizard.domain.Form();
-                        cfg.setWizard(true);
-                        cfg.setHideSaveLabel(true);
-                        cfg.setNextLabel(getString(R.string.next));
-                        cfg.setPreviousLabel(getString(R.string.previous));
-                        cfg.setSaveLabel(getString(R.string.submit));
-                        cfg.setNavigationBackground(R.color.chimwemwe_primary);
-                        intent.putExtra(
-                                com.vijay.jsonwizard.constants.JsonFormConstants.JSON_FORM_KEY.FORM, cfg);
-                        intent.putExtra(
-                                com.vijay.jsonwizard.constants.JsonFormConstants.JSON_FORM_KEY.JSON,
-                                finalForm.toString());
-                        startActivityForResult(intent, REQUEST_CODE_PARTICIPANT_FORM);
-                    } catch (Exception e) {
-                        Timber.e(e, "Error launching participant form");
-                    }
-                });
+                populateParticipantForm(form, existing, sn);
+                launchJsonWizardForm(form, REQUEST_CODE_PARTICIPANT_FORM, true,
+                        "Error launching participant form");
             } catch (Exception e) {
                 Timber.e(e, "Error preparing participant form");
             }
@@ -413,40 +489,9 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
             try {
                 FormUtils formUtils = new FormUtils(this);
                 JSONObject form = formUtils.getFormJson("chimwemwe_participant_register_ovc_enrolled");
-
-                setFieldValue(form, "step1", "child_first_name",     ovcRecord.getFirstName());
-                setFieldValue(form, "step1", "child_surname",        ovcRecord.getLastName());
-                setFieldValue(form, "step1", "child_dob",            normalizeDob(ovcRecord.getBirthdate()));
-                setFieldValue(form, "step1", "child_sex",            normalizeGender(ovcRecord.getGender()));
-                setFieldValue(form, "step1", "is_enrolled_ovc",      "Yes");
-                setFieldValue(form, "step1", "vca_id",               ovcRecord.getUniqueId());
-                setFieldValue(form, "step1", "caregiver_id",         ovcRecord.getHouseholdId());
-
-                form.put("_sn", sn);
-                form.put("_participant_id", -1L);
-
-                final JSONObject finalForm = form;
-                Threading.main(() -> {
-                    try {
-                        Intent intent = new Intent(
-                                this, org.smartregister.family.util.Utils.metadata().familyFormActivity);
-                        com.vijay.jsonwizard.domain.Form cfg = new com.vijay.jsonwizard.domain.Form();
-                        cfg.setWizard(true);
-                        cfg.setHideSaveLabel(true);
-                        cfg.setNextLabel(getString(R.string.next));
-                        cfg.setPreviousLabel(getString(R.string.previous));
-                        cfg.setSaveLabel(getString(R.string.submit));
-                        cfg.setNavigationBackground(R.color.chimwemwe_primary);
-                        intent.putExtra(
-                                com.vijay.jsonwizard.constants.JsonFormConstants.JSON_FORM_KEY.FORM, cfg);
-                        intent.putExtra(
-                                com.vijay.jsonwizard.constants.JsonFormConstants.JSON_FORM_KEY.JSON,
-                                finalForm.toString());
-                        startActivityForResult(intent, REQUEST_CODE_PARTICIPANT_FORM);
-                    } catch (Exception e) {
-                        Timber.e(e, "Error launching OVC participant form");
-                    }
-                });
+                populateOvcParticipantForm(form, ovcRecord, sn);
+                launchJsonWizardForm(form, REQUEST_CODE_PARTICIPANT_FORM, true,
+                        "Error launching OVC participant form");
             } catch (Exception e) {
                 Timber.e(e, "Error preparing OVC participant form");
             }
@@ -485,6 +530,54 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode != Activity.RESULT_OK || data == null) return;
+
+        if (requestCode == REQUEST_CODE_GROUP_FORM) {
+            String jsonString = data.getStringExtra(OpdConstants.JSON_FORM_EXTRA.JSON);
+            if (jsonString == null) return;
+            Threading.io(() -> {
+                try {
+                    JSONObject form  = new JSONObject(jsonString);
+                    JSONObject step1 = form.optJSONObject("step1");
+                    JSONObject step2 = form.optJSONObject("step2");
+                    JSONObject step3 = form.optJSONObject("step3");
+                    HotspotGroupModel m = currentGroup != null ? currentGroup : new HotspotGroupModel();
+                    m.setId(groupId);
+                    m.setGroupName(fieldValue(step1,             "group_name"));
+                    m.setHotspotName(fieldValue(step1,           "hotspot_name"));
+                    m.setProvince(fieldValue(step1,              "province"));
+                    m.setDistrict(fieldValue(step1,              "district"));
+                    m.setLocationOfSession(fieldValue(step1,     "location_of_session"));
+                    m.setNearestHealthFacility(fieldValue(step1, "nearest_health_facility"));
+                    m.setFacilitator1FirstName(fieldValue(step2, "facilitator_1_first_name"));
+                    m.setFacilitator1Surname(fieldValue(step2,   "facilitator_1_surname"));
+                    m.setFacilitator2FirstName(fieldValue(step2, "facilitator_2_first_name"));
+                    m.setFacilitator2Surname(fieldValue(step2,   "facilitator_2_surname"));
+                    m.setSession1Date(fieldValue(step3,  "session_1_date"));
+                    m.setSession2Date(fieldValue(step3,  "session_2_date"));
+                    m.setSession3Date(fieldValue(step3,  "session_3_date"));
+                    m.setSession4Date(fieldValue(step3,  "session_4_date"));
+                    m.setSession5Date(fieldValue(step3,  "session_5_date"));
+                    m.setSession6Date(fieldValue(step3,  "session_6_date"));
+                    m.setSession7Date(fieldValue(step3,  "session_7_date"));
+                    m.setSession8Date(fieldValue(step3,  "session_8_date"));
+                    m.setSession9Date(fieldValue(step3,  "session_9_date"));
+                    m.setSession10Date(fieldValue(step3, "session_10_date"));
+                    m.setSession11Date(fieldValue(step3, "session_11_date"));
+                    m.setSession12Date(fieldValue(step3, "session_12_date"));
+                    m.setSession13Date(fieldValue(step3, "session_13_date"));
+                    m.setSession14Date(fieldValue(step3, "session_14_date"));
+                    HotspotGroupDao.updateGroup(m);
+                    saveFormEvent(form, "ec_chimwemwe_group");
+                    Threading.main(() -> {
+                        Toast.makeText(this, "Group updated", Toast.LENGTH_SHORT).show();
+                        loadGroup();
+                    });
+                } catch (Exception e) {
+                    Timber.e(e, "onActivityResult group form");
+                }
+            });
+            return;
+        }
 
         if (requestCode == REQUEST_CODE_REVIEW_FORM) {
             String jsonString = data.getStringExtra(OpdConstants.JSON_FORM_EXTRA.JSON);
@@ -604,7 +697,10 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
             org.smartregister.repository.AllSharedPreferences prefs = getAllSharedPreferences();
             org.smartregister.domain.tag.FormTag formTag = getFormTag();
 
-            String entityId = org.smartregister.util.JsonFormUtils.generateRandomUUIDString();
+            String entityId = form.optString("entity_id", "");
+            if (entityId.isEmpty()) {
+                entityId = org.smartregister.util.JsonFormUtils.generateRandomUUIDString();
+            }
             org.json.JSONArray fields = org.smartregister.util.JsonFormUtils.fields(form);
             JSONObject metadata = form.optJSONObject("metadata");
             String encounterType = form.optString("encounter_type", "");
@@ -656,6 +752,15 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
         return "";
     }
 
+    private String orDash(String v) { return (v == null || v.isEmpty()) ? "\u2014" : v; }
+
+    private String combineName(String first, String last) {
+        String f = first != null ? first.trim() : "";
+        String l = last  != null ? last.trim()  : "";
+        if (f.isEmpty() && l.isEmpty()) return "";
+        return f.isEmpty() ? l : (l.isEmpty() ? f : f + " " + l);
+    }
+
     /** Inject a value into a field in the form JSON before launching (for pre-population / edit). */
     private void setFieldValue(JSONObject form, String stepKey, String fieldKey, String value) {
         if (value == null || value.isEmpty()) return;
@@ -674,9 +779,129 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
         } catch (Exception ignored) {}
     }
 
+    private void populateGroupEditForm(JSONObject form) {
+        if (form == null || currentGroup == null) return;
+        setFieldValue(form, "step1", "group_name", currentGroup.getGroupName());
+        setFieldValue(form, "step1", "hotspot_name", currentGroup.getHotspotName());
+        setFieldValue(form, "step1", "province", currentGroup.getProvince());
+        setFieldValue(form, "step1", "district", currentGroup.getDistrict());
+        setFieldValue(form, "step1", "location_of_session", currentGroup.getLocationOfSession());
+        setFieldValue(form, "step1", "nearest_health_facility", currentGroup.getNearestHealthFacility());
+        setFieldValue(form, "step2", "facilitator_1_first_name", currentGroup.getFacilitator1FirstName());
+        setFieldValue(form, "step2", "facilitator_1_surname", currentGroup.getFacilitator1Surname());
+        setFieldValue(form, "step2", "facilitator_2_first_name", currentGroup.getFacilitator2FirstName());
+        setFieldValue(form, "step2", "facilitator_2_surname", currentGroup.getFacilitator2Surname());
+        setFieldValue(form, "step3", "session_1_date", currentGroup.getSession1Date());
+        setFieldValue(form, "step3", "session_2_date", currentGroup.getSession2Date());
+        setFieldValue(form, "step3", "session_3_date", currentGroup.getSession3Date());
+        setFieldValue(form, "step3", "session_4_date", currentGroup.getSession4Date());
+        setFieldValue(form, "step3", "session_5_date", currentGroup.getSession5Date());
+        setFieldValue(form, "step3", "session_6_date", currentGroup.getSession6Date());
+        setFieldValue(form, "step3", "session_7_date", currentGroup.getSession7Date());
+        setFieldValue(form, "step3", "session_8_date", currentGroup.getSession8Date());
+        setFieldValue(form, "step3", "session_9_date", currentGroup.getSession9Date());
+        setFieldValue(form, "step3", "session_10_date", currentGroup.getSession10Date());
+        setFieldValue(form, "step3", "session_11_date", currentGroup.getSession11Date());
+        setFieldValue(form, "step3", "session_12_date", currentGroup.getSession12Date());
+        setFieldValue(form, "step3", "session_13_date", currentGroup.getSession13Date());
+        setFieldValue(form, "step3", "session_14_date", currentGroup.getSession14Date());
+        try {
+            if (currentGroup.getGroupCode() != null) {
+                form.put("entity_id", currentGroup.getGroupCode());
+            }
+        } catch (Exception ignored) {}
+    }
+
+    private void populateParticipantForm(JSONObject form, ParticipantModel existing, int sn)
+            throws Exception {
+        if (form == null) return;
+        boolean isEdit = existing != null && existing.getId() > 0;
+
+        if (existing != null) {
+            setFieldValue(form, "step1", "caregiver_first_name", existing.getCaregiverFirstName());
+            setFieldValue(form, "step1", "caregiver_surname", existing.getCaregiverSurname());
+            setFieldValue(form, "step2", "child_first_name", existing.getChildFirstName());
+            setFieldValue(form, "step2", "child_surname", existing.getChildSurname());
+            setFieldValue(form, "step2", "child_dob", existing.getChildDob());
+            setFieldValue(form, "step2", "child_sex", existing.getChildSex());
+            setFieldValue(form, "step2", "is_enrolled_ovc", existing.getIsEnrolledOvc());
+            setFieldValue(form, "step3", "who_referred", existing.getWhoReferred());
+            setFieldValue(form, "step3", "service_referred_for", existing.getServiceReferredFor());
+            setFieldValue(form, "step3", "referral_date", existing.getReferralDate());
+            setFieldValue(form, "step3", "receiving_org", existing.getReceivingOrg());
+            setFieldValue(form, "step3", "job_title", existing.getJobTitle());
+            setFieldValue(form, "step3", "service_date", existing.getServiceDate());
+        }
+
+        if (isEdit) {
+            setFieldValue(form, "step2", "vca_id", existing.getVcaId());
+            setFieldValue(form, "step2", "caregiver_id", existing.getCaregiverId());
+            if (existing.getParticipantCode() != null) {
+                form.put("entity_id", existing.getParticipantCode());
+            }
+        } else {
+            setFieldValue(form, "step2", "vca_id", generateNumericIdentifier());
+            setFieldValue(form, "step2", "caregiver_id", generateNumericIdentifier());
+        }
+
+        form.put("_sn", sn);
+        form.put("_participant_id", existing != null ? existing.getId() : -1L);
+    }
+
+    private void populateOvcParticipantForm(JSONObject form, ChimwemweIndexModel ovcRecord, int sn)
+            throws Exception {
+        if (form == null || ovcRecord == null) return;
+        setFieldValue(form, "step1", "child_first_name", ovcRecord.getFirstName());
+        setFieldValue(form, "step1", "child_surname", ovcRecord.getLastName());
+        setFieldValue(form, "step1", "child_dob", normalizeDob(ovcRecord.getBirthdate()));
+        setFieldValue(form, "step1", "child_sex", normalizeGender(ovcRecord.getGender()));
+        setFieldValue(form, "step1", "is_enrolled_ovc", "Yes");
+        setFieldValue(form, "step1", "vca_id", ovcRecord.getUniqueId());
+        setFieldValue(form, "step1", "caregiver_id", ovcRecord.getHouseholdId());
+        form.put("_sn", sn);
+        form.put("_participant_id", -1L);
+    }
+
+    private String generateNumericIdentifier() {
+        return String.valueOf(new Random().nextInt(900_000_000));
+    }
+
+    private void launchJsonWizardForm(JSONObject form, int requestCode, boolean wizard, String errorTag) {
+        if (form == null) return;
+        final JSONObject finalForm = form;
+        Threading.main(() -> {
+            try {
+                Intent intent = new Intent(
+                        this, org.smartregister.family.util.Utils.metadata().familyFormActivity);
+                intent.putExtra(
+                        com.vijay.jsonwizard.constants.JsonFormConstants.JSON_FORM_KEY.FORM,
+                        createJsonWizardConfig(wizard));
+                intent.putExtra(
+                        com.vijay.jsonwizard.constants.JsonFormConstants.JSON_FORM_KEY.JSON,
+                        finalForm.toString());
+                startActivityForResult(intent, requestCode);
+            } catch (Exception e) {
+                Timber.e(e, errorTag);
+            }
+        });
+    }
+
+    private com.vijay.jsonwizard.domain.Form createJsonWizardConfig(boolean wizard) {
+        com.vijay.jsonwizard.domain.Form cfg = new com.vijay.jsonwizard.domain.Form();
+        cfg.setWizard(wizard);
+        cfg.setHideSaveLabel(true);
+        cfg.setSaveLabel(getString(R.string.submit));
+        cfg.setNavigationBackground(R.color.chimwemwe_primary);
+        if (wizard) {
+            cfg.setNextLabel(getString(R.string.next));
+            cfg.setPreviousLabel(getString(R.string.previous));
+        }
+        return cfg;
+    }
+
     // ── Monthly review ───────────────────────────────────────
 
-    private void openMonthlyReview() {
+    void openMonthlyReview() {
         if (groupId == -1) {
             Toast.makeText(this, "Save the group first", Toast.LENGTH_SHORT).show();
             return;
@@ -685,26 +910,8 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
             try {
                 FormUtils formUtils = new FormUtils(this);
                 JSONObject form = formUtils.getFormJson("chimwemwe_monthly_review");
-                final JSONObject finalForm = form;
-                Threading.main(() -> {
-                    try {
-                        Intent intent = new Intent(
-                                this, org.smartregister.family.util.Utils.metadata().familyFormActivity);
-                        com.vijay.jsonwizard.domain.Form cfg = new com.vijay.jsonwizard.domain.Form();
-                        cfg.setWizard(false);
-                        cfg.setHideSaveLabel(true);
-                        cfg.setSaveLabel(getString(R.string.submit));
-                        cfg.setNavigationBackground(R.color.chimwemwe_primary);
-                        intent.putExtra(
-                                com.vijay.jsonwizard.constants.JsonFormConstants.JSON_FORM_KEY.FORM, cfg);
-                        intent.putExtra(
-                                com.vijay.jsonwizard.constants.JsonFormConstants.JSON_FORM_KEY.JSON,
-                                finalForm.toString());
-                        startActivityForResult(intent, REQUEST_CODE_REVIEW_FORM);
-                    } catch (Exception e) {
-                        Timber.e(e, "Error launching review form");
-                    }
-                });
+                launchJsonWizardForm(form, REQUEST_CODE_REVIEW_FORM, false,
+                        "Error launching review form");
             } catch (Exception e) {
                 Timber.e(e, "Error preparing review form");
             }
@@ -713,7 +920,7 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
 
     // ── Attendance ────────────────────────────────────────────
 
-    private void openRecordAttendance(int sessionNum) {
+    void openRecordAttendance(int sessionNum) {
         Threading.io(() -> {
             int count = ParticipantDao.countParticipants(groupId);
             Threading.main(() -> {
@@ -728,5 +935,9 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
                 startActivity(intent);
             });
         });
+    }
+
+    public interface HotspotGroupSectionFragment {
+        void refreshContent();
     }
 }

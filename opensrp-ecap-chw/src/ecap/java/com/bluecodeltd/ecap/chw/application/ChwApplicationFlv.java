@@ -159,7 +159,6 @@ public class ChwApplicationFlv extends DefaultChwApplicationFlv {
                 "caregiver_name",
                 "delete_status"
         });
-
         return map;
     }
 
@@ -211,7 +210,6 @@ public class ChwApplicationFlv extends DefaultChwApplicationFlv {
                 "caregiver_name",
                 "delete_status"
         });
-
         return map;
     }
 

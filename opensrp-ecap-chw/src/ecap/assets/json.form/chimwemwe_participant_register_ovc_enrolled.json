@@ -168,7 +168,7 @@
         "values": ["-- Select --", "Yes", "No"],
         "read_only": "true",
         "v_required": {
-          "value": "false",
+          "value": "Yes",
           "err": ""
         }
       },

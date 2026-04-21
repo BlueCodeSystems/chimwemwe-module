@@ -1,10 +1,17 @@
 package com.bluecodeltd.ecap.chw.fragment;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.os.Handler;
+import android.os.Looper;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.bluecodeltd.ecap.chw.util.Threading;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -24,11 +31,30 @@ import org.smartregister.util.Utils;
 
 import java.util.HashMap;
 
+import timber.log.Timber;
+
 public class ChimwemweRegisterFragment extends BaseSafeRegisterFragment
         implements ChimwemweRegisterFragmentContract.View {
 
-    private static final String TAG = "ChimwemweRegFrag";
+    private static final String TAG   = "ChimwemweRegFrag";
     private static final String TABLE = "ec_chimwemwe_group";
+    private static final long   SEARCH_DEBOUNCE_MS = 350L;
+
+    private final Handler  searchHandler = new Handler(Looper.getMainLooper());
+    private       String   pendingSearchText = "";
+
+    private final Runnable searchRunnable = () -> applySearch(pendingSearchText);
+
+    private final TextWatcher debouncedSearchWatcher = new TextWatcher() {
+        @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+        @Override public void afterTextChanged(Editable s) {}
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            pendingSearchText = s == null ? "" : s.toString();
+            searchHandler.removeCallbacks(searchRunnable);
+            searchHandler.postDelayed(searchRunnable, SEARCH_DEBOUNCE_MS);
+        }
+    };
 
     @Override
     protected void initializePresenter() {
@@ -40,10 +66,8 @@ public class ChimwemweRegisterFragment extends BaseSafeRegisterFragment
     @Override
     public void setupViews(View view) {
         try {
-            // Ensure RecyclerView + ProgressBar exist before base setup (handled by BaseSafeRegisterFragment)
             super.setupViews(view);
 
-            // Toolbar
             Toolbar toolbar = view.findViewById(org.smartregister.R.id.register_toolbar);
             if (toolbar != null) {
                 if (getActivity() instanceof AppCompatActivity) {
@@ -75,11 +99,9 @@ public class ChimwemweRegisterFragment extends BaseSafeRegisterFragment
                 } catch (Throwable ignored) {}
             }
 
-            // Navbar
             View navbarContainer = view.findViewById(org.smartregister.R.id.register_nav_bar_container);
             if (navbarContainer != null) navbarContainer.bringToFront();
 
-            // Search bar styling
             View searchBarLayout = view.findViewById(R.id.search_bar_layout);
             if (searchBarLayout != null) {
                 LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
@@ -93,7 +115,6 @@ public class ChimwemweRegisterFragment extends BaseSafeRegisterFragment
                         (int) org.smartregister.chw.core.utils.Utils.convertDpToPixel(10, getActivity()));
             }
 
-            // Search view appearance
             if (getSearchView() != null) {
                 getSearchView().setHint(getString(R.string.search_hint));
                 getSearchView().setBackgroundResource(org.smartregister.R.color.white);
@@ -102,7 +123,6 @@ public class ChimwemweRegisterFragment extends BaseSafeRegisterFragment
                 getSearchView().setTextColor(getResources().getColor(org.smartregister.R.color.text_black));
             }
 
-            // Hide unused header sections
             hideIfPresent(view, org.smartregister.R.id.top_right_layout);
             hideIfPresent(view, org.smartregister.R.id.top_left_layout);
             hideIfPresent(view, org.smartregister.R.id.register_sort_filter_bar_layout);
@@ -120,6 +140,68 @@ public class ChimwemweRegisterFragment extends BaseSafeRegisterFragment
             if (v != null) v.setVisibility(View.GONE);
         } catch (Exception ignored) {}
     }
+
+    // ── Search ───────────────────────────────────────────────
+
+    @Override
+    protected void updateSearchView() {
+        if (getSearchView() != null) {
+            getSearchView().removeTextChangedListener(textWatcher);
+            getSearchView().removeTextChangedListener(debouncedSearchWatcher);
+            getSearchView().addTextChangedListener(debouncedSearchWatcher);
+            getSearchView().setOnKeyListener(hideKeyboard);
+        }
+    }
+
+    @Override
+    public void filter(String filterString, String joinTableString,
+                       String mainConditionString, boolean qrCode) {
+        if (getSearchCancelView() != null) {
+            getSearchCancelView().setVisibility(
+                    filterString == null || filterString.isEmpty() ? View.INVISIBLE : View.VISIBLE);
+        }
+        if (filterString == null || filterString.isEmpty()) {
+            Utils.hideKeyboard(getActivity());
+        }
+
+        String condition;
+        if (filterString == null || filterString.isEmpty()) {
+            condition = "1=1";
+        } else {
+            String safe = filterString.replace("'", "''");
+            condition = "(group_name LIKE '%" + safe + "%' OR hotspot_name LIKE '%" + safe + "%')";
+        }
+
+        // ec_chimwemwe_group has no FTS virtual table; never set this.filters or
+        // SmartRegisterQueryBuilder will try to JOIN ec_chimwemwe_group_search (non-existent).
+        // All search logic lives in mainCondition via LIKE instead.
+        this.filters       = "";
+        this.joinTable     = "";
+        this.mainCondition = condition;
+
+        if (clientAdapter != null) {
+            if (clientAdapter.getCurrentlimit() == 0) clientAdapter.setCurrentlimit(20);
+            clientAdapter.setCurrentoffset(0);
+        }
+
+        showProgressView();
+        filterandSortExecute(countBundle());
+    }
+
+    private void applySearch(String text) {
+        filter(text, "", getMainCondition(), false);
+    }
+
+    @Override
+    public void onDestroyView() {
+        searchHandler.removeCallbacks(searchRunnable);
+        if (getSearchView() != null) {
+            getSearchView().removeTextChangedListener(debouncedSearchWatcher);
+        }
+        super.onDestroyView();
+    }
+
+    // ── Lifecycle ────────────────────────────────────────────
 
     @Override
     public void onResume() {
@@ -143,6 +225,37 @@ public class ChimwemweRegisterFragment extends BaseSafeRegisterFragment
                 act.getSupportActionBar().setDisplayShowTitleEnabled(false);
             }
         }
+    }
+
+    // ── Adapter ──────────────────────────────────────────────
+
+    /**
+     * Run the COUNT query off the main thread to avoid blocking on a SQLite write lock held
+     * by OpenSRP's background sync, which would otherwise cause an ANR.
+     */
+    @Override
+    public void countExecute() {
+        Threading.io(() -> {
+            int count = 0;
+            try {
+                Cursor cursor = context().commonrepository(TABLE)
+                        .rawCustomQueryForAdapter("SELECT COUNT(*) FROM " + TABLE);
+                if (cursor != null) {
+                    cursor.moveToFirst();
+                    count = cursor.getInt(0);
+                    cursor.close();
+                }
+            } catch (Exception e) {
+                Timber.e(e, "countExecute");
+            }
+            final int finalCount = count;
+            Threading.main(() -> {
+                if (clientAdapter != null) {
+                    clientAdapter.setTotalcount(finalCount);
+                    clientAdapter.setCurrentlimit(20);
+                }
+            });
+        });
     }
 
     @Override
@@ -185,6 +298,8 @@ public class ChimwemweRegisterFragment extends BaseSafeRegisterFragment
         }
     }
 
+    // ── Navigation ───────────────────────────────────────────
+
     @Override
     protected void onViewClicked(View view) {
         Object tag = view.getTag();
@@ -197,6 +312,8 @@ public class ChimwemweRegisterFragment extends BaseSafeRegisterFragment
         intent.putExtra("group_id", groupId);
         startActivity(intent);
     }
+
+    // ── Query params ─────────────────────────────────────────
 
     @Override
     protected String getMainCondition() {
@@ -211,14 +328,11 @@ public class ChimwemweRegisterFragment extends BaseSafeRegisterFragment
     @Override
     protected void startRegistration() {}
 
-    @Override
-    public void setUniqueID(String s) {}
+    // ── Contract stubs ───────────────────────────────────────
 
-    @Override
-    public void setAdvancedSearchFormData(HashMap<String, String> map) {}
-
-    @Override
-    public void showNotFoundPopup(String s) {}
+    @Override public void setUniqueID(String s) {}
+    @Override public void setAdvancedSearchFormData(HashMap<String, String> map) {}
+    @Override public void showNotFoundPopup(String s) {}
 
     @Override
     public void showProgressView() {

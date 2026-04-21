@@ -4,6 +4,7 @@ public class MonthlyReviewModel {
 
     private long   id;
     private long   groupId;
+    private long   participantId;
     private String reviewQuarter;
     private String reviewDate;
     private String reviewerName;
@@ -16,6 +17,9 @@ public class MonthlyReviewModel {
 
     public long getGroupId()              { return groupId; }
     public void setGroupId(long groupId)  { this.groupId = groupId; }
+
+    public long getParticipantId()                   { return participantId; }
+    public void setParticipantId(long participantId) { this.participantId = participantId; }
 
     public String getReviewQuarter()                      { return reviewQuarter; }
     public void   setReviewQuarter(String reviewQuarter)  { this.reviewQuarter = reviewQuarter; }

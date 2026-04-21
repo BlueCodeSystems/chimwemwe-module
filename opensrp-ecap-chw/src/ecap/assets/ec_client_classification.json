@@ -800,6 +800,13 @@
             "creates_case": [
               "ec_chimwemwe_enrollment"
             ]
+          },
+          {
+            "field": "eventType",
+            "field_value": "Chimwemwe Referral",
+            "creates_case": [
+              "ec_chimwemwe_referral"
+            ]
           }
         ]
       }

@@ -143,13 +143,21 @@ public class ParticipantDao extends AbstractDao {
     }
 
     public static ParticipantModel getParticipant(long id) {
-        String sql = "SELECT id, participant_code, group_id, sn, caregiver_first_name, caregiver_surname," +
-                " child_first_name, child_surname, child_dob, child_sex," +
-                " is_enrolled_ovc, caregiver_id, vca_id," +
-                " who_referred, service_referred_for, referral_date," +
-                " receiving_org, job_title, service_date FROM " + TABLE +
-                " WHERE id=" + id;
-        List<ParticipantModel> list = AbstractDao.readData(sql, ParticipantDao::mapParticipant);
+        String sql = "SELECT p.id, p.participant_code, p.group_id, p.sn, p.caregiver_first_name, p.caregiver_surname," +
+                " p.child_first_name, p.child_surname, p.child_dob, p.child_sex," +
+                " p.is_enrolled_ovc, p.caregiver_id, p.vca_id," +
+                " p.who_referred, p.service_referred_for, p.referral_date," +
+                " p.receiving_org, p.job_title, p.service_date," +
+                " (SELECT COUNT(*) FROM ec_chimwemwe_attendance a" +
+                "  WHERE a.participant_id=p.id AND (a.caregiver_attendance!='' OR a.child_attendance!='')) AS sessions_done" +
+                " FROM " + TABLE + " p WHERE p.id=" + id;
+        List<ParticipantModel> list = AbstractDao.readData(sql, cursor -> {
+            ParticipantModel m = mapParticipant(cursor);
+            int done = cursor.getInt(19);
+            m.setSessionsCompleted(done);
+            m.setCompletedProgram(done >= 14);
+            return m;
+        });
         return (list != null && !list.isEmpty()) ? list.get(0) : null;
     }
 

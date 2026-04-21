@@ -130,6 +130,9 @@ public class ChwRepositoryFlv {
                 case 32:
                     upgradeToVersion32(db);
                     break;
+                case 33:
+                    upgradeToVersion33(db);
+                    break;
                 default:
                     break;
             }
@@ -1221,6 +1224,17 @@ public class ChwRepositoryFlv {
             com.bluecodeltd.ecap.chw.dao.ParticipantDao.migrateToV32(db);
         } catch (Exception e) {
             Timber.e(e, "upgradeToVersion32");
+        }
+    }
+
+    private static void upgradeToVersion33(SQLiteDatabase db) {
+        try {
+            // Add participant_id column to ec_chimwemwe_review
+            com.bluecodeltd.ecap.chw.dao.MonthlyReviewDao.migrateToV33(db);
+            // Create ec_chimwemwe_referral table
+            com.bluecodeltd.ecap.chw.dao.ChimwemweReferralDao.createTable(db);
+        } catch (Exception e) {
+            Timber.e(e, "upgradeToVersion33");
         }
     }
 

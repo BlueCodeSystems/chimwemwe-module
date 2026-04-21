@@ -1,12 +1,7 @@
 package com.bluecodeltd.ecap.chw.activity;
 
-import static com.bluecodeltd.ecap.chw.util.IndexClientsUtils.getAllSharedPreferences;
-import static com.bluecodeltd.ecap.chw.util.IndexClientsUtils.getFormTag;
-import static com.bluecodeltd.ecap.chw.util.JsonFormUtils.tagSyncMetadata;
-import static org.smartregister.chw.fp.util.FpUtil.getClientProcessorForJava;
 import static org.smartregister.util.JsonFormUtils.STEP1;
 import static org.smartregister.family.util.JsonFormUtils.STEP2;
-
 
 import android.app.Activity;
 import android.content.SharedPreferences;
@@ -21,11 +16,11 @@ import androidx.fragment.app.Fragment;
 import androidx.preference.PreferenceManager;
 
 import com.bluecodeltd.ecap.chw.R;
-import com.bluecodeltd.ecap.chw.application.ChwApplication;
-import com.bluecodeltd.ecap.chw.dao.HotspotGroupDao;
+import com.bluecodeltd.ecap.chw.contract.ChimwemweRegisterContract;
 import com.bluecodeltd.ecap.chw.fragment.ChimwemweRegisterFragment;
 import com.bluecodeltd.ecap.chw.listener.ChwBottomNavigationListener;
 import com.bluecodeltd.ecap.chw.model.HotspotGroupModel;
+import com.bluecodeltd.ecap.chw.presenter.ChimwemweGroupPresenter;
 import com.bluecodeltd.ecap.chw.util.Constants;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vijay.jsonwizard.constants.JsonFormConstants;
@@ -34,28 +29,22 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.smartregister.chw.core.custom_views.NavigationMenu;
 import org.smartregister.chw.core.utils.CoreJsonFormUtils;
-import org.smartregister.clientandeventmodel.Client;
-import org.smartregister.clientandeventmodel.Event;
-import org.smartregister.domain.db.EventClient;
-import org.smartregister.family.util.AppExecutors;
+import org.smartregister.domain.FetchStatus;
 import org.smartregister.family.util.JsonFormUtils;
 import org.smartregister.helper.BottomNavigationHelper;
 import org.smartregister.opd.utils.OpdConstants;
-import org.smartregister.sync.helper.ECSyncHelper;
 import org.smartregister.view.activity.BaseRegisterActivity;
-import org.smartregister.view.contract.BaseRegisterContract;
 import org.smartregister.view.fragment.BaseRegisterFragment;
 
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
 import timber.log.Timber;
 
-public class ChimwemweRegisterActivity extends BaseRegisterActivity {
+public class ChimwemweRegisterActivity extends BaseRegisterActivity
+        implements ChimwemweRegisterContract.View {
 
     private final ObjectMapper oMapper = new ObjectMapper();
 
@@ -72,9 +61,7 @@ public class ChimwemweRegisterActivity extends BaseRegisterActivity {
             }
             toolbar.setTitle("");
             TextView titleLabel = toolbar.findViewById(org.smartregister.R.id.txt_title_label);
-            if (titleLabel != null) {
-                titleLabel.setVisibility(View.GONE);
-            }
+            if (titleLabel != null) titleLabel.setVisibility(View.GONE);
             menu = NavigationMenu.getInstance(this, null, toolbar);
             try {
                 if (menu != null) {
@@ -99,12 +86,11 @@ public class ChimwemweRegisterActivity extends BaseRegisterActivity {
 
     @Override
     protected void initializePresenter() {
-        this.presenter = new BaseRegisterContract.Presenter() {
-            @Override public void registerViewConfigurations(List<String> viewIdentifiers) {}
-            @Override public void unregisterViewConfiguration(List<String> viewIdentifiers) {}
-            @Override public void onDestroy(boolean isChangingConfiguration) {}
-            @Override public void updateInitials() {}
-        };
+        this.presenter = new ChimwemweGroupPresenter(this);
+    }
+
+    private ChimwemweGroupPresenter groupPresenter() {
+        return (ChimwemweGroupPresenter) this.presenter;
     }
 
     @Override
@@ -124,10 +110,7 @@ public class ChimwemweRegisterActivity extends BaseRegisterActivity {
     public void startFormActivity(JSONObject jsonObject) {
         try {
             SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
-            Object spAll = sp.getAll();
-
-            // Bulk-populate form fields from SharedPreferences (province, district, etc.)
-            CoreJsonFormUtils.populateJsonForm(jsonObject, oMapper.convertValue(spAll, Map.class));
+            CoreJsonFormUtils.populateJsonForm(jsonObject, oMapper.convertValue(sp.getAll(), Map.class));
 
             android.content.Intent intent = new android.content.Intent(
                     this, org.smartregister.family.util.Utils.metadata().familyFormActivity);
@@ -160,15 +143,38 @@ public class ChimwemweRegisterActivity extends BaseRegisterActivity {
         try {
             JSONObject form = new JSONObject(jsonString);
             HotspotGroupModel group = buildGroupModel(form);
-            if (group == null) return;
-
-            saveRegistration(form, group);
-
+            if (group == null) {
+                Toast.makeText(this, "Group name and hotspot name are required.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            groupPresenter().saveForm(form, group);
         } catch (Exception e) {
             Timber.e(e, "Error processing chimwemwe enrollment form");
             Toast.makeText(this, "Error saving enrollment. Please try again.", Toast.LENGTH_SHORT).show();
         }
     }
+
+    // ── ChimwemweRegisterContract.View ───────────────────────
+
+    @Override
+    public void toggleDialogVisibility(boolean showDialog) {
+        // Group saves are fast local operations; no blocking progress dialog needed
+    }
+
+    @Override
+    public void onGroupSaveComplete(String groupName) {
+        refreshList(FetchStatus.fetched);
+        Toast.makeText(this,
+                "Group \"" + groupName + "\" enrolled. Add participants inside the group.",
+                Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onGroupSaveError(String errorMessage) {
+        Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show();
+    }
+
+    // ── Form parsing ─────────────────────────────────────────
 
     private HotspotGroupModel buildGroupModel(JSONObject form) {
         JSONObject step1 = form.optJSONObject(STEP1);
@@ -181,7 +187,6 @@ public class ChimwemweRegisterActivity extends BaseRegisterActivity {
 
         HotspotGroupModel group = new HotspotGroupModel();
 
-        // Step 1 — Group & Venue
         group.setGroupCode(generateGroupCode());
         group.setHotspotName(hotspotName);
         group.setGroupName(groupName);
@@ -192,13 +197,11 @@ public class ChimwemweRegisterActivity extends BaseRegisterActivity {
         group.setNearestHealthFacility(fieldValue(step1, "nearest_health_facility"));
         group.setCreatedDate(LocalDate.now().toString());
 
-        // Step 2 — Facilitators
         group.setFacilitator1FirstName(fieldValue(step2, "facilitator_1_first_name"));
         group.setFacilitator1Surname(fieldValue(step2,   "facilitator_1_surname"));
         group.setFacilitator2FirstName(fieldValue(step2, "facilitator_2_first_name"));
         group.setFacilitator2Surname(fieldValue(step2,   "facilitator_2_surname"));
 
-        // Step 3 — Planned session dates
         group.setSession1Date(fieldValue(step3,  "session_1_date"));
         group.setSession2Date(fieldValue(step3,  "session_2_date"));
         group.setSession3Date(fieldValue(step3,  "session_3_date"));
@@ -215,65 +218,6 @@ public class ChimwemweRegisterActivity extends BaseRegisterActivity {
         group.setSession14Date(fieldValue(step3, "session_14_date"));
 
         return group;
-    }
-
-    private void saveRegistration(JSONObject form, HotspotGroupModel group) {
-        final String groupName = group.getGroupName();
-
-        Runnable runnable = () -> {
-            try {
-                long groupId = HotspotGroupDao.insertGroup(group);
-                if (groupId == -1) return;
-
-                org.smartregister.repository.AllSharedPreferences prefs = getAllSharedPreferences();
-                org.smartregister.domain.tag.FormTag formTag = getFormTag();
-
-                String entityId = org.smartregister.util.JsonFormUtils.generateRandomUUIDString();
-                JSONArray formFields = org.smartregister.util.JsonFormUtils.fields(form);
-                JSONObject metadata = form.optJSONObject("metadata");
-                String encounterType = form.optString("encounter_type", "");
-
-                if (formFields == null || metadata == null || encounterType.isEmpty()) return;
-
-                Event event = org.smartregister.util.JsonFormUtils.createEvent(
-                        formFields, metadata, formTag, entityId, encounterType, "ec_chimwemwe_group");
-                tagSyncMetadata(event);
-
-                Client client = org.smartregister.util.JsonFormUtils.createBaseClient(formFields, formTag, entityId);
-
-                ECSyncHelper syncHelper = ChwApplication.getInstance().getEcSyncHelper();
-                syncHelper.addClient(entityId,
-                        new JSONObject(org.smartregister.util.JsonFormUtils.gson.toJson(client)));
-                syncHelper.addEvent(entityId,
-                        new JSONObject(org.smartregister.util.JsonFormUtils.gson.toJson(event)));
-
-                Long lastUpdatedAtDate = prefs.fetchLastUpdatedAtDate(0);
-                Date currentSyncDate = new Date(lastUpdatedAtDate);
-
-                List<EventClient> saved = syncHelper.getEvents(
-                        Collections.singletonList(event.getFormSubmissionId()));
-                getClientProcessorForJava().processClient(saved);
-
-                prefs.saveLastUpdatedAtDate(currentSyncDate.getTime());
-
-                runOnUiThread(() ->
-                        Toast.makeText(this,
-                                "Group \"" + groupName + "\" enrolled. Add participants inside the group.",
-                                Toast.LENGTH_LONG).show());
-
-            } catch (Exception e) {
-                Timber.e(e, "Error saving chimwemwe group");
-                runOnUiThread(() ->
-                        Toast.makeText(this, "Error saving enrollment. Please try again.",
-                                Toast.LENGTH_SHORT).show());
-            }
-        };
-
-        try {
-            new AppExecutors().diskIO().execute(runnable);
-        } catch (Exception e) {
-            Timber.e(e, "AppExecutors failed");
-        }
     }
 
     private static String generateGroupCode() {
@@ -318,9 +262,7 @@ public class ChimwemweRegisterActivity extends BaseRegisterActivity {
             bottomNavigationView.getMenu().removeItem(R.id.action_hts);
 
             MenuItem enrollItem = bottomNavigationView.getMenu().findItem(R.id.action_identifcation);
-            if (enrollItem != null) {
-                enrollItem.setTitle("Add Group");
-            }
+            if (enrollItem != null) enrollItem.setTitle("Add Group");
         }
     }
 }

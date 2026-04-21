@@ -15924,6 +15924,19 @@
         { "column_name": "register_accurate", "type": "Client", "json_mapping": { "field": "attributes.register_accurate" } },
         { "column_name": "reviewer_notes", "type": "Client", "json_mapping": { "field": "attributes.reviewer_notes" } }
       ]
+    },
+    {
+      "name": "ec_chimwemwe_referral",
+      "columns": [
+        { "column_name": "base_entity_id", "type": "Client", "json_mapping": { "field": "baseEntityId" } },
+        { "column_name": "last_interacted_with", "type": "Event", "json_mapping": { "field": "version" } },
+        { "column_name": "who_referred", "type": "Client", "json_mapping": { "field": "attributes.who_referred" } },
+        { "column_name": "service_referred_for", "type": "Client", "json_mapping": { "field": "attributes.service_referred_for" } },
+        { "column_name": "referral_date", "type": "Client", "json_mapping": { "field": "attributes.referral_date" } },
+        { "column_name": "receiving_org", "type": "Client", "json_mapping": { "field": "attributes.receiving_org" } },
+        { "column_name": "job_title", "type": "Client", "json_mapping": { "field": "attributes.job_title" } },
+        { "column_name": "service_date", "type": "Client", "json_mapping": { "field": "attributes.service_date" } }
+      ]
     }
   ]
 }
