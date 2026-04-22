@@ -27,6 +27,15 @@ public class AttendanceDao extends AbstractDao {
         db.execSQL(CREATE_TABLE_SQL);
     }
 
+    /** Add group_id column to existing installs that were created without it (DB v35). */
+    public static void migrateToV35(SQLiteDatabase db) {
+        try {
+            db.execSQL("ALTER TABLE " + TABLE + " ADD COLUMN group_id INTEGER DEFAULT 0");
+        } catch (Exception ignored) {
+            // Column already exists
+        }
+    }
+
     /**
      * Save (insert or replace) attendance for one participant in one session.
      * Uses INSERT OR REPLACE based on (group_id, participant_id, session_number).

@@ -1,10 +1,5 @@
 package com.bluecodeltd.ecap.chw.activity;
 
-import static com.bluecodeltd.ecap.chw.util.IndexClientsUtils.getAllSharedPreferences;
-import static com.bluecodeltd.ecap.chw.util.IndexClientsUtils.getFormTag;
-import static com.bluecodeltd.ecap.chw.util.JsonFormUtils.tagSyncMetadata;
-import static org.smartregister.chw.fp.util.FpUtil.getClientProcessorForJava;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
@@ -29,22 +24,15 @@ import com.bluecodeltd.ecap.chw.model.ChimwemweReferralModel;
 import com.bluecodeltd.ecap.chw.model.HotspotGroupModel;
 import com.bluecodeltd.ecap.chw.model.MonthlyReviewModel;
 import com.bluecodeltd.ecap.chw.model.ParticipantModel;
+import com.bluecodeltd.ecap.chw.util.ChimwemweFormUtils;
 import com.bluecodeltd.ecap.chw.util.Threading;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.smartregister.domain.db.EventClient;
-import org.smartregister.domain.tag.FormTag;
 import org.smartregister.opd.utils.OpdConstants;
-import org.smartregister.repository.AllSharedPreferences;
-import org.smartregister.sync.helper.ECSyncHelper;
 import org.smartregister.util.FormUtils;
 
-import java.util.Collections;
-import java.util.Date;
 import java.util.List;
-import java.util.Random;
-
 import timber.log.Timber;
 
 public class ChimwemweParticipantProfileActivity extends AppCompatActivity {
@@ -204,8 +192,8 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity {
         tvProvinceDistrict.setText(province + " / " + district);
         tvSessionLocation.setText(orDash(g.getLocationOfSession()));
         tvHealthFacility.setText(orDash(g.getNearestHealthFacility()));
-        String f1 = combineName(g.getFacilitator1FirstName(), g.getFacilitator1Surname());
-        String f2 = combineName(g.getFacilitator2FirstName(), g.getFacilitator2Surname());
+        String f1 = g.getFacilitatorName1() != null ? g.getFacilitatorName1().trim() : "";
+        String f2 = g.getFacilitatorName2() != null ? g.getFacilitatorName2().trim() : "";
         String facilitators = f1.isEmpty() ? f2 : (f2.isEmpty() ? f1 : f1 + ", " + f2);
         tvFacilitators.setText(orDash(facilitators));
     }
@@ -283,9 +271,11 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity {
                 setFieldValue(form, "step1", "receiving_org",        participant.getReceivingOrg());
                 setFieldValue(form, "step1", "job_title",            participant.getJobTitle());
                 setFieldValue(form, "step1", "service_date",         participant.getServiceDate());
-                if (participant.getParticipantCode() != null) {
-                    form.put("entity_id", participant.getParticipantCode());
+                String participantCode = participant.getParticipantCode();
+                if (participantCode == null || participantCode.trim().isEmpty()) {
+                    participantCode = "chm-participant-" + participantId;
                 }
+                form.put("entity_id", participantCode);
                 form.put("_sn", participant.getSn());
                 form.put("_participant_id", participant.getId());
                 final JSONObject finalForm = form;
@@ -326,6 +316,7 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity {
                     setFieldValue(form, "step1", "reviewer_name",     existing.getReviewerName());
                     setFieldValue(form, "step1", "register_accurate", existing.getRegisterAccurate());
                     setFieldValue(form, "step1", "reviewer_notes",    existing.getReviewerNotes());
+                    form.put("entity_id", ChimwemweFormUtils.reviewEntityId(existing.getId()));
                 }
                 launchJsonForm(form, REQ_REVIEW);
             } catch (Exception e) {
@@ -348,6 +339,7 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity {
                     setFieldValue(form, "step1", "receiving_org",         existing.getReceivingOrg());
                     setFieldValue(form, "step1", "job_title",             existing.getJobTitle());
                     setFieldValue(form, "step1", "service_date",          existing.getServiceDate());
+                    form.put("entity_id", ChimwemweFormUtils.referralEntityId(existing.getId()));
                 }
                 launchJsonForm(form, REQ_REFERRAL);
             } catch (Exception e) {
@@ -390,9 +382,20 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity {
                     updated.setId(participantId);
                     updated.setGroupId(participant.getGroupId());
                     updated.setSn(participant.getSn());
-                    updated.setParticipantCode(participant.getParticipantCode());
+                    String participantCode = form.optString("entity_id", participant.getParticipantCode());
+                    if (participantCode == null || participantCode.trim().isEmpty()) {
+                        participantCode = "chm-participant-" + participantId;
+                    }
+                    updated.setParticipantCode(participantCode);
                     ParticipantDao.updateParticipant(updated);
-                    saveFormEvent(form, "ec_chimwemwe_participant");
+                    ChimwemweFormUtils.saveRegistration(
+                            ChimwemweFormUtils.processRegistration(
+                                    form,
+                                    "ec_chimwemwe_participant",
+                                    updated.getParticipantCode()
+                            ),
+                            true
+                    );
 
                 } else if (requestCode == REQ_REVIEW) {
                     MonthlyReviewModel m = buildReviewModel(form);
@@ -400,9 +403,16 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity {
                         m.setId(pendingEditReviewId);
                         MonthlyReviewDao.updateReview(m);
                     } else {
-                        MonthlyReviewDao.insertReview(m);
+                        m.setId(MonthlyReviewDao.insertReview(m));
                     }
-                    saveFormEvent(form, "ec_chimwemwe_monthly_review");
+                    ChimwemweFormUtils.saveRegistration(
+                            ChimwemweFormUtils.processRegistration(
+                                    form,
+                                    "ec_chimwemwe_monthly_review",
+                                    ChimwemweFormUtils.reviewEntityId(m.getId())
+                            ),
+                            pendingEditReviewId > 0
+                    );
 
                 } else if (requestCode == REQ_REFERRAL) {
                     ChimwemweReferralModel r = buildReferralModel(form);
@@ -410,9 +420,16 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity {
                         r.setId(pendingEditReferralId);
                         ChimwemweReferralDao.updateReferral(r);
                     } else {
-                        ChimwemweReferralDao.insertReferral(r);
+                        r.setId(ChimwemweReferralDao.insertReferral(r));
                     }
-                    saveFormEvent(form, "ec_chimwemwe_referral");
+                    ChimwemweFormUtils.saveRegistration(
+                            ChimwemweFormUtils.processRegistration(
+                                    form,
+                                    "ec_chimwemwe_referral",
+                                    ChimwemweFormUtils.referralEntityId(r.getId())
+                            ),
+                            pendingEditReferralId > 0
+                    );
                 }
 
                 pendingEditReviewId   = -1;
@@ -473,44 +490,7 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity {
 
     // ── Client processing ────────────────────────────────────
 
-    private void saveFormEvent(JSONObject form, String bindType) {
-        try {
-            AllSharedPreferences prefs   = getAllSharedPreferences();
-            FormTag              formTag = getFormTag();
-            String entityId = form.optString("entity_id", "");
-            if (entityId.isEmpty()) {
-                entityId = org.smartregister.util.JsonFormUtils.generateRandomUUIDString();
-            }
-            JSONArray  fields    = org.smartregister.util.JsonFormUtils.fields(form);
-            JSONObject metadata  = form.optJSONObject("metadata");
-            String encounterType = form.optString("encounter_type", "");
-            if (fields == null || metadata == null || encounterType.isEmpty()) return;
 
-            org.smartregister.clientandeventmodel.Event event =
-                    org.smartregister.util.JsonFormUtils.createEvent(
-                            fields, metadata, formTag, entityId, encounterType, bindType);
-            tagSyncMetadata(event);
-
-            org.smartregister.clientandeventmodel.Client client =
-                    org.smartregister.util.JsonFormUtils.createBaseClient(fields, formTag, entityId);
-
-            ECSyncHelper syncHelper =
-                    com.bluecodeltd.ecap.chw.application.ChwApplication.getInstance().getEcSyncHelper();
-            syncHelper.addClient(entityId,
-                    new JSONObject(org.smartregister.util.JsonFormUtils.gson.toJson(client)));
-            syncHelper.addEvent(entityId,
-                    new JSONObject(org.smartregister.util.JsonFormUtils.gson.toJson(event)));
-
-            Date currentSyncDate = new Date(prefs.fetchLastUpdatedAtDate(0));
-            List<EventClient> saved = syncHelper.getEvents(
-                    Collections.singletonList(event.getFormSubmissionId()));
-            getClientProcessorForJava().processClient(saved);
-            prefs.saveLastUpdatedAtDate(currentSyncDate.getTime());
-
-        } catch (Exception e) {
-            Timber.e(e, "saveFormEvent profile");
-        }
-    }
 
     // ── Helpers ──────────────────────────────────────────────
 
@@ -551,12 +531,4 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity {
 
     private String orDash(String v) { return (v == null || v.isEmpty()) ? "\u2014" : v; }
 
-    private String combineName(String first, String last) {
-        String f = first != null ? first.trim() : "";
-        String l = last  != null ? last.trim()  : "";
-        if (f.isEmpty() && l.isEmpty()) return "";
-        if (f.isEmpty()) return l;
-        if (l.isEmpty()) return f;
-        return f + " " + l;
-    }
 }

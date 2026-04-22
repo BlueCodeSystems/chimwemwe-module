@@ -5,12 +5,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#F0F4F8"
+    android:background="@color/chimwemwe_surface"
     tools:context=".activity.DashboardActivity">
 
-    <!-- ═══════════════════════════════════════════════
-         HEADER  (deep teal gradient)
-         ═══════════════════════════════════════════════ -->
+    <!-- ══════════════════════════════════════════════════════
+         HEADER  —  identical pattern to activity_hotspot_group_detail
+         ══════════════════════════════════════════════════════ -->
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/collapsing_toolbar_appbarlayout"
         android:layout_width="match_parent"
@@ -18,139 +18,129 @@
         android:background="@drawable/chimwemwe_header_bg"
         app:elevation="0dp">
 
-        <!-- Toolbar – overflow menu lives here -->
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbarx"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+            android:title=""
+            app:navigationIconTint="#FFFFFF"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+            app:titleTextColor="#FFFFFF" />
 
-        <!-- Hero content -->
+        <!-- Hero row: circle avatar + programme info + sync pill -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingStart="20dp"
-            android:paddingEnd="20dp"
-            android:paddingTop="0dp"
-            android:paddingBottom="28dp">
+            android:orientation="horizontal"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="14dp"
+            android:gravity="center_vertical">
 
-            <!-- Branding row -->
+            <!-- Programme avatar circle  -->
+            <TextView
+                android:layout_width="52dp"
+                android:layout_height="52dp"
+                android:gravity="center"
+                android:background="@drawable/bg_icon_circle_white"
+                android:text="CH"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <!-- Programme name + facility + badges -->
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginStart="14dp">
 
-                <LinearLayout
-                    android:layout_width="0dp"
+                <TextView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
+                    android:text="Chimwemwe Programme"
+                    android:textColor="#FFFFFF"
+                    android:textSize="17sp"
+                    android:textStyle="bold" />
 
-                    <TextView
-                        android:id="@+id/dash_facility_name"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Facility"
-                        android:textColor="#FFFFFF"
-                        android:textSize="20sp"
-                        android:textStyle="bold"
-                        android:letterSpacing="0.01"
-                        tools:text="Chipata Urban Clinic" />
+                <TextView
+                    android:id="@+id/dash_facility_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:textColor="#B3FFFFFF"
+                    android:textSize="13sp"
+                    tools:text="Chipata Urban Clinic" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:text="Chimwemwe · Children &amp; Adolescents"
-                        android:textColor="#99FFFFFF"
-                        android:textSize="12sp" />
-
-                </LinearLayout>
-
-                <!-- Sync info pill -->
+                <!-- Badge row -->
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:background="@drawable/bg_pill_translucent"
-                    android:paddingStart="10dp"
-                    android:paddingEnd="10dp"
-                    android:paddingTop="4dp"
-                    android:paddingBottom="4dp">
+                    android:layout_marginTop="8dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Synced "
-                        android:textColor="#AAFFFFFF"
-                        android:textSize="10sp" />
-
-                    <TextView
-                        android:id="@+id/last_updated"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="--"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="10dp"
+                        android:paddingTop="3dp"
+                        android:paddingBottom="3dp"
+                        android:background="@drawable/bg_pill_translucent"
+                        android:text="ECAP II"
                         android:textColor="#FFFFFF"
-                        android:textSize="10sp"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="6dp"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="10dp"
+                        android:paddingTop="3dp"
+                        android:paddingBottom="3dp"
+                        android:background="@drawable/bg_pill_translucent"
+                        android:text="Children &amp; Adolescents"
+                        android:textColor="#FFFFFF"
+                        android:textSize="11sp"
                         android:textStyle="bold" />
 
                 </LinearLayout>
 
             </LinearLayout>
 
-            <!-- ── Advanced Search Bar ── -->
+            <!-- LAST SYNC pill (top-right) -->
             <LinearLayout
-                android:id="@+id/search_bar_container"
-                android:layout_width="match_parent"
-                android:layout_height="52dp"
-                android:layout_marginTop="18dp"
-                android:background="@drawable/bg_search_bar"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground">
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:background="@drawable/bg_pill_translucent"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp">
 
-                <ImageView
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
-                    android:src="@drawable/ic_baseline_person_add_24"
-                    app:tint="#9CA3AF" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
+                <TextView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="12dp"
-                    android:orientation="vertical">
+                    android:text="LAST SYNC"
+                    android:textColor="#AAFFFFFF"
+                    android:textSize="9sp"
+                    android:letterSpacing="0.08" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Advanced Client Search"
-                        android:textColor="#374151"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Search the remote OpenSRP database"
-                        android:textColor="#9CA3AF"
-                        android:textSize="11sp" />
-
-                </LinearLayout>
-
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:src="@drawable/ic_navigate_next_black_24dp"
-                    app:tint="@color/chimwemwe_primary" />
+                <TextView
+                    android:id="@+id/last_updated"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="--"
+                    android:textColor="#FFFFFF"
+                    android:textSize="10sp"
+                    android:textStyle="bold" />
 
             </LinearLayout>
 
@@ -158,14 +148,14 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <!-- ═══════════════════════════════════════════════
+    <!-- ══════════════════════════════════════════════════════
          SCROLLABLE BODY
-         ═══════════════════════════════════════════════ -->
+         ══════════════════════════════════════════════════════ -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:background="#F0F4F8"
+        android:background="@color/chimwemwe_surface"
         android:clipToPadding="false"
         android:overScrollMode="never">
 
@@ -176,325 +166,312 @@
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
             android:paddingTop="20dp"
-            android:paddingBottom="40dp">
+            android:paddingBottom="48dp">
 
-            <!-- Hidden switch – kept for Java binding; toggled via menu -->
+            <!-- Hidden switch — binding only -->
             <Switch
                 android:id="@+id/information_switch"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:showText="true"
-                android:textOff="All CA"
-                android:textOn="Only my CA"
                 android:visibility="gone"
                 tools:ignore="UseSwitchCompatOrMaterialSwitch" />
 
-            <!-- ── Section label ── -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
-                android:text="OVERVIEW"
-                android:textSize="11sp"
-                android:textStyle="bold"
-                android:textColor="@color/chimwemwe_text_secondary"
-                android:letterSpacing="0.12" />
-
-            <!-- ── KPI CARDS (2-up row) ── -->
+            <!-- ══════════════════════════
+                 SECTION: OVERVIEW
+                 ══════════════════════════ -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:baselineAligned="false"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="10dp">
 
-                <!-- Children / Adolescents -->
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/card_view1"
+                <TextView
                     android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginEnd="8dp"
+                    android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:foreground="?attr/selectableItemBackground"
-                    app:cardCornerRadius="18dp"
-                    app:cardElevation="3dp"
-                    app:cardBackgroundColor="@android:color/transparent">
+                    android:text="OVERVIEW"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/chimwemwe_text_secondary"
+                    android:letterSpacing="0.12" />
 
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:minHeight="136dp"
-                        android:background="@drawable/bg_card_children">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:orientation="vertical"
-                            android:gravity="center"
-                            android:padding="14dp">
-
-                            <TextView
-                                android:id="@+id/allVcasNumber"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="0"
-                                android:textColor="#FFFFFF"
-                                android:textSize="32sp"
-                                android:textStyle="bold"
-                                tools:text="248" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="4dp"
-                                android:text="Children &amp;\nAdolescents"
-                                android:textColor="#CCFFFFFF"
-                                android:textSize="11sp"
-                                android:gravity="center"
-                                android:lineSpacingMultiplier="1.1" />
-
-                            <LinearLayout
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="8dp"
-                                android:orientation="horizontal"
-                                android:gravity="center"
-                                android:background="@drawable/bg_pill_translucent"
-                                android:paddingStart="8dp"
-                                android:paddingEnd="8dp"
-                                android:paddingTop="3dp"
-                                android:paddingBottom="3dp">
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="M "
-                                    android:textColor="#AAFFFFFF"
-                                    android:textSize="10sp" />
-
-                                <TextView
-                                    android:id="@+id/card_male_count"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="0"
-                                    android:textColor="#FFFFFF"
-                                    android:textSize="10sp"
-                                    android:textStyle="bold" />
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="  F "
-                                    android:textColor="#AAFFFFFF"
-                                    android:textSize="10sp" />
-
-                                <TextView
-                                    android:id="@+id/card_female_count"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="0"
-                                    android:textColor="#FFFFFF"
-                                    android:textSize="10sp"
-                                    android:textStyle="bold" />
-
-                            </LinearLayout>
-
-                        </LinearLayout>
-
-                        <ImageView
-                            android:layout_width="16dp"
-                            android:layout_height="16dp"
-                            android:layout_gravity="top|end"
-                            android:layout_margin="10dp"
-                            android:src="@drawable/ic_navigate_next_black_24dp"
-                            app:tint="#55FFFFFF" />
-
-                    </FrameLayout>
-                </androidx.cardview.widget.CardView>
-
-                <!-- Households -->
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/card_view2"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginStart="8dp"
-                    android:layout_weight="1"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:foreground="?attr/selectableItemBackground"
-                    app:cardCornerRadius="18dp"
-                    app:cardElevation="3dp"
-                    app:cardBackgroundColor="@android:color/transparent">
-
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:minHeight="136dp"
-                        android:background="@drawable/bg_card_households">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:orientation="vertical"
-                            android:gravity="center"
-                            android:padding="14dp">
-
-                            <TextView
-                                android:id="@+id/allHouseholdsNumber"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="0"
-                                android:textColor="#FFFFFF"
-                                android:textSize="32sp"
-                                android:textStyle="bold"
-                                tools:text="92" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="4dp"
-                                android:text="Households"
-                                android:textColor="#CCFFFFFF"
-                                android:textSize="11sp"
-                                android:gravity="center" />
-
-                            <LinearLayout
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="8dp"
-                                android:orientation="horizontal"
-                                android:gravity="center"
-                                android:background="@drawable/bg_pill_translucent"
-                                android:paddingStart="8dp"
-                                android:paddingEnd="8dp"
-                                android:paddingTop="3dp"
-                                android:paddingBottom="3dp">
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="M "
-                                    android:textColor="#AAFFFFFF"
-                                    android:textSize="10sp" />
-
-                                <TextView
-                                    android:id="@+id/card_caregiver_male_count"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="0"
-                                    android:textColor="#FFFFFF"
-                                    android:textSize="10sp"
-                                    android:textStyle="bold" />
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="  F "
-                                    android:textColor="#AAFFFFFF"
-                                    android:textSize="10sp" />
-
-                                <TextView
-                                    android:id="@+id/card_caregiver_female_count"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="0"
-                                    android:textColor="#FFFFFF"
-                                    android:textSize="10sp"
-                                    android:textStyle="bold" />
-
-                            </LinearLayout>
-
-                        </LinearLayout>
-
-                        <ImageView
-                            android:layout_width="16dp"
-                            android:layout_height="16dp"
-                            android:layout_gravity="top|end"
-                            android:layout_margin="10dp"
-                            android:src="@drawable/ic_navigate_next_black_24dp"
-                            app:tint="#55FFFFFF" />
-
-                    </FrameLayout>
-                </androidx.cardview.widget.CardView>
+                <ProgressBar
+                    android:id="@+id/dash_progressbar"
+                    style="?android:attr/progressBarStyleSmall"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:visibility="gone" />
 
             </LinearLayout>
 
-            <!-- ── Due Visits (full-width) ── -->
+            <!-- Stats card — 4 info rows matching participant profile pattern -->
             <androidx.cardview.widget.CardView
-                android:id="@+id/due_card_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                app:cardCornerRadius="18dp"
-                app:cardElevation="3dp"
-                app:cardBackgroundColor="@android:color/transparent">
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="#FFFFFF">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/bg_card_due"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:paddingStart="20dp"
-                    android:paddingEnd="20dp"
-                    android:paddingTop="18dp"
-                    android:paddingBottom="18dp">
+                    android:orientation="vertical">
 
-                    <ImageView
-                        android:id="@+id/icon_due_visits"
-                        android:layout_width="28dp"
-                        android:layout_height="28dp"
-                        android:layout_marginEnd="14dp"
-                        android:src="@drawable/ic_baseline_event_note_24"
-                        app:tint="#AAFFFFFF" />
-
+                    <!-- Row 1: Groups Enrolled -->
                     <LinearLayout
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:paddingTop="16dp"
+                        android:paddingBottom="16dp">
+
+                        <FrameLayout
+                            android:layout_width="42dp"
+                            android:layout_height="42dp"
+                            android:background="@drawable/bg_register_icon"
+                            android:backgroundTint="#E0F2F1"
+                            android:layout_marginEnd="14dp">
+                            <ImageView
+                                android:layout_width="22dp"
+                                android:layout_height="22dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/baseline_folder_open_24"
+                                app:tint="@color/chimwemwe_primary" />
+                        </FrameLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Groups Enrolled"
+                                android:textSize="14sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/chimwemwe_text_primary" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:text="Hotspot groups registered"
+                                android:textSize="12sp"
+                                android:textColor="@color/chimwemwe_text_secondary" />
+                        </LinearLayout>
 
                         <TextView
-                            android:id="@+id/due_visits_view"
+                            android:id="@+id/stat_groups"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Due Visits This Month"
-                            android:textColor="#FFFFFF"
-                            android:textSize="14sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="2dp"
-                            android:text="Clients requiring a scheduled visit"
-                            android:textColor="#CCFFFFFF"
-                            android:textSize="12sp" />
+                            android:text="0"
+                            android:textColor="@color/chimwemwe_primary"
+                            android:textSize="30sp"
+                            android:textStyle="bold"
+                            tools:text="12" />
 
                     </LinearLayout>
 
-                    <TextView
-                        android:id="@+id/due_visits"
-                        android:layout_width="wrap_content"
+                    <View android:layout_width="match_parent" android:layout_height="1dp"
+                        android:layout_marginStart="72dp" android:background="@color/chimwemwe_surface" />
+
+                    <!-- Row 2: Total Participants -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="0"
-                        android:textColor="#FFFFFF"
-                        android:textSize="40sp"
-                        android:textStyle="bold"
-                        tools:text="7" />
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:paddingTop="16dp"
+                        android:paddingBottom="16dp">
+
+                        <FrameLayout
+                            android:layout_width="42dp"
+                            android:layout_height="42dp"
+                            android:background="@drawable/bg_register_icon"
+                            android:backgroundTint="#E8EAF6"
+                            android:layout_marginEnd="14dp">
+                            <ImageView
+                                android:layout_width="22dp"
+                                android:layout_height="22dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_children"
+                                app:tint="#3949AB" />
+                        </FrameLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Total Participants"
+                                android:textSize="14sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/chimwemwe_text_primary" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:text="Caregivers &amp; children across all groups"
+                                android:textSize="12sp"
+                                android:textColor="@color/chimwemwe_text_secondary" />
+                        </LinearLayout>
+
+                        <TextView
+                            android:id="@+id/stat_participants"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textColor="#3949AB"
+                            android:textSize="30sp"
+                            android:textStyle="bold"
+                            tools:text="148" />
+
+                    </LinearLayout>
+
+                    <View android:layout_width="match_parent" android:layout_height="1dp"
+                        android:layout_marginStart="72dp" android:background="@color/chimwemwe_surface" />
+
+                    <!-- Row 3: Sessions Recorded -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:paddingTop="16dp"
+                        android:paddingBottom="16dp">
+
+                        <FrameLayout
+                            android:layout_width="42dp"
+                            android:layout_height="42dp"
+                            android:background="@drawable/bg_register_icon"
+                            android:backgroundTint="#FFF3E0"
+                            android:layout_marginEnd="14dp">
+                            <ImageView
+                                android:layout_width="22dp"
+                                android:layout_height="22dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_baseline_event_note_24"
+                                app:tint="#E65100" />
+                        </FrameLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Sessions Recorded"
+                                android:textSize="14sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/chimwemwe_text_primary" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:text="Sessions held out of 14 per group"
+                                android:textSize="12sp"
+                                android:textColor="@color/chimwemwe_text_secondary" />
+                        </LinearLayout>
+
+                        <TextView
+                            android:id="@+id/stat_sessions"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0 / 0"
+                            android:textColor="#E65100"
+                            android:textSize="18sp"
+                            android:textStyle="bold"
+                            tools:text="42 / 168" />
+
+                    </LinearLayout>
+
+                    <View android:layout_width="match_parent" android:layout_height="1dp"
+                        android:layout_marginStart="72dp" android:background="@color/chimwemwe_surface" />
+
+                    <!-- Row 4: Programme Graduates -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:paddingTop="16dp"
+                        android:paddingBottom="16dp">
+
+                        <FrameLayout
+                            android:layout_width="42dp"
+                            android:layout_height="42dp"
+                            android:background="@drawable/bg_register_icon"
+                            android:backgroundTint="#E8F5E9"
+                            android:layout_marginEnd="14dp">
+                            <ImageView
+                                android:layout_width="22dp"
+                                android:layout_height="22dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/baseline_done_24"
+                                app:tint="#2E7D32" />
+                        </FrameLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Programme Graduates"
+                                android:textSize="14sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/chimwemwe_text_primary" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:text="Participants who completed all 14 sessions"
+                                android:textSize="12sp"
+                                android:textColor="@color/chimwemwe_text_secondary" />
+                        </LinearLayout>
+
+                        <TextView
+                            android:id="@+id/stat_completed"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textColor="#2E7D32"
+                            android:textSize="30sp"
+                            android:textStyle="bold"
+                            tools:text="31" />
+
+                    </LinearLayout>
 
                 </LinearLayout>
 
             </androidx.cardview.widget.CardView>
 
-            <!-- ── CHIMWEMWE REGISTER ── -->
+            <!-- ══════════════════════════
+                 SECTION: PROGRAMME
+                 ══════════════════════════ -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="28dp"
+                android:layout_marginTop="24dp"
                 android:layout_marginBottom="10dp"
-                android:text="REGISTER"
+                android:text="PROGRAMME"
                 android:textSize="11sp"
                 android:textStyle="bold"
                 android:textColor="@color/chimwemwe_text_secondary"
@@ -503,7 +480,7 @@
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="18dp"
+                app:cardCornerRadius="12dp"
                 app:cardElevation="2dp"
                 app:cardBackgroundColor="#FFFFFF">
 
@@ -514,21 +491,22 @@
                     android:background="?attr/selectableItemBackground"
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:paddingTop="18dp"
-                    android:paddingBottom="18dp"
+                    android:paddingTop="16dp"
+                    android:paddingBottom="16dp"
                     android:paddingStart="16dp"
                     android:paddingEnd="16dp"
                     android:clickable="true"
                     android:focusable="true">
 
                     <FrameLayout
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
+                        android:layout_width="42dp"
+                        android:layout_height="42dp"
                         android:background="@drawable/bg_register_icon"
-                        android:backgroundTint="#E0F2F1">
+                        android:backgroundTint="#E0F2F1"
+                        android:layout_marginEnd="14dp">
                         <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
                             android:layout_gravity="center"
                             android:src="@drawable/baseline_folder_open_24"
                             app:tint="@color/chimwemwe_primary" />
@@ -538,61 +516,32 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:layout_marginStart="16dp"
                         android:orientation="vertical">
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Chimwemwe Groups"
-                            android:textSize="15sp"
+                            android:textSize="14sp"
                             android:textStyle="bold"
                             android:textColor="@color/chimwemwe_text_primary" />
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="3dp"
-                            android:text="Hotspot group session attendance register"
+                            android:text="View and manage hotspot groups"
                             android:textSize="12sp"
                             android:textColor="@color/chimwemwe_text_secondary" />
                     </LinearLayout>
 
                     <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
                         android:src="@drawable/ic_navigate_next_black_24dp"
-                        app:tint="@color/chimwemwe_primary" />
+                        app:tint="@color/chimwemwe_text_secondary" />
 
                 </LinearLayout>
 
             </androidx.cardview.widget.CardView>
-
-            <!-- Hidden stubs — keep IDs for ViewBinding compatibility only -->
-            <LinearLayout android:id="@+id/register_row_mother" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" />
-            <LinearLayout android:id="@+id/register_row_hts"    android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" />
-            <LinearLayout android:id="@+id/register_row_pmtct"  android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" />
-            <TextView android:id="@+id/register_mother_count" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" />
-            <TextView android:id="@+id/register_hts_count"    android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" />
-            <TextView android:id="@+id/register_pmtct_count"  android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" />
-
-            <!-- Chart views kept for ViewBinding compatibility — not shown -->
-            <com.github.mikephil.charting.charts.BarChart
-                android:id="@+id/fragment_verticalbarchart_chart"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:visibility="gone" />
-
-            <ProgressBar
-                android:id="@+id/dash_progressbar"
-                style="?android:attr/progressBarStyle"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:visibility="gone" />
-
-            <TextView
-                android:id="@+id/chart_empty_state"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:visibility="gone" />
 
         </LinearLayout>
 

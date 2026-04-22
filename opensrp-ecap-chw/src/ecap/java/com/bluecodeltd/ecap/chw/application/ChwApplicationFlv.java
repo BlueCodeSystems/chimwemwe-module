@@ -169,7 +169,7 @@ public class ChwApplicationFlv extends DefaultChwApplicationFlv {
         map.put("ec_chimwemwe_group", new String[]{
                 "group_name",
                 "hotspot_name",
-                "group_code",
+                "group_id",
                 "created_date"
         });
         return map;
@@ -226,7 +226,7 @@ public class ChwApplicationFlv extends DefaultChwApplicationFlv {
         map.put("ec_chimwemwe_group", new String[]{
                 "group_name",
                 "hotspot_name",
-                "group_code",
+                "group_id",
                 "created_date"
         });
         return map;

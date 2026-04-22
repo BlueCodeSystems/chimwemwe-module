@@ -41,15 +41,17 @@ public class ChimwemweRegisterProvider implements RecyclerViewProvider<Chimwemwe
     @Override
     public void getView(Cursor cursor, SmartRegisterClient client, ChimwemweGroupViewHolder holder) {
         CommonPersonObjectClient personClient = (CommonPersonObjectClient) client;
-        String groupName = Utils.getValue(personClient.getColumnmaps(), "group_name",   false);
-        String hotspot   = Utils.getValue(personClient.getColumnmaps(), "hotspot_name", false);
+        String groupName = Utils.getValue(personClient.getColumnmaps(), "group_name", false);
+        String groupId = Utils.getValue(personClient.getColumnmaps(), "group_id", false);
+        String groupCode = Utils.getValue(personClient.getColumnmaps(), "group_code", false);
+        String hotspot = Utils.getValue(personClient.getColumnmaps(), "hotspot_name", false);
 
-        // Read computed counts directly from the cursor — CommonRepository may not include
-        // aliased subquery columns in the column map, so we bypass it here.
         String pCount = cursorString(cursor, "p_count", "0");
         String sCount = cursorString(cursor, "s_count", "0");
+        String visibleGroupId = !groupId.isEmpty() ? groupId : groupCode;
 
-        holder.tvGroupName.setText(!groupName.isEmpty() ? groupName : "—");
+        holder.tvGroupName.setText(!groupName.isEmpty() ? groupName : "-");
+        holder.tvGroupId.setText(!visibleGroupId.isEmpty() ? "Group ID: " + visibleGroupId : "Group ID: -");
         holder.tvHotspotName.setText(hotspot);
         holder.tvParticipantCount.setText(pCount + " participants");
         holder.tvSessionsRecorded.setText(sCount + "/14 sessions");
@@ -58,7 +60,6 @@ public class ChimwemweRegisterProvider implements RecyclerViewProvider<Chimwemwe
         holder.itemView.setOnClickListener(onClickListener);
     }
 
-    /** Read a string value from the cursor by column name, returning {@code fallback} if absent. */
     private static String cursorString(Cursor cursor, String column, String fallback) {
         int idx = cursor.getColumnIndex(column);
         if (idx < 0) return fallback;

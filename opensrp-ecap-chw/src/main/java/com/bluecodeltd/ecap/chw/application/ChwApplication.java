@@ -215,6 +215,8 @@ public class ChwApplication extends CoreChwApplication implements SyncStatusBroa
         }
 
         ColumnDetails[] groupCols = new ColumnDetails[]{
+                ColumnDetails.builder().name("id").dataType("INTEGER").build(),
+                ColumnDetails.builder().name("group_id").dataType("VARCHAR").build(),
                 ColumnDetails.builder().name("hotspot_name").dataType("VARCHAR").build(),
                 ColumnDetails.builder().name("group_name").dataType("VARCHAR").build(),
                 ColumnDetails.builder().name("group_code").dataType("VARCHAR").build(),

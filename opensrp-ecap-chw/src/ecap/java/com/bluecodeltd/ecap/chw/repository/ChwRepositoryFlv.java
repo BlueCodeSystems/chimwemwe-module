@@ -136,6 +136,15 @@ public class ChwRepositoryFlv {
                 case 34:
                     upgradeToVersion34(db);
                     break;
+                case 35:
+                    upgradeToVersion35(db);
+                    break;
+                case 36:
+                    upgradeToVersion36(db);
+                    break;
+                case 37:
+                    upgradeToVersion37(db);
+                    break;
                 default:
                     break;
             }
@@ -1186,6 +1195,14 @@ public class ChwRepositoryFlv {
         } catch (Exception e) {
             Timber.e(e, "upgradeToVersion28");
         }
+        // Ensure group_id exists — createTable uses IF NOT EXISTS so tables that
+        // already existed (without group_id) are not recreated. Add it explicitly.
+        try {
+            db.execSQL("ALTER TABLE ec_chimwemwe_participant ADD COLUMN group_id INTEGER DEFAULT 0");
+        } catch (Exception ignored) {}
+        try {
+            db.execSQL("ALTER TABLE ec_chimwemwe_attendance ADD COLUMN group_id INTEGER DEFAULT 0");
+        } catch (Exception ignored) {}
     }
 
     private static void upgradeToVersion29(SQLiteDatabase db) {
@@ -1241,6 +1258,31 @@ public class ChwRepositoryFlv {
         }
     }
 
+    private static void upgradeToVersion35(SQLiteDatabase db) {
+        try {
+            com.bluecodeltd.ecap.chw.dao.ParticipantDao.migrateToV35(db);
+            com.bluecodeltd.ecap.chw.dao.AttendanceDao.migrateToV35(db);
+        } catch (Exception e) {
+            Timber.e(e, "upgradeToVersion35");
+        }
+    }
+
+    private static void upgradeToVersion36(SQLiteDatabase db) {
+        try {
+            com.bluecodeltd.ecap.chw.dao.HotspotGroupDao.migrateToV36(db);
+        } catch (Exception e) {
+            Timber.e(e, "upgradeToVersion36 HotspotGroupDao");
+        }
+        // Add new facilitator columns to the OpenSRP-managed shadow table as well.
+        String[] enrollmentAlters = {
+                "ALTER TABLE ec_chimwemwe_enrollment ADD COLUMN facilitator_name_1 TEXT",
+                "ALTER TABLE ec_chimwemwe_enrollment ADD COLUMN facilitator_name_2 TEXT"
+        };
+        for (String sql : enrollmentAlters) {
+            try { db.execSQL(sql); } catch (Exception ignored) {}
+        }
+    }
+
     private static void upgradeToVersion34(SQLiteDatabase db) {
         try {
             DatabaseMigrationUtils.createAddedECTables(
@@ -1250,6 +1292,21 @@ public class ChwRepositoryFlv {
             );
         } catch (Exception e) {
             Timber.e(e, "upgradeToVersion34");
+        }
+    }
+
+    private static void upgradeToVersion37(SQLiteDatabase db) {
+        String[] alters = {
+                "ALTER TABLE ec_chimwemwe_enrollment ADD COLUMN group_id TEXT",
+                "ALTER TABLE ec_chimwemwe_group ADD COLUMN group_id TEXT"
+        };
+        for (String sql : alters) {
+            try { db.execSQL(sql); } catch (Exception ignored) {}
+        }
+        try {
+            com.bluecodeltd.ecap.chw.dao.HotspotGroupDao.migrateToV37(db);
+        } catch (Exception e) {
+            Timber.e(e, "upgradeToVersion37 HotspotGroupDao");
         }
     }
 

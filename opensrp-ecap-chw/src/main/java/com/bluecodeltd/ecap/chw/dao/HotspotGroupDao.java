@@ -15,6 +15,7 @@ public class HotspotGroupDao extends AbstractDao {
     private static final String CREATE_TABLE_SQL =
             "CREATE TABLE IF NOT EXISTS " + TABLE + " (" +
             "  id                      INTEGER PRIMARY KEY AUTOINCREMENT," +
+            "  group_id                TEXT," +
             "  group_code              TEXT," +
             "  hotspot_name            TEXT," +
             "  group_name              TEXT," +
@@ -24,10 +25,8 @@ public class HotspotGroupDao extends AbstractDao {
             "  location_of_session     TEXT," +
             "  location_gps            TEXT," +
             "  nearest_health_facility TEXT," +
-            "  facilitator_1_first_name TEXT," +
-            "  facilitator_1_surname    TEXT," +
-            "  facilitator_2_first_name TEXT," +
-            "  facilitator_2_surname    TEXT," +
+            "  facilitator_name_1      TEXT," +
+            "  facilitator_name_2      TEXT," +
             "  session_1_date          TEXT," +
             "  session_2_date          TEXT," +
             "  session_3_date          TEXT," +
@@ -48,6 +47,10 @@ public class HotspotGroupDao extends AbstractDao {
     private static final String ALTER_V32 =
             "ALTER TABLE " + TABLE + " ADD COLUMN group_code TEXT";
 
+    /** Column added in DB version 37 (business group identifier from the form). */
+    private static final String ALTER_V37 =
+            "ALTER TABLE " + TABLE + " ADD COLUMN group_id TEXT";
+
     /** Columns added in DB version 31 (province + district). */
     private static final String[] ALTER_V31 = {
             "ALTER TABLE " + TABLE + " ADD COLUMN province  TEXT",
@@ -59,10 +62,8 @@ public class HotspotGroupDao extends AbstractDao {
             "ALTER TABLE " + TABLE + " ADD COLUMN location_of_session     TEXT",
             "ALTER TABLE " + TABLE + " ADD COLUMN location_gps            TEXT",
             "ALTER TABLE " + TABLE + " ADD COLUMN nearest_health_facility TEXT",
-            "ALTER TABLE " + TABLE + " ADD COLUMN facilitator_1_first_name TEXT",
-            "ALTER TABLE " + TABLE + " ADD COLUMN facilitator_1_surname    TEXT",
-            "ALTER TABLE " + TABLE + " ADD COLUMN facilitator_2_first_name TEXT",
-            "ALTER TABLE " + TABLE + " ADD COLUMN facilitator_2_surname    TEXT",
+            "ALTER TABLE " + TABLE + " ADD COLUMN facilitator_name_1      TEXT",
+            "ALTER TABLE " + TABLE + " ADD COLUMN facilitator_name_2      TEXT",
             "ALTER TABLE " + TABLE + " ADD COLUMN session_1_date          TEXT",
             "ALTER TABLE " + TABLE + " ADD COLUMN session_2_date          TEXT",
             "ALTER TABLE " + TABLE + " ADD COLUMN session_3_date          TEXT",
@@ -94,12 +95,37 @@ public class HotspotGroupDao extends AbstractDao {
         }
     }
 
+    /** Replace split facilitator columns with combined facilitator_name_1/2 (DB v36). */
+    public static void migrateToV36(SQLiteDatabase db) {
+        String[] alters = {
+                "ALTER TABLE " + TABLE + " ADD COLUMN facilitator_name_1 TEXT",
+                "ALTER TABLE " + TABLE + " ADD COLUMN facilitator_name_2 TEXT"
+        };
+        for (String sql : alters) {
+            try { db.execSQL(sql); } catch (Exception ignored) {}
+        }
+    }
+
     /** Add group_code column to existing installs (DB v32). */
     public static void migrateToV32(SQLiteDatabase db) {
         try {
             db.execSQL(ALTER_V32);
         } catch (Exception ignored) {
             // Column may already exist
+        }
+    }
+
+    public static void migrateToV37(SQLiteDatabase db) {
+        try {
+            db.execSQL(ALTER_V37);
+        } catch (Exception ignored) {
+            // Column may already exist
+        }
+        try {
+            db.execSQL("UPDATE " + TABLE + " SET group_id = " +
+                    "COALESCE(NULLIF(group_id, ''), NULLIF(group_code, ''), CAST(id AS TEXT))");
+        } catch (Exception ignored) {
+            // best effort backfill
         }
     }
 
@@ -117,17 +143,19 @@ public class HotspotGroupDao extends AbstractDao {
     // ── Insert ────────────────────────────────────────────────
 
     public static long insertGroup(HotspotGroupModel m) {
+        String idPart = m.getId() > 0 ? m.getId() + "," : "NULL,";
         String sql = "INSERT INTO " + TABLE + " (" +
-                "group_code, hotspot_name, group_name, created_date," +
+                "id, group_id, group_code, hotspot_name, group_name, created_date," +
                 "province, district," +
                 "location_of_session, location_gps, nearest_health_facility," +
-                "facilitator_1_first_name, facilitator_1_surname," +
-                "facilitator_2_first_name, facilitator_2_surname," +
+                "facilitator_name_1, facilitator_name_2," +
                 "session_1_date, session_2_date, session_3_date, session_4_date," +
                 "session_5_date, session_6_date, session_7_date, session_8_date," +
                 "session_9_date, session_10_date, session_11_date, session_12_date," +
                 "session_13_date, session_14_date" +
                 ") VALUES (" +
+                idPart +
+                q(m.getGroupId()) + "," +
                 q(m.getGroupCode()) + "," +
                 q(m.getHotspotName()) + "," +
                 q(m.getGroupName()) + "," +
@@ -137,10 +165,8 @@ public class HotspotGroupDao extends AbstractDao {
                 q(m.getLocationOfSession()) + "," +
                 q(m.getLocationGps()) + "," +
                 q(m.getNearestHealthFacility()) + "," +
-                q(m.getFacilitator1FirstName()) + "," +
-                q(m.getFacilitator1Surname()) + "," +
-                q(m.getFacilitator2FirstName()) + "," +
-                q(m.getFacilitator2Surname()) + "," +
+                q(m.getFacilitatorName1()) + "," +
+                q(m.getFacilitatorName2()) + "," +
                 q(m.getSession1Date()) + "," +
                 q(m.getSession2Date()) + "," +
                 q(m.getSession3Date()) + "," +
@@ -166,6 +192,8 @@ public class HotspotGroupDao extends AbstractDao {
 
     public static void updateGroup(HotspotGroupModel m) {
         String sql = "UPDATE " + TABLE + " SET " +
+                "group_id="                 + q(m.getGroupId()) + "," +
+                "group_code="               + q(m.getGroupCode()) + "," +
                 "hotspot_name="             + q(m.getHotspotName()) + "," +
                 "group_name="               + q(m.getGroupName()) + "," +
                 "province="                 + q(m.getProvince()) + "," +
@@ -173,10 +201,8 @@ public class HotspotGroupDao extends AbstractDao {
                 "location_of_session="      + q(m.getLocationOfSession()) + "," +
                 "location_gps="             + q(m.getLocationGps()) + "," +
                 "nearest_health_facility="  + q(m.getNearestHealthFacility()) + "," +
-                "facilitator_1_first_name=" + q(m.getFacilitator1FirstName()) + "," +
-                "facilitator_1_surname="    + q(m.getFacilitator1Surname()) + "," +
-                "facilitator_2_first_name=" + q(m.getFacilitator2FirstName()) + "," +
-                "facilitator_2_surname="    + q(m.getFacilitator2Surname()) + "," +
+                "facilitator_name_1="       + q(m.getFacilitatorName1()) + "," +
+                "facilitator_name_2="       + q(m.getFacilitatorName2()) + "," +
                 "session_1_date="           + q(m.getSession1Date()) + "," +
                 "session_2_date="           + q(m.getSession2Date()) + "," +
                 "session_3_date="           + q(m.getSession3Date()) + "," +
@@ -198,11 +224,10 @@ public class HotspotGroupDao extends AbstractDao {
     // ── Read ──────────────────────────────────────────────────
 
     public static HotspotGroupModel getGroup(long id) {
-        String sql = "SELECT id, group_code, hotspot_name, group_name, created_date," +
+        String sql = "SELECT id, group_id, group_code, hotspot_name, group_name, created_date," +
                 " province, district," +
                 " location_of_session, location_gps, nearest_health_facility," +
-                " facilitator_1_first_name, facilitator_1_surname," +
-                " facilitator_2_first_name, facilitator_2_surname," +
+                " facilitator_name_1, facilitator_name_2," +
                 " session_1_date,  session_2_date,  session_3_date,  session_4_date," +
                 " session_5_date,  session_6_date,  session_7_date,  session_8_date," +
                 " session_9_date,  session_10_date, session_11_date, session_12_date," +
@@ -213,11 +238,10 @@ public class HotspotGroupDao extends AbstractDao {
     }
 
     public static List<HotspotGroupModel> getAllGroups() {
-        String sql = "SELECT g.id, g.group_code, g.hotspot_name, g.group_name, g.created_date," +
+        String sql = "SELECT g.id, g.group_id, g.group_code, g.hotspot_name, g.group_name, g.created_date," +
                 " g.province, g.district," +
                 " g.location_of_session, g.location_gps, g.nearest_health_facility," +
-                " g.facilitator_1_first_name, g.facilitator_1_surname," +
-                " g.facilitator_2_first_name, g.facilitator_2_surname," +
+                " g.facilitator_name_1, g.facilitator_name_2," +
                 " g.session_1_date,  g.session_2_date,  g.session_3_date,  g.session_4_date," +
                 " g.session_5_date,  g.session_6_date,  g.session_7_date,  g.session_8_date," +
                 " g.session_9_date,  g.session_10_date, g.session_11_date, g.session_12_date," +
@@ -227,10 +251,17 @@ public class HotspotGroupDao extends AbstractDao {
                 " FROM " + TABLE + " g ORDER BY g.id DESC";
         return AbstractDao.readData(sql, cursor -> {
             HotspotGroupModel m = mapFull(cursor);
-            m.setParticipantCount(cursor.getInt(28));
-            m.setSessionsRecorded(cursor.getInt(29));
+            m.setParticipantCount(cursor.getInt(27));
+            m.setSessionsRecorded(cursor.getInt(28));
             return m;
         });
+    }
+
+    public static int countGroups() {
+        List<Integer> counts = AbstractDao.readData(
+                "SELECT COUNT(*) FROM " + TABLE,
+                cursor -> cursor.getInt(0));
+        return (counts != null && !counts.isEmpty()) ? counts.get(0) : 0;
     }
 
     public static void deleteGroup(long id) {
@@ -239,38 +270,53 @@ public class HotspotGroupDao extends AbstractDao {
         AbstractDao.updateDB("DELETE FROM " + TABLE + "             WHERE id=" + id);
     }
 
+    public static HotspotGroupModel getGroupByBusinessId(String groupId) {
+        String sql = "SELECT id, group_id, group_code, hotspot_name, group_name, created_date," +
+                " province, district," +
+                " location_of_session, location_gps, nearest_health_facility," +
+                " facilitator_name_1, facilitator_name_2," +
+                " session_1_date,  session_2_date,  session_3_date,  session_4_date," +
+                " session_5_date,  session_6_date,  session_7_date,  session_8_date," +
+                " session_9_date,  session_10_date, session_11_date, session_12_date," +
+                " session_13_date, session_14_date" +
+                " FROM " + TABLE + " WHERE group_id=" + q(groupId) +
+                " OR group_code=" + q(groupId) +
+                " LIMIT 1";
+        List<HotspotGroupModel> list = AbstractDao.readData(sql, HotspotGroupDao::mapFull);
+        return (list != null && !list.isEmpty()) ? list.get(0) : null;
+    }
+
     // ── Mapper ────────────────────────────────────────────────
 
     private static HotspotGroupModel mapFull(android.database.Cursor cursor) {
         HotspotGroupModel m = new HotspotGroupModel();
         m.setId(cursor.getLong(0));
-        m.setGroupCode(cursor.getString(1));
-        m.setHotspotName(cursor.getString(2));
-        m.setGroupName(cursor.getString(3));
-        m.setCreatedDate(cursor.getString(4));
-        m.setProvince(cursor.getString(5));
-        m.setDistrict(cursor.getString(6));
-        m.setLocationOfSession(cursor.getString(7));
-        m.setLocationGps(cursor.getString(8));
-        m.setNearestHealthFacility(cursor.getString(9));
-        m.setFacilitator1FirstName(cursor.getString(10));
-        m.setFacilitator1Surname(cursor.getString(11));
-        m.setFacilitator2FirstName(cursor.getString(12));
-        m.setFacilitator2Surname(cursor.getString(13));
-        m.setSession1Date(cursor.getString(14));
-        m.setSession2Date(cursor.getString(15));
-        m.setSession3Date(cursor.getString(16));
-        m.setSession4Date(cursor.getString(17));
-        m.setSession5Date(cursor.getString(18));
-        m.setSession6Date(cursor.getString(19));
-        m.setSession7Date(cursor.getString(20));
-        m.setSession8Date(cursor.getString(21));
-        m.setSession9Date(cursor.getString(22));
-        m.setSession10Date(cursor.getString(23));
-        m.setSession11Date(cursor.getString(24));
-        m.setSession12Date(cursor.getString(25));
-        m.setSession13Date(cursor.getString(26));
-        m.setSession14Date(cursor.getString(27));
+        m.setGroupId(cursor.getString(1));
+        m.setGroupCode(cursor.getString(2));
+        m.setHotspotName(cursor.getString(3));
+        m.setGroupName(cursor.getString(4));
+        m.setCreatedDate(cursor.getString(5));
+        m.setProvince(cursor.getString(6));
+        m.setDistrict(cursor.getString(7));
+        m.setLocationOfSession(cursor.getString(8));
+        m.setLocationGps(cursor.getString(9));
+        m.setNearestHealthFacility(cursor.getString(10));
+        m.setFacilitatorName1(cursor.getString(11));
+        m.setFacilitatorName2(cursor.getString(12));
+        m.setSession1Date(cursor.getString(13));
+        m.setSession2Date(cursor.getString(14));
+        m.setSession3Date(cursor.getString(15));
+        m.setSession4Date(cursor.getString(16));
+        m.setSession5Date(cursor.getString(17));
+        m.setSession6Date(cursor.getString(18));
+        m.setSession7Date(cursor.getString(19));
+        m.setSession8Date(cursor.getString(20));
+        m.setSession9Date(cursor.getString(21));
+        m.setSession10Date(cursor.getString(22));
+        m.setSession11Date(cursor.getString(23));
+        m.setSession12Date(cursor.getString(24));
+        m.setSession13Date(cursor.getString(25));
+        m.setSession14Date(cursor.getString(26));
         return m;
     }
 

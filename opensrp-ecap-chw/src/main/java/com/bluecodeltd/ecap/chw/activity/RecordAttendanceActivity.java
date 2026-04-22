@@ -1,10 +1,5 @@
 package com.bluecodeltd.ecap.chw.activity;
 
-import static com.bluecodeltd.ecap.chw.util.IndexClientsUtils.getAllSharedPreferences;
-import static com.bluecodeltd.ecap.chw.util.IndexClientsUtils.getFormTag;
-import static com.bluecodeltd.ecap.chw.util.JsonFormUtils.tagSyncMetadata;
-import static org.smartregister.chw.fp.util.FpUtil.getClientProcessorForJava;
-
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,19 +22,14 @@ import com.bluecodeltd.ecap.chw.dao.AttendanceDao;
 import com.bluecodeltd.ecap.chw.dao.ParticipantDao;
 import com.bluecodeltd.ecap.chw.model.AttendanceModel;
 import com.bluecodeltd.ecap.chw.model.ParticipantModel;
+import com.bluecodeltd.ecap.chw.util.ChimwemweFormUtils;
 import com.bluecodeltd.ecap.chw.util.Threading;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.smartregister.domain.db.EventClient;
-import org.smartregister.domain.tag.FormTag;
-import org.smartregister.repository.AllSharedPreferences;
-import org.smartregister.sync.helper.ECSyncHelper;
 import org.smartregister.util.FormUtils;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -127,6 +117,7 @@ public class RecordAttendanceActivity extends AppCompatActivity {
 
         List<AttendanceRowItem> rows = adapter.getRows();
         Threading.io(() -> {
+            boolean isEditMode = !AttendanceDao.getSessionAttendance(groupId, sessionNumber).isEmpty();
             for (AttendanceRowItem row : rows) {
                 AttendanceModel a = new AttendanceModel();
                 a.setGroupId(groupId);
@@ -137,7 +128,7 @@ public class RecordAttendanceActivity extends AppCompatActivity {
                 a.setChildAttendance(row.childAttendance);
                 AttendanceDao.saveAttendance(a);
             }
-            saveFormEvent(date, rows);
+            saveFormEvent(date, rows, isEditMode);
             Threading.main(() -> {
                 Toast.makeText(this, "Attendance saved", Toast.LENGTH_SHORT).show();
                 finish();
@@ -147,7 +138,7 @@ public class RecordAttendanceActivity extends AppCompatActivity {
 
     // ── Client processing ─────────────────────────────────────
 
-    private void saveFormEvent(String date, List<AttendanceRowItem> rows) {
+    private void saveFormEvent(String date, List<AttendanceRowItem> rows, boolean isEditMode) {
         try {
             FormUtils formUtils = new FormUtils(this);
             JSONObject form = formUtils.getFormJson("chimwemwe_session_attendance");
@@ -170,36 +161,12 @@ public class RecordAttendanceActivity extends AppCompatActivity {
                 setFieldValue(form, step, "p" + slot + "_child_attendance", row.childAttendance);
             }
 
-            AllSharedPreferences prefs = getAllSharedPreferences();
-            FormTag formTag = getFormTag();
-            String entityId = org.smartregister.util.JsonFormUtils.generateRandomUUIDString();
-            JSONArray fields = org.smartregister.util.JsonFormUtils.fields(form);
-            JSONObject metadata = form.optJSONObject("metadata");
-            String encounterType = form.optString("encounter_type", "");
-            if (fields == null || metadata == null || encounterType.isEmpty()) return;
-
-            org.smartregister.clientandeventmodel.Event event =
-                    org.smartregister.util.JsonFormUtils.createEvent(
-                            fields, metadata, formTag, entityId, encounterType,
-                            "ec_chimwemwe_session_attendance");
-            tagSyncMetadata(event);
-
-            org.smartregister.clientandeventmodel.Client client =
-                    org.smartregister.util.JsonFormUtils.createBaseClient(fields, formTag, entityId);
-
-            ECSyncHelper syncHelper =
-                    com.bluecodeltd.ecap.chw.application.ChwApplication.getInstance().getEcSyncHelper();
-            syncHelper.addClient(entityId,
-                    new JSONObject(org.smartregister.util.JsonFormUtils.gson.toJson(client)));
-            syncHelper.addEvent(entityId,
-                    new JSONObject(org.smartregister.util.JsonFormUtils.gson.toJson(event)));
-
-            Date currentSyncDate = new Date(prefs.fetchLastUpdatedAtDate(0));
-            List<EventClient> saved = syncHelper.getEvents(
-                    Collections.singletonList(event.getFormSubmissionId()));
-            getClientProcessorForJava().processClient(saved);
-            prefs.saveLastUpdatedAtDate(currentSyncDate.getTime());
-
+            ChimwemweFormUtils.ProcessedForm processedForm = ChimwemweFormUtils.processRegistration(
+                    form,
+                    "ec_chimwemwe_session_attendance",
+                    ChimwemweFormUtils.attendanceEntityId(groupId, sessionNumber)
+            );
+            ChimwemweFormUtils.saveRegistration(processedForm, isEditMode);
         } catch (Exception e) {
             timber.log.Timber.e(e, "saveFormEvent failed for session attendance");
         }

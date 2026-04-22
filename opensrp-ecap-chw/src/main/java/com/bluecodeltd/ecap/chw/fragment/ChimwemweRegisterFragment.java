@@ -85,18 +85,7 @@ public class ChimwemweRegisterFragment extends BaseSafeRegisterFragment
                 if (menu != null && menu.getNavigationAdapter() != null) {
                     menu.getNavigationAdapter().setSelectedView(Constants.DrawerMenu.CHIMWEMWE);
                 }
-                try {
-                    if (menu != null && getActivity() != null) {
-                        androidx.drawerlayout.widget.DrawerLayout drawer = menu.getDrawer();
-                        androidx.appcompat.graphics.drawable.DrawerArrowDrawable arrow =
-                                new androidx.appcompat.graphics.drawable.DrawerArrowDrawable(getActivity());
-                        arrow.setColor(android.graphics.Color.WHITE);
-                        toolbar.setNavigationIcon(arrow);
-                        toolbar.setNavigationOnClickListener(v -> {
-                            if (drawer != null) drawer.openDrawer(androidx.core.view.GravityCompat.START);
-                        });
-                    }
-                } catch (Throwable ignored) {}
+                applyDrawerNavigation(toolbar, menu);
             }
 
             View navbarContainer = view.findViewById(org.smartregister.R.id.register_nav_bar_container);
@@ -164,7 +153,7 @@ public class ChimwemweRegisterFragment extends BaseSafeRegisterFragment
             Utils.hideKeyboard(getActivity());
         }
 
-        this.filters = filterString;
+        this.filters = buildSqlFilter(filterString);
         this.joinTable = joinTableString;
         this.mainCondition = mainConditionString;
 
@@ -175,6 +164,23 @@ public class ChimwemweRegisterFragment extends BaseSafeRegisterFragment
 
         showProgressView();
         filterandSortExecute(countBundle());
+    }
+
+    private String buildSqlFilter(String filterString) {
+        if (filterString == null || filterString.trim().isEmpty()) {
+            return "";
+        }
+
+        String escaped = filterString.trim()
+                .replace("'", "''")
+                .replace("%", "\\%")
+                .replace("_", "\\_");
+        return "WHERE 1=1 AND ("
+                + "group_name LIKE '%" + escaped + "%' ESCAPE '\\' "
+                + "OR hotspot_name LIKE '%" + escaped + "%' ESCAPE '\\' "
+                + "OR group_id LIKE '%" + escaped + "%' ESCAPE '\\' "
+                + "OR group_code LIKE '%" + escaped + "%' ESCAPE '\\'"
+                + ")";
     }
 
     private void applySearch(String text) {
@@ -202,7 +208,10 @@ public class ChimwemweRegisterFragment extends BaseSafeRegisterFragment
         View root = getView();
         if (root == null) return;
         Toolbar toolbar = root.findViewById(org.smartregister.R.id.register_toolbar);
-        if (toolbar != null) toolbar.setTitle("");
+        if (toolbar != null) {
+            toolbar.setTitle("");
+            applyDrawerNavigation(toolbar, NavigationMenu.getInstance(getActivity(), null, toolbar));
+        }
         TextView titleLabel = root.findViewById(org.smartregister.R.id.txt_title_label);
         if (titleLabel != null) {
             titleLabel.setVisibility(View.VISIBLE);
@@ -227,8 +236,10 @@ public class ChimwemweRegisterFragment extends BaseSafeRegisterFragment
         Threading.io(() -> {
             int count = 0;
             try {
+                String query = "SELECT COUNT(*) FROM " + TABLE + " "
+                        + (filters == null ? "" : filters);
                 Cursor cursor = context().commonrepository(TABLE)
-                        .rawCustomQueryForAdapter("SELECT COUNT(*) FROM " + TABLE);
+                        .rawCustomQueryForAdapter(query);
                 if (cursor != null) {
                     cursor.moveToFirst();
                     count = cursor.getInt(0);
@@ -294,11 +305,12 @@ public class ChimwemweRegisterFragment extends BaseSafeRegisterFragment
         Object tag = view.getTag();
         if (!(tag instanceof CommonPersonObjectClient)) return;
         CommonPersonObjectClient client = (CommonPersonObjectClient) tag;
-        String idStr = Utils.getValue(client.getColumnmaps(), "id", false);
-        long groupId = -1L;
-        try { groupId = Long.parseLong(idStr); } catch (Exception ignored) {}
         Intent intent = new Intent(requireContext(), HotspotGroupDetailActivity.class);
-        intent.putExtra("group_id", groupId);
+        String groupId = Utils.getValue(client.getColumnmaps(), "group_id", false);
+        if (groupId == null || groupId.trim().isEmpty()) {
+            groupId = Utils.getValue(client.getColumnmaps(), "id", false);
+        }
+        intent.putExtra(HotspotGroupDetailActivity.EXTRA_GROUP_ID, groupId);
         startActivity(intent);
     }
 
@@ -312,6 +324,27 @@ public class ChimwemweRegisterFragment extends BaseSafeRegisterFragment
     @Override
     protected String getDefaultSortQuery() {
         return "group_name ASC";
+    }
+
+    @Override
+    protected boolean isValidFilterForFts(org.smartregister.commonregistry.CommonRepository commonRepository) {
+        return false;
+    }
+
+    private void applyDrawerNavigation(Toolbar toolbar, NavigationMenu menu) {
+        try {
+            if (toolbar == null || menu == null || getActivity() == null) return;
+            androidx.drawerlayout.widget.DrawerLayout drawer = menu.getDrawer();
+            androidx.appcompat.graphics.drawable.DrawerArrowDrawable arrow =
+                    new androidx.appcompat.graphics.drawable.DrawerArrowDrawable(getActivity());
+            arrow.setColor(android.graphics.Color.WHITE);
+            arrow.setProgress(0f);
+            toolbar.setNavigationIcon(arrow);
+            toolbar.setNavigationContentDescription("Open drawer");
+            toolbar.setNavigationOnClickListener(v -> {
+                if (drawer != null) drawer.openDrawer(androidx.core.view.GravityCompat.START);
+            });
+        } catch (Throwable ignored) {}
     }
 
     @Override

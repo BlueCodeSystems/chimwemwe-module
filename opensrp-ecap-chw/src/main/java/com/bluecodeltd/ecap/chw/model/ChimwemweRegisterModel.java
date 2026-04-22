@@ -58,15 +58,18 @@ public class ChimwemweRegisterModel implements ChimwemweRegisterContract.Model {
 
     private HotspotGroupModel buildGroupModel(JSONObject form) {
         JSONObject step1 = form.optJSONObject("step1");
-        JSONObject step2 = form.optJSONObject("step2");
-        JSONObject step3 = form.optJSONObject("step3");
 
         String hotspotName = fieldValue(step1, "hotspot_name");
         String groupName = fieldValue(step1, "group_name");
         if (hotspotName.isEmpty() || groupName.isEmpty()) return null;
 
         HotspotGroupModel group = new HotspotGroupModel();
-        group.setGroupCode(generateGroupCode());
+        String groupIdStr = fieldValue(step1, "group_id");
+        group.setGroupId(groupIdStr);
+        if (!groupIdStr.isEmpty()) {
+            try { group.setId(Long.parseLong(groupIdStr)); } catch (NumberFormatException ignored) {}
+        }
+        group.setGroupCode(groupIdStr.isEmpty() ? generateGroupCode() : groupIdStr);
         group.setHotspotName(hotspotName);
         group.setGroupName(groupName);
         group.setProvince(fieldValue(step1, "province"));
@@ -76,25 +79,8 @@ public class ChimwemweRegisterModel implements ChimwemweRegisterContract.Model {
         group.setNearestHealthFacility(fieldValue(step1, "nearest_health_facility"));
         group.setCreatedDate(LocalDate.now().toString());
 
-        group.setFacilitator1FirstName(fieldValue(step2, "facilitator_1_first_name"));
-        group.setFacilitator1Surname(fieldValue(step2, "facilitator_1_surname"));
-        group.setFacilitator2FirstName(fieldValue(step2, "facilitator_2_first_name"));
-        group.setFacilitator2Surname(fieldValue(step2, "facilitator_2_surname"));
-
-        group.setSession1Date(fieldValue(step3, "session_1_date"));
-        group.setSession2Date(fieldValue(step3, "session_2_date"));
-        group.setSession3Date(fieldValue(step3, "session_3_date"));
-        group.setSession4Date(fieldValue(step3, "session_4_date"));
-        group.setSession5Date(fieldValue(step3, "session_5_date"));
-        group.setSession6Date(fieldValue(step3, "session_6_date"));
-        group.setSession7Date(fieldValue(step3, "session_7_date"));
-        group.setSession8Date(fieldValue(step3, "session_8_date"));
-        group.setSession9Date(fieldValue(step3, "session_9_date"));
-        group.setSession10Date(fieldValue(step3, "session_10_date"));
-        group.setSession11Date(fieldValue(step3, "session_11_date"));
-        group.setSession12Date(fieldValue(step3, "session_12_date"));
-        group.setSession13Date(fieldValue(step3, "session_13_date"));
-        group.setSession14Date(fieldValue(step3, "session_14_date"));
+        group.setFacilitatorName1(fieldValue(step1, "facilitator_name_1"));
+        group.setFacilitatorName2(fieldValue(step1, "facilitator_name_2"));
 
         return group;
     }

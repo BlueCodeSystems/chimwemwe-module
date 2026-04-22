@@ -35,6 +35,15 @@ public class ParticipantDao extends AbstractDao {
             "  service_date         TEXT" +
             ")";
 
+    /** Add group_id column to existing installs that were created without it (DB v35). */
+    public static void migrateToV35(SQLiteDatabase db) {
+        try {
+            db.execSQL("ALTER TABLE " + TABLE + " ADD COLUMN group_id INTEGER DEFAULT 0");
+        } catch (Exception ignored) {
+            // Column already exists
+        }
+    }
+
     /** Column added in DB version 32 (system-generated UUID for the participant). */
     public static void migrateToV32(SQLiteDatabase db) {
         try {
@@ -104,6 +113,7 @@ public class ParticipantDao extends AbstractDao {
 
     public static void updateParticipant(ParticipantModel m) {
         String sql = "UPDATE " + TABLE + " SET " +
+                "participant_code="     + q(m.getParticipantCode()) + "," +
                 "caregiver_first_name=" + q(m.getCaregiverFirstName()) + "," +
                 "caregiver_surname="    + q(m.getCaregiverSurname()) + "," +
                 "child_first_name="     + q(m.getChildFirstName()) + "," +
@@ -189,6 +199,21 @@ public class ParticipantDao extends AbstractDao {
         List<Integer> res = AbstractDao.readData(
                 "SELECT COUNT(*) FROM " + TABLE + " WHERE group_id=" + groupId,
                 cursor -> cursor.getInt(0));
+        return (res != null && !res.isEmpty()) ? res.get(0) : 0;
+    }
+
+    public static int countAllParticipants() {
+        List<Integer> res = AbstractDao.readData(
+                "SELECT COUNT(*) FROM " + TABLE,
+                cursor -> cursor.getInt(0));
+        return (res != null && !res.isEmpty()) ? res.get(0) : 0;
+    }
+
+    public static int countCompletedParticipants() {
+        String sql = "SELECT COUNT(*) FROM " + TABLE + " p WHERE " +
+                "(SELECT COUNT(*) FROM ec_chimwemwe_attendance a " +
+                " WHERE a.participant_id=p.id AND (a.caregiver_attendance!='' OR a.child_attendance!='')) >= 14";
+        List<Integer> res = AbstractDao.readData(sql, cursor -> cursor.getInt(0));
         return (res != null && !res.isEmpty()) ? res.get(0) : 0;
     }
 

@@ -46,7 +46,7 @@ public class MonthlyReviewDao extends AbstractDao {
         db.execSQL(CREATE_TABLE_SQL);
     }
 
-    public static void insertReview(MonthlyReviewModel m) {
+    public static long insertReview(MonthlyReviewModel m) {
         String sql = "INSERT INTO " + TABLE +
                 " (group_id, participant_id, review_quarter, review_date, reviewer_name, register_accurate, reviewer_notes, created_at)" +
                 " VALUES (" +
@@ -59,6 +59,10 @@ public class MonthlyReviewDao extends AbstractDao {
                 q(m.getReviewerNotes()) + "," +
                 q(LocalDate.now().toString()) + ")";
         AbstractDao.updateDB(sql);
+        List<Long> ids = AbstractDao.readData(
+                "SELECT id FROM " + TABLE + " ORDER BY id DESC LIMIT 1",
+                cursor -> cursor.getLong(0));
+        return (ids != null && !ids.isEmpty()) ? ids.get(0) : -1L;
     }
 
     /** Returns all reviews for a group, most recent first. */

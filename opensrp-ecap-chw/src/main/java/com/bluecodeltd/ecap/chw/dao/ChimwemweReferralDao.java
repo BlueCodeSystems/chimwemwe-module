@@ -31,7 +31,7 @@ public class ChimwemweReferralDao extends AbstractDao {
         db.execSQL(CREATE_TABLE_SQL);
     }
 
-    public static void insertReferral(ChimwemweReferralModel m) {
+    public static long insertReferral(ChimwemweReferralModel m) {
         String sql = "INSERT INTO " + TABLE +
                 " (participant_id, group_id, who_referred, service_referred_for, referral_date, receiving_org, job_title, service_date, created_at)" +
                 " VALUES (" +
@@ -45,6 +45,10 @@ public class ChimwemweReferralDao extends AbstractDao {
                 q(m.getServiceDate()) + "," +
                 q(LocalDate.now().toString()) + ")";
         AbstractDao.updateDB(sql);
+        List<Long> ids = AbstractDao.readData(
+                "SELECT id FROM " + TABLE + " ORDER BY id DESC LIMIT 1",
+                cursor -> cursor.getLong(0));
+        return (ids != null && !ids.isEmpty()) ? ids.get(0) : -1L;
     }
 
     public static List<ChimwemweReferralModel> getParticipantReferrals(long participantId) {
