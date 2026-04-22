@@ -15,7 +15,7 @@ public class ParticipantDao extends AbstractDao {
     private static final String CREATE_TABLE_SQL =
             "CREATE TABLE IF NOT EXISTS " + TABLE + " (" +
             "  id                   INTEGER PRIMARY KEY AUTOINCREMENT," +
-            "  participant_code     TEXT," +
+            "  participant_id     TEXT," +
             "  group_id             INTEGER NOT NULL," +
             "  sn                   INTEGER," +
             "  caregiver_first_name TEXT," +
@@ -47,7 +47,7 @@ public class ParticipantDao extends AbstractDao {
     /** Column added in DB version 32 (system-generated UUID for the participant). */
     public static void migrateToV32(SQLiteDatabase db) {
         try {
-            db.execSQL("ALTER TABLE " + TABLE + " ADD COLUMN participant_code TEXT");
+            db.execSQL("ALTER TABLE " + TABLE + " ADD COLUMN participant_id TEXT");
         } catch (Exception ignored) {
             // Column may already exist
         }
@@ -80,12 +80,12 @@ public class ParticipantDao extends AbstractDao {
 
     public static long insertParticipant(ParticipantModel m) {
         String sql = "INSERT INTO " + TABLE +
-                " (participant_code, group_id, sn, caregiver_first_name, caregiver_surname," +
+                " (participant_id, group_id, sn, caregiver_first_name, caregiver_surname," +
                 "  child_first_name, child_surname, child_dob, child_sex," +
                 "  is_enrolled_ovc, caregiver_id, vca_id," +
                 "  who_referred, service_referred_for, referral_date," +
                 "  receiving_org, job_title, service_date) VALUES (" +
-                q(m.getParticipantCode()) + "," +
+                q(m.getParticipantId()) + "," +
                 m.getGroupId() + "," +
                 m.getSn() + "," +
                 q(m.getCaregiverFirstName()) + "," +
@@ -113,7 +113,7 @@ public class ParticipantDao extends AbstractDao {
 
     public static void updateParticipant(ParticipantModel m) {
         String sql = "UPDATE " + TABLE + " SET " +
-                "participant_code="     + q(m.getParticipantCode()) + "," +
+                "participant_id="     + q(m.getParticipantId()) + "," +
                 "caregiver_first_name=" + q(m.getCaregiverFirstName()) + "," +
                 "caregiver_surname="    + q(m.getCaregiverSurname()) + "," +
                 "child_first_name="     + q(m.getChildFirstName()) + "," +
@@ -135,7 +135,7 @@ public class ParticipantDao extends AbstractDao {
 
     /** Load all participants for a group, ordered by sn. Includes sessions_completed count. */
     public static List<ParticipantModel> getParticipants(long groupId) {
-        String sql = "SELECT p.id, p.participant_code, p.group_id, p.sn, p.caregiver_first_name, p.caregiver_surname," +
+        String sql = "SELECT p.id, p.participant_id, p.group_id, p.sn, p.caregiver_first_name, p.caregiver_surname," +
                 "  p.child_first_name, p.child_surname, p.child_dob, p.child_sex," +
                 "  p.is_enrolled_ovc, p.caregiver_id, p.vca_id," +
                 "  p.who_referred, p.service_referred_for, p.referral_date," +
@@ -153,7 +153,7 @@ public class ParticipantDao extends AbstractDao {
     }
 
     public static ParticipantModel getParticipant(long id) {
-        String sql = "SELECT p.id, p.participant_code, p.group_id, p.sn, p.caregiver_first_name, p.caregiver_surname," +
+        String sql = "SELECT p.id, p.participant_id, p.group_id, p.sn, p.caregiver_first_name, p.caregiver_surname," +
                 " p.child_first_name, p.child_surname, p.child_dob, p.child_sex," +
                 " p.is_enrolled_ovc, p.caregiver_id, p.vca_id," +
                 " p.who_referred, p.service_referred_for, p.referral_date," +
@@ -174,7 +174,7 @@ public class ParticipantDao extends AbstractDao {
     private static ParticipantModel mapParticipant(android.database.Cursor cursor) {
         ParticipantModel m = new ParticipantModel();
         m.setId(cursor.getLong(0));
-        m.setParticipantCode(cursor.getString(1));
+        m.setParticipantId(cursor.getString(1));
         m.setGroupId(cursor.getLong(2));
         m.setSn(cursor.getInt(3));
         m.setCaregiverFirstName(cursor.getString(4));

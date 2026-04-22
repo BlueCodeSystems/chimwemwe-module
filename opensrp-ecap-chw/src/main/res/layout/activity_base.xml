@@ -1,0 +1,404 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.drawerlayout.widget.DrawerLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
+
+    <!-- Main content area -->
+    <RelativeLayout
+        android:id="@+id/nav_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- Drawer panel -->
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/nav_view"
+        android:layout_width="@dimen/nav_drawer_width"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:background="#FFFFFF"
+        android:fitsSystemWindows="false">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <!-- ═══════════════════════════════
+                 HEADER  —  chimwemwe gradient
+                 ═══════════════════════════════ -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/chimwemwe_header_bg"
+                android:orientation="horizontal"
+                android:padding="20dp"
+                android:paddingTop="36dp"
+                android:paddingBottom="20dp"
+                android:gravity="center_vertical">
+
+                <!-- Avatar circle -->
+                <TextView
+                    android:layout_width="52dp"
+                    android:layout_height="52dp"
+                    android:gravity="center"
+                    android:background="@drawable/bg_icon_circle_white"
+                    android:text="CH"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <!-- Programme title + subtitle -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginStart="14dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Chimwemwe"
+                        android:textColor="#FFFFFF"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                    <!-- tvLogo is set to R.string.nav_logo ("ECAP II") by NavigationMenu -->
+                    <TextView
+                        android:id="@+id/tvLogo"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:textColor="#B3FFFFFF"
+                        android:textSize="13sp" />
+
+                    <!-- ivLogo — required by NavigationMenu; kept hidden -->
+                    <ImageView
+                        android:id="@+id/ivLogo"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:visibility="gone" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- ═══════════════════════════════
+                 SCROLLABLE MIDDLE SECTION
+                 ═══════════════════════════════ -->
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:overScrollMode="never">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <!-- MENU label -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
+                        android:layout_marginTop="20dp"
+                        android:layout_marginBottom="6dp"
+                        android:text="MENU"
+                        android:textSize="10sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/chimwemwe_text_secondary"
+                        android:letterSpacing="0.15" />
+
+                    <!-- Navigation items (Home, Chimwemwe Groups, …) -->
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rvOptions"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:clipToPadding="false" />
+
+                    <!-- Divider -->
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginStart="20dp"
+                        android:layout_marginEnd="20dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="8dp"
+                        android:background="@color/chimwemwe_surface" />
+
+                    <!-- SETTINGS label -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginBottom="4dp"
+                        android:text="SETTINGS"
+                        android:textSize="10sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/chimwemwe_text_secondary"
+                        android:letterSpacing="0.15" />
+
+                    <!-- Language row -->
+                    <LinearLayout
+                        android:id="@+id/rlIconLang"
+                        android:layout_width="match_parent"
+                        android:layout_height="52dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="16dp"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                        <FrameLayout
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
+                            android:background="@drawable/bg_register_icon"
+                            android:backgroundTint="#F1F5F9"
+                            android:layout_marginEnd="14dp">
+                            <ImageView
+                                android:id="@+id/ivIconLang"
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:layout_gravity="center"
+                                app:srcCompat="@drawable/ic_nav_language"
+                                app:tint="@color/chimwemwe_text_secondary" />
+                        </FrameLayout>
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Language"
+                            android:textSize="14sp"
+                            android:textColor="@color/chimwemwe_text_primary" />
+
+                        <TextView
+                            android:id="@+id/tvLang"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="English"
+                            android:textSize="12sp"
+                            android:textColor="@color/chimwemwe_text_secondary" />
+
+                    </LinearLayout>
+
+                    <!-- Device-to-device row -->
+                    <LinearLayout
+                        android:id="@+id/rlIconDevice"
+                        android:layout_width="match_parent"
+                        android:layout_height="52dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="16dp"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                        <FrameLayout
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
+                            android:background="@drawable/bg_register_icon"
+                            android:backgroundTint="#F1F5F9"
+                            android:layout_marginEnd="14dp">
+                            <ImageView
+                                android:id="@+id/ivIconDevice"
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:layout_gravity="center"
+                                app:srcCompat="@drawable/ic_nav_device_share"
+                                app:tint="@color/chimwemwe_text_secondary" />
+                        </FrameLayout>
+
+                        <TextView
+                            android:id="@+id/tvDeviceToDevice"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/device_to_device"
+                            android:textSize="14sp"
+                            android:textColor="@color/chimwemwe_text_primary" />
+
+                    </LinearLayout>
+
+                    <!-- Hidden rows — required by NavigationMenu; visibility=gone -->
+                    <RelativeLayout android:id="@+id/rlReferralNotification"
+                        android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone">
+                        <ImageView android:id="@+id/ivIconReferralNotification"
+                            android:layout_width="0dp" android:layout_height="0dp" />
+                        <TextView android:id="@+id/tvReferralNotification"
+                            android:layout_width="0dp" android:layout_height="0dp" />
+                    </RelativeLayout>
+
+                    <RelativeLayout android:id="@+id/rlServiceReport"
+                        android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone">
+                        <ImageView android:id="@+id/ivIconServiceReport"
+                            android:layout_width="0dp" android:layout_height="0dp" />
+                        <TextView android:id="@+id/tvServiceReport"
+                            android:layout_width="0dp" android:layout_height="0dp" />
+                    </RelativeLayout>
+
+                    <RelativeLayout android:id="@+id/rlIconStockReport"
+                        android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone">
+                        <ImageView android:id="@+id/ivIconStockReport"
+                            android:layout_width="0dp" android:layout_height="0dp" />
+                        <TextView android:id="@+id/tvStockReport"
+                            android:layout_width="0dp" android:layout_height="0dp" />
+                    </RelativeLayout>
+
+                    <RelativeLayout android:id="@+id/rlIconResponders"
+                        android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone">
+                        <ImageView android:id="@+id/ivIconResponders"
+                            android:layout_width="0dp" android:layout_height="0dp" />
+                        <TextView android:id="@+id/tvResponders"
+                            android:layout_width="0dp" android:layout_height="0dp" />
+                    </RelativeLayout>
+
+                </LinearLayout>
+
+            </ScrollView>
+
+            <!-- ═══════════════════════════════
+                 SYNC ROW
+                 ═══════════════════════════════ -->
+            <LinearLayout
+                android:id="@+id/rlSync"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingStart="12dp"
+                android:paddingEnd="16dp"
+                android:background="@color/chimwemwe_surface"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
+
+                <FrameLayout
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="@drawable/bg_register_icon"
+                    android:backgroundTint="#E0F2F1"
+                    android:layout_marginEnd="14dp">
+
+                    <ImageView
+                        android:id="@+id/ivSyncIcon"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="center"
+                        android:clickable="true"
+                        android:focusable="true"
+                        app:srcCompat="@mipmap/sidemenu_sync" />
+
+                    <ProgressBar
+                        android:id="@+id/pbSync"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="center"
+                        android:indeterminate="true"
+                        android:visibility="invisible" />
+
+                </FrameLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tvSync"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/nav_sync"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/chimwemwe_text_primary"
+                        android:clickable="true"
+                        android:focusable="true" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/tvSyncTimeTitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/nav_last"
+                            android:textSize="11sp"
+                            android:textColor="@color/chimwemwe_text_secondary" />
+
+                        <TextView
+                            android:id="@+id/tvSyncTime"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/nav_last_sync_time"
+                            android:textSize="11sp"
+                            android:textColor="@color/chimwemwe_text_secondary" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- ═══════════════════════════════
+                 LOGOUT ROW
+                 ═══════════════════════════════ -->
+            <LinearLayout
+                android:id="@+id/rlLogout"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingStart="12dp"
+                android:paddingEnd="16dp"
+                android:background="#FFFFFF"
+                android:elevation="4dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
+
+                <FrameLayout
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="@drawable/bg_register_icon"
+                    android:backgroundTint="#FEE2E2"
+                    android:layout_marginEnd="14dp">
+
+                    <ImageView
+                        android:id="@+id/ivLogout"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="center"
+                        app:srcCompat="@drawable/ic_nav_logout"
+                        app:tint="#DC2626" />
+
+                </FrameLayout>
+
+                <TextView
+                    android:id="@+id/tvLogout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/log_out_as"
+                    android:textSize="14sp"
+                    android:textColor="#DC2626" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </com.google.android.material.navigation.NavigationView>
+
+</androidx.drawerlayout.widget.DrawerLayout>

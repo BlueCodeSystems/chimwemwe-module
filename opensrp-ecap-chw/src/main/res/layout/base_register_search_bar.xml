@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/search_bar_layout"
     android:layout_width="match_parent"
@@ -43,14 +42,11 @@
 
     </RelativeLayout>
 
-
     <RelativeLayout
         android:id="@+id/filter_sort_layout"
         android:layout_width="0dp"
         android:layout_height="@dimen/ec_main_header_search_layout_height"
         android:layout_marginEnd="@dimen/register_search_bar_margin"
-        android:layout_marginLeft="@dimen/search_bar_min_margin"
-        android:layout_marginRight="@dimen/register_search_bar_margin"
         android:layout_marginStart="@dimen/search_bar_min_margin"
         android:layout_weight="0.5">
 
@@ -61,7 +57,6 @@
             android:layout_alignParentEnd="true"
             android:layout_alignParentTop="true"
             android:layout_marginEnd="5dp"
-            android:layout_marginRight="5dp"
             android:drawableLeft="@drawable/ic_icon_filter"
             android:drawablePadding="@dimen/register_search_bar_min_margin"
             android:drawableStart="@drawable/ic_icon_filter"
@@ -73,7 +68,6 @@
             android:textColor="@android:color/white"
             android:textSize="@dimen/default_font_size_search_bar" />
 
-
     </RelativeLayout>
 
     <RelativeLayout
@@ -81,12 +75,9 @@
         android:layout_width="0dp"
         android:layout_height="@dimen/ec_main_header_search_layout_height"
         android:layout_marginEnd="@dimen/register_search_bar_margin"
-        android:layout_marginLeft="@dimen/search_bar_min_margin"
-        android:layout_marginRight="@dimen/register_search_bar_margin"
         android:layout_marginStart="@dimen/search_bar_min_margin"
-        android:visibility="gone"
-        android:layout_weight="0.75">
-
+        android:layout_weight="0.75"
+        android:visibility="gone">
 
         <TextView
             android:id="@+id/due_only_text_view"
@@ -94,7 +85,6 @@
             android:layout_height="match_parent"
             android:layout_alignParentEnd="true"
             android:layout_alignParentTop="true"
-            android:layout_marginRight="5dp"
             android:layout_marginEnd="5dp"
             android:drawableEnd="@drawable/ic_due_filter_off"
             android:drawableRight="@drawable/ic_due_filter_off"
@@ -104,6 +94,8 @@
             android:scrollHorizontally="true"
             android:text="@string/due_only"
             android:textColor="@android:color/white"
-            android:textSize="@dimen/default_font_size_search_bar"/>
+            android:textSize="@dimen/default_font_size_search_bar" />
+
     </RelativeLayout>
+
 </LinearLayout>

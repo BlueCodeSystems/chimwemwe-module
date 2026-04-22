@@ -695,21 +695,24 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
                 m.setJobTitle(fieldValue(referralStep,           "job_title"));
                 m.setServiceDate(fieldValue(referralStep,        "service_date"));
 
-                String participantCode = form.optString("entity_id", "").trim();
-                if (participantCode.isEmpty() && participantId != -1L && participants != null) {
+                String participantIdCode = fieldValue(step1, "participant_id");
+                if (participantIdCode == null || participantIdCode.trim().isEmpty()) {
+                    participantIdCode = form.optString("entity_id", "").trim();
+                }
+                if (participantIdCode.isEmpty() && participantId != -1L && participants != null) {
                     for (ParticipantModel existing : participants) {
                         if (existing.getId() == participantId) {
-                            participantCode = existing.getParticipantCode();
+                            participantIdCode = existing.getParticipantId();
                             break;
                         }
                     }
                 }
-                if (participantCode.isEmpty()) {
-                    participantCode = participantId == -1L
-                            ? "chm-participant-" + System.currentTimeMillis()
-                            : "chm-participant-" + participantId;
+                if (participantIdCode == null || participantIdCode.isEmpty()) {
+                    participantIdCode = participantId == -1L
+                            ? "CHIM-" + System.currentTimeMillis()
+                            : "CHIM-" + participantId;
                 }
-                m.setParticipantCode(participantCode);
+                m.setParticipantId(participantIdCode);
 
                 if (participantId == -1L) {
                     ParticipantDao.insertParticipant(m);
@@ -720,7 +723,7 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
                         ChimwemweFormUtils.processRegistration(
                                 form,
                                 "ec_chimwemwe_participant",
-                                m.getParticipantCode()
+                                m.getParticipantId()
                         ),
                         participantId != -1L
                 );
@@ -803,11 +806,11 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
             throws Exception {
         if (form == null) return;
         boolean isEdit = existing != null && existing.getId() > 0;
-        String participantCode = isEdit ? existing.getParticipantCode() : form.optString("entity_id", "");
+        String participantCode = isEdit ? existing.getParticipantId() : null;
         if (participantCode == null || participantCode.trim().isEmpty()) {
             participantCode = isEdit
-                    ? "chm-participant-" + existing.getId()
-                    : "chm-participant-" + System.currentTimeMillis();
+                    ? "CHIM-" + existing.getId()
+                    : "CHIM-" + System.currentTimeMillis();
         }
 
         if (existing != null) {
@@ -834,6 +837,7 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
             setFieldValue(form, "step2", "caregiver_id", generateNumericIdentifier());
         }
 
+        setFieldValue(form, "step1", "participant_id", participantCode);
         form.put("entity_id", participantCode);
         form.put("_sn", sn);
         form.put("_participant_id", existing != null ? existing.getId() : -1L);
@@ -849,7 +853,9 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
         setFieldValue(form, "step1", "is_enrolled_ovc", "Yes");
         setFieldValue(form, "step1", "vca_id", ovcRecord.getUniqueId());
         setFieldValue(form, "step1", "caregiver_id", ovcRecord.getHouseholdId());
-        form.put("entity_id", "chm-participant-" + System.currentTimeMillis());
+        String newParticipantId = "CHIM-" + System.currentTimeMillis();
+        setFieldValue(form, "step1", "participant_id", newParticipantId);
+        form.put("entity_id", newParticipantId);
         form.put("_sn", sn);
         form.put("_participant_id", -1L);
     }

@@ -145,6 +145,15 @@ public class ChwRepositoryFlv {
                 case 37:
                     upgradeToVersion37(db);
                     break;
+                case 38:
+                    upgradeToVersion38(db);
+                    break;
+                case 39:
+                    upgradeToVersion39(db);
+                    break;
+                case 40:
+                    upgradeToVersion40(db);
+                    break;
                 default:
                     break;
             }
@@ -1293,6 +1302,45 @@ public class ChwRepositoryFlv {
         } catch (Exception e) {
             Timber.e(e, "upgradeToVersion34");
         }
+    }
+
+    private static void upgradeToVersion38(SQLiteDatabase db) {
+        try {
+            db.execSQL("ALTER TABLE ec_chimwemwe_participant ADD COLUMN sn INTEGER");
+        } catch (Exception ignored) {}
+        try {
+            db.execSQL("ALTER TABLE ec_chimwemwe_attendance ADD COLUMN participant_id TEXT");
+        } catch (Exception ignored) {}
+    }
+
+    private static void upgradeToVersion40(SQLiteDatabase db) {
+        Timber.i("DB upgradeToVersion40: start");
+        try {
+            db.execSQL("ALTER TABLE ec_chimwemwe_participant ADD COLUMN participant_id TEXT");
+            Timber.i("DB upgradeToVersion40: added participant_id column");
+        } catch (Exception e) { Timber.w("upgradeToVersion40 add col: %s", e.getMessage()); }
+        try {
+            db.execSQL("UPDATE ec_chimwemwe_participant SET participant_id = participant_code WHERE participant_id IS NULL");
+            Timber.i("DB upgradeToVersion40: copied participant_code -> participant_id");
+        } catch (Exception e) { Timber.w("upgradeToVersion40 copy: %s", e.getMessage()); }
+        Timber.i("DB upgradeToVersion40: done");
+    }
+
+    private static void upgradeToVersion39(SQLiteDatabase db) {
+        Timber.i("DB upgradeToVersion39: start");
+        try {
+            db.execSQL("ALTER TABLE ec_chimwemwe_attendance ADD COLUMN participant_id TEXT");
+            Timber.i("DB upgradeToVersion39: added attendance.participant_id");
+        } catch (Exception e) { Timber.w("upgradeToVersion39 attendance: %s", e.getMessage()); }
+        try {
+            db.execSQL("ALTER TABLE ec_chimwemwe_referral ADD COLUMN participant_id INTEGER");
+            Timber.i("DB upgradeToVersion39: added referral.participant_id");
+        } catch (Exception e) { Timber.w("upgradeToVersion39 referral pid: %s", e.getMessage()); }
+        try {
+            db.execSQL("ALTER TABLE ec_chimwemwe_referral ADD COLUMN group_id INTEGER");
+            Timber.i("DB upgradeToVersion39: added referral.group_id");
+        } catch (Exception e) { Timber.w("upgradeToVersion39 referral gid: %s", e.getMessage()); }
+        Timber.i("DB upgradeToVersion39: done");
     }
 
     private static void upgradeToVersion37(SQLiteDatabase db) {

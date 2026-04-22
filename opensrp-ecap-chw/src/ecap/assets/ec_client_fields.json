@@ -15832,7 +15832,9 @@
       "columns": [
         { "column_name": "base_entity_id", "type": "Client", "json_mapping": { "field": "baseEntityId" } },
         { "column_name": "last_interacted_with", "type": "Event", "json_mapping": { "field": "version" } },
+        { "column_name": "participant_id", "type": "Client", "json_mapping": { "field": "attributes.participant_id" } },
         { "column_name": "group_id", "type": "Client", "json_mapping": { "field": "attributes.group_id" } },
+        { "column_name": "sn", "type": "Client", "json_mapping": { "field": "attributes.sn" } },
         { "column_name": "caregiver_first_name", "type": "Client", "json_mapping": { "field": "attributes.caregiver_first_name" } },
         { "column_name": "caregiver_surname", "type": "Client", "json_mapping": { "field": "attributes.caregiver_surname" } },
         { "column_name": "child_first_name", "type": "Client", "json_mapping": { "field": "attributes.child_first_name" } },
@@ -15859,7 +15861,8 @@
         { "column_name": "session_number", "type": "Client", "json_mapping": { "field": "attributes.session_number" } },
         { "column_name": "session_date", "type": "Client", "json_mapping": { "field": "attributes.session_date" } },
         { "column_name": "caregiver_attendance", "type": "Client", "json_mapping": { "field": "attributes.caregiver_attendance" } },
-        { "column_name": "child_attendance", "type": "Client", "json_mapping": { "field": "attributes.child_attendance" } }
+        { "column_name": "child_attendance", "type": "Client", "json_mapping": { "field": "attributes.child_attendance" } },
+        { "column_name": "participant_id", "type": "Client", "json_mapping": { "field": "attributes.participant_id" } }
       ]
     },
     {
@@ -15929,6 +15932,8 @@
       "columns": [
         { "column_name": "base_entity_id", "type": "Client", "json_mapping": { "field": "baseEntityId" } },
         { "column_name": "last_interacted_with", "type": "Event", "json_mapping": { "field": "version" } },
+        { "column_name": "participant_id", "type": "Client", "json_mapping": { "field": "attributes.participant_id" } },
+        { "column_name": "group_id", "type": "Client", "json_mapping": { "field": "attributes.group_id" } },
         { "column_name": "who_referred", "type": "Client", "json_mapping": { "field": "attributes.who_referred" } },
         { "column_name": "service_referred_for", "type": "Client", "json_mapping": { "field": "attributes.service_referred_for" } },
         { "column_name": "referral_date", "type": "Client", "json_mapping": { "field": "attributes.referral_date" } },

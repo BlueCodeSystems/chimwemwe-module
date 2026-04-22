@@ -119,7 +119,7 @@
             android:name=".activity.ChimwemweRegisterActivity"
             android:exported="false"
             android:label="Chimwemwe Groups"
-            android:theme="@style/ChwTheme.NoActionBar" />
+            android:theme="@style/ChwTheme.Material" />
         <activity
             android:name="com.bluecodeltd.ecap.chw.activity.SignatureActivity"
             android:theme="@style/ChwTheme.NoActionBar" />

@@ -271,9 +271,9 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity {
                 setFieldValue(form, "step1", "receiving_org",        participant.getReceivingOrg());
                 setFieldValue(form, "step1", "job_title",            participant.getJobTitle());
                 setFieldValue(form, "step1", "service_date",         participant.getServiceDate());
-                String participantCode = participant.getParticipantCode();
+                String participantCode = participant.getParticipantId();
                 if (participantCode == null || participantCode.trim().isEmpty()) {
-                    participantCode = "chm-participant-" + participantId;
+                    participantCode = "CHIM-" + participantId;
                 }
                 form.put("entity_id", participantCode);
                 form.put("_sn", participant.getSn());
@@ -382,17 +382,17 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity {
                     updated.setId(participantId);
                     updated.setGroupId(participant.getGroupId());
                     updated.setSn(participant.getSn());
-                    String participantCode = form.optString("entity_id", participant.getParticipantCode());
+                    String participantCode = form.optString("entity_id", participant.getParticipantId());
                     if (participantCode == null || participantCode.trim().isEmpty()) {
                         participantCode = "chm-participant-" + participantId;
                     }
-                    updated.setParticipantCode(participantCode);
+                    updated.setParticipantId(participantCode);
                     ParticipantDao.updateParticipant(updated);
                     ChimwemweFormUtils.saveRegistration(
                             ChimwemweFormUtils.processRegistration(
                                     form,
                                     "ec_chimwemwe_participant",
-                                    updated.getParticipantCode()
+                                    updated.getParticipantId()
                             ),
                             true
                     );

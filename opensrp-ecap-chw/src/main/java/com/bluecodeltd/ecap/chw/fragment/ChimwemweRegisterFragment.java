@@ -2,13 +2,15 @@ package com.bluecodeltd.ecap.chw.fragment;
 
 import android.content.Intent;
 import android.database.Cursor;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.LinearLayout;
+import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.bluecodeltd.ecap.chw.util.Threading;
@@ -64,6 +66,15 @@ public class ChimwemweRegisterFragment extends BaseSafeRegisterFragment
     }
 
     @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        // Inflate the dedicated Chimwemwe layout instead of the shared base register layout
+        // so other registers (Family, ANC, HTS, etc.) are not affected.
+        View view = inflater.inflate(R.layout.fragment_chimwemwe_register, container, false);
+        setupViews(view);
+        return view;
+    }
+
+    @Override
     public void setupViews(View view) {
         try {
             super.setupViews(view);
@@ -79,7 +90,7 @@ public class ChimwemweRegisterFragment extends BaseSafeRegisterFragment
                 }
                 toolbar.setTitle("");
                 TextView titleLabel = toolbar.findViewById(org.smartregister.R.id.txt_title_label);
-                if (titleLabel != null) titleLabel.setVisibility(View.GONE);
+                if (titleLabel != null) titleLabel.setVisibility(View.VISIBLE);
 
                 NavigationMenu menu = NavigationMenu.getInstance(getActivity(), null, toolbar);
                 if (menu != null && menu.getNavigationAdapter() != null) {
@@ -91,25 +102,10 @@ public class ChimwemweRegisterFragment extends BaseSafeRegisterFragment
             View navbarContainer = view.findViewById(org.smartregister.R.id.register_nav_bar_container);
             if (navbarContainer != null) navbarContainer.bringToFront();
 
-            View searchBarLayout = view.findViewById(R.id.search_bar_layout);
-            if (searchBarLayout != null) {
-                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                searchBarLayout.setLayoutParams(params);
-                searchBarLayout.setBackgroundResource(R.color.primary);
-                searchBarLayout.setPadding(
-                        searchBarLayout.getPaddingLeft(),
-                        searchBarLayout.getPaddingTop(),
-                        searchBarLayout.getPaddingRight(),
-                        (int) org.smartregister.chw.core.utils.Utils.convertDpToPixel(10, getActivity()));
-            }
-
             if (getSearchView() != null) {
-                getSearchView().setHint(getString(R.string.search_hint));
-                getSearchView().setBackgroundResource(org.smartregister.R.color.white);
                 getSearchView().setCompoundDrawablesWithIntrinsicBounds(
                         org.smartregister.R.drawable.ic_action_search, 0, 0, 0);
-                getSearchView().setTextColor(getResources().getColor(org.smartregister.R.color.text_black));
+                getSearchView().setTextColor(getResources().getColor(R.color.chimwemwe_text_primary));
             }
 
             hideIfPresent(view, org.smartregister.R.id.top_right_layout);
@@ -175,11 +171,13 @@ public class ChimwemweRegisterFragment extends BaseSafeRegisterFragment
                 .replace("'", "''")
                 .replace("%", "\\%")
                 .replace("_", "\\_");
+        // Qualify group_id and group_code with the table name to avoid ambiguity
+        // with the JOIN subquery aliases that also expose a group_id column.
         return "WHERE 1=1 AND ("
-                + "group_name LIKE '%" + escaped + "%' ESCAPE '\\' "
-                + "OR hotspot_name LIKE '%" + escaped + "%' ESCAPE '\\' "
-                + "OR group_id LIKE '%" + escaped + "%' ESCAPE '\\' "
-                + "OR group_code LIKE '%" + escaped + "%' ESCAPE '\\'"
+                + "ec_chimwemwe_group.group_name LIKE '%" + escaped + "%' ESCAPE '\\' "
+                + "OR ec_chimwemwe_group.hotspot_name LIKE '%" + escaped + "%' ESCAPE '\\' "
+                + "OR ec_chimwemwe_group.group_id LIKE '%" + escaped + "%' ESCAPE '\\' "
+                + "OR ec_chimwemwe_group.group_code LIKE '%" + escaped + "%' ESCAPE '\\'"
                 + ")";
     }
 
@@ -215,7 +213,6 @@ public class ChimwemweRegisterFragment extends BaseSafeRegisterFragment
         TextView titleLabel = root.findViewById(org.smartregister.R.id.txt_title_label);
         if (titleLabel != null) {
             titleLabel.setVisibility(View.VISIBLE);
-            titleLabel.setText(getString(R.string.chimwemwe_groups));
         }
         if (getActivity() instanceof AppCompatActivity) {
             AppCompatActivity act = (AppCompatActivity) getActivity();
@@ -236,8 +233,13 @@ public class ChimwemweRegisterFragment extends BaseSafeRegisterFragment
         Threading.io(() -> {
             int count = 0;
             try {
-                String query = "SELECT COUNT(*) FROM " + TABLE + " "
-                        + (filters == null ? "" : filters);
+                String joinClause =
+                        " LEFT JOIN (SELECT group_id, COUNT(*) AS p_count FROM ec_chimwemwe_participant GROUP BY group_id) AS participant_counts" +
+                        " ON participant_counts.group_id = ec_chimwemwe_group.id" +
+                        " LEFT JOIN (SELECT group_id, COUNT(DISTINCT CASE WHEN caregiver_attendance!='' OR child_attendance!='' THEN session_number END) AS s_count FROM ec_chimwemwe_attendance GROUP BY group_id) AS attendance_counts" +
+                        " ON attendance_counts.group_id = ec_chimwemwe_group.id";
+                String filterClause = (filters == null || filters.isEmpty()) ? "" : " " + filters;
+                String query = "SELECT COUNT(*) FROM " + TABLE + joinClause + filterClause;
                 Cursor cursor = context().commonrepository(TABLE)
                         .rawCustomQueryForAdapter(query);
                 if (cursor != null) {

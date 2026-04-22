@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <!-- ══════════════════════════════════════════
+         CHIMWEMWE GRADIENT HEADER
+         Contains required IDs: register_toolbar,
+         txt_title_label, register_nav_bar_container
+         ══════════════════════════════════════════ -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/chimwemwe_header_bg"
+        android:orientation="vertical">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/register_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@android:color/transparent"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+
+            <TextView
+                android:id="@+id/txt_title_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Chimwemwe Groups"
+                android:textColor="#FFFFFF"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:id="@+id/register_nav_bar_container"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="end"
+                android:gravity="center_vertical"
+                android:orientation="horizontal" />
+
+        </androidx.appcompat.widget.Toolbar>
+
+        <!-- Subtitle row: icon bubble + programme description -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingBottom="18dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <FrameLayout
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/bg_icon_circle_white"
+                android:layout_marginEnd="14dp">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/baseline_folder_open_24"
+                    app:tint="#FFFFFF" />
+
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Group Enrollment Register"
+                    android:textColor="#FFFFFF"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="ECAP II · Chimwemwe Programme"
+                    android:textColor="#B3FFFFFF"
+                    android:textSize="11sp" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- ══════════════════════════════════════════
+         SEARCH BAR
+         Contains required IDs: search_bar_layout,
+         edt_search, btn_search_cancel,
+         filter_sort_layout, filter_text_view,
+         due_only_layout, due_only_text_view
+         ══════════════════════════════════════════ -->
+    <LinearLayout
+        android:id="@+id/search_bar_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/chimwemwe_surface"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <!-- White pill search card -->
+        <RelativeLayout
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_search_bar"
+            android:paddingStart="14dp"
+            android:paddingEnd="4dp">
+
+            <EditText
+                android:id="@+id/edt_search"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_toStartOf="@+id/btn_search_cancel"
+                android:background="@android:color/transparent"
+                android:drawablePadding="8dp"
+                android:hint="Search groups…"
+                android:imeOptions="actionSearch"
+                android:inputType="text"
+                android:maxLines="1"
+                android:textColor="@color/chimwemwe_text_primary"
+                android:textColorHint="@color/chimwemwe_text_secondary"
+                android:textSize="14sp" />
+
+            <ImageButton
+                android:id="@+id/btn_search_cancel"
+                android:layout_width="36dp"
+                android:layout_height="match_parent"
+                android:layout_alignParentEnd="true"
+                android:background="@android:color/transparent"
+                android:src="@drawable/ic_cross"
+                android:visibility="invisible" />
+
+        </RelativeLayout>
+
+        <!-- Hidden stubs required by the base register class -->
+        <RelativeLayout
+            android:id="@+id/filter_sort_layout"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone">
+            <TextView
+                android:id="@+id/filter_text_view"
+                android:layout_width="0dp"
+                android:layout_height="0dp" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/due_only_layout"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone">
+            <TextView
+                android:id="@+id/due_only_text_view"
+                android:layout_width="0dp"
+                android:layout_height="0dp" />
+        </RelativeLayout>
+
+    </LinearLayout>
+
+    <!-- Hidden sort/filter bar stub -->
+    <LinearLayout
+        android:id="@+id/register_sort_filter_bar_layout"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:orientation="horizontal"
+        android:visibility="gone" />
+
+    <!-- ══════════════════════════════════════════
+         GROUP LIST
+         ══════════════════════════════════════════ -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@color/chimwemwe_surface">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingTop="8dp"
+            android:paddingBottom="80dp"
+            android:scrollbars="none" />
+
+        <ProgressBar
+            android:id="@+id/client_list_progress"
+            style="@android:style/Widget.Holo.Light.ProgressBar.Large.Inverse"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:visibility="gone" />
+
+    </RelativeLayout>
+
+</LinearLayout>
