@@ -5,6 +5,8 @@ import static com.bluecodeltd.ecap.chw.util.IndexClientsUtils.getFormTag;
 import static com.bluecodeltd.ecap.chw.util.JsonFormUtils.tagSyncMetadata;
 import static org.smartregister.chw.fp.util.FpUtil.getClientProcessorForJava;
 
+import androidx.annotation.NonNull;
+
 import com.bluecodeltd.ecap.chw.application.ChwApplication;
 import com.bluecodeltd.ecap.chw.contract.ChimwemweRegisterContract;
 import com.bluecodeltd.ecap.chw.dao.HotspotGroupDao;
@@ -17,6 +19,7 @@ import org.smartregister.clientandeventmodel.Event;
 import org.smartregister.domain.db.EventClient;
 import org.smartregister.domain.tag.FormTag;
 import org.smartregister.family.util.AppExecutors;
+import org.smartregister.opd.pojo.RegisterParams;
 import org.smartregister.repository.AllSharedPreferences;
 import org.smartregister.sync.helper.ECSyncHelper;
 
@@ -29,9 +32,14 @@ import timber.log.Timber;
 public class ChimwemweRegisterInteractor implements ChimwemweRegisterContract.Interactor {
 
     @Override
-    public void saveGroup(JSONObject form, HotspotGroupModel group,
-                          ChimwemweRegisterContract.InteractorCallback callback) {
+    public void saveRegistration(@NonNull ChimwemweRegisterContract.RegistrationData registrationData,
+                                 @NonNull String jsonString,
+                                 @NonNull RegisterParams registerParams,
+                                 ChimwemweRegisterContract.InteractorCallback callback) {
+        final JSONObject form = registrationData.getForm();
+        final HotspotGroupModel group = registrationData.getGroup();
         final String groupName = group.getGroupName();
+
         new AppExecutors().diskIO().execute(() -> {
             try {
                 long groupId = HotspotGroupDao.insertGroup(group);
@@ -69,8 +77,7 @@ public class ChimwemweRegisterInteractor implements ChimwemweRegisterContract.In
                     prefs.saveLastUpdatedAtDate(currentSyncDate.getTime());
                 }
 
-                callback.onGroupSaved(groupName);
-
+                callback.onRegistrationSaved(registerParams.isEditMode(), groupName);
             } catch (Exception e) {
                 Timber.e(e, "ChimwemweRegisterInteractor: error saving group");
                 callback.onSaveError("Error saving enrollment. Please try again.");

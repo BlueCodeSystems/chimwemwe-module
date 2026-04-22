@@ -164,20 +164,9 @@ public class ChimwemweRegisterFragment extends BaseSafeRegisterFragment
             Utils.hideKeyboard(getActivity());
         }
 
-        String condition;
-        if (filterString == null || filterString.isEmpty()) {
-            condition = "1=1";
-        } else {
-            String safe = filterString.replace("'", "''");
-            condition = "(group_name LIKE '%" + safe + "%' OR hotspot_name LIKE '%" + safe + "%')";
-        }
-
-        // ec_chimwemwe_group has no FTS virtual table; never set this.filters or
-        // SmartRegisterQueryBuilder will try to JOIN ec_chimwemwe_group_search (non-existent).
-        // All search logic lives in mainCondition via LIKE instead.
-        this.filters       = "";
-        this.joinTable     = "";
-        this.mainCondition = condition;
+        this.filters = filterString;
+        this.joinTable = joinTableString;
+        this.mainCondition = mainConditionString;
 
         if (clientAdapter != null) {
             if (clientAdapter.getCurrentlimit() == 0) clientAdapter.setCurrentlimit(20);

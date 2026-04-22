@@ -256,7 +256,14 @@ public abstract class DefaultChwApplicationFlv implements ChwApplication.Flavor 
 
     @Override
     public String[] getFTSTables() {
-        return new String[]{CoreConstants.TABLE_NAME.EC_CLIENT_INDEX, Constants.EcapClientTable.EC_MOTHER_INDEX, CoreConstants.TABLE_NAME.EC_HOUSEHOLD, Constants.EcapClientTable.EC_HIV_TESTING_SERVICE,CoreConstants.TABLE_NAME.EC_MOTHER_PMTCT};
+        return new String[]{
+                CoreConstants.TABLE_NAME.EC_CLIENT_INDEX,
+                Constants.EcapClientTable.EC_MOTHER_INDEX,
+                CoreConstants.TABLE_NAME.EC_HOUSEHOLD,
+                Constants.EcapClientTable.EC_HIV_TESTING_SERVICE,
+                CoreConstants.TABLE_NAME.EC_MOTHER_PMTCT,
+                "ec_chimwemwe_group"
+        };
     }
 
     @Override
@@ -307,6 +314,12 @@ public abstract class DefaultChwApplicationFlv implements ChwApplication.Flavor 
                 "caregiver_name",
                 "delete_status"
         });
+        map.put("ec_chimwemwe_group", new String[]{
+                "group_name",
+                "hotspot_name",
+                "group_code",
+                "created_date"
+        });
         return map;
     }
 
@@ -356,6 +369,12 @@ public abstract class DefaultChwApplicationFlv implements ChwApplication.Flavor 
                 "household_id",
                 "caregiver_name",
                 "delete_status"
+        });
+        map.put("ec_chimwemwe_group", new String[]{
+                "group_name",
+                "hotspot_name",
+                "group_code",
+                "created_date"
         });
 
         return map;

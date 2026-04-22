@@ -1,8 +1,5 @@
 package com.bluecodeltd.ecap.chw.activity;
 
-import static org.smartregister.util.JsonFormUtils.STEP1;
-import static org.smartregister.family.util.JsonFormUtils.STEP2;
-
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -19,27 +16,27 @@ import com.bluecodeltd.ecap.chw.R;
 import com.bluecodeltd.ecap.chw.contract.ChimwemweRegisterContract;
 import com.bluecodeltd.ecap.chw.fragment.ChimwemweRegisterFragment;
 import com.bluecodeltd.ecap.chw.listener.ChwBottomNavigationListener;
-import com.bluecodeltd.ecap.chw.model.HotspotGroupModel;
 import com.bluecodeltd.ecap.chw.presenter.ChimwemweGroupPresenter;
 import com.bluecodeltd.ecap.chw.util.Constants;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vijay.jsonwizard.constants.JsonFormConstants;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
+import org.smartregister.AllConstants;
 import org.smartregister.chw.core.custom_views.NavigationMenu;
 import org.smartregister.chw.core.utils.CoreJsonFormUtils;
-import org.smartregister.domain.FetchStatus;
+import org.smartregister.client.utils.domain.Form;
 import org.smartregister.family.util.JsonFormUtils;
 import org.smartregister.helper.BottomNavigationHelper;
+import org.smartregister.opd.pojo.RegisterParams;
 import org.smartregister.opd.utils.OpdConstants;
+import org.smartregister.opd.utils.OpdJsonFormUtils;
+import org.smartregister.opd.utils.OpdUtils;
 import org.smartregister.view.activity.BaseRegisterActivity;
 import org.smartregister.view.fragment.BaseRegisterFragment;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 import timber.log.Timber;
 
@@ -104,7 +101,9 @@ public class ChimwemweRegisterActivity extends BaseRegisterActivity
     }
 
     @Override
-    public void startFormActivity(String formName, String entityId, Map<String, String> map) {}
+    public void startFormActivity(String formName, String entityId, Map<String, String> map) {
+        // Overridden
+    }
 
     @Override
     public void startFormActivity(JSONObject jsonObject) {
@@ -114,7 +113,7 @@ public class ChimwemweRegisterActivity extends BaseRegisterActivity
 
             android.content.Intent intent = new android.content.Intent(
                     this, org.smartregister.family.util.Utils.metadata().familyFormActivity);
-            com.vijay.jsonwizard.domain.Form form = new com.vijay.jsonwizard.domain.Form();
+            Form form = new Form();
             form.setWizard(true);
             form.setHideSaveLabel(true);
             form.setNextLabel(getString(R.string.next));
@@ -130,7 +129,17 @@ public class ChimwemweRegisterActivity extends BaseRegisterActivity
     }
 
     @Override
-    public void startFormActivity(String formName, String entityId, String metaData) {}
+    public void startFormActivity(String formName, String entityId, String metaData) {
+        try {
+            String locationId = com.bluecodeltd.ecap.chw.util.Utils.context()
+                    .allSharedPreferences()
+                    .getPreference(AllConstants.CURRENT_LOCATION_ID);
+            groupPresenter().startForm(formName, entityId, metaData, locationId);
+        } catch (Exception e) {
+            Timber.e(e);
+            displayToast(R.string.error_unable_to_start_form);
+        }
+    }
 
     @Override
     protected void onActivityResultExtended(int requestCode, int resultCode, android.content.Intent data) {
@@ -141,29 +150,31 @@ public class ChimwemweRegisterActivity extends BaseRegisterActivity
         if (jsonString == null) return;
 
         try {
-            JSONObject form = new JSONObject(jsonString);
-            HotspotGroupModel group = buildGroupModel(form);
-            if (group == null) {
-                Toast.makeText(this, "Group name and hotspot name are required.", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            groupPresenter().saveForm(form, group);
+            JSONObject jsonFormObject = new JSONObject(jsonString);
+            if (jsonFormObject.optString(JsonFormConstants.ENCOUNTER_TYPE, "").isEmpty()) return;
+
+            RegisterParams registerParams = new RegisterParams();
+            registerParams.setEditMode(false);
+            registerParams.setFormTag(OpdJsonFormUtils.formTag(OpdUtils.context().allSharedPreferences()));
+            showProgressDialog(R.string.saving_dialog_title);
+            groupPresenter().saveForm(jsonString, registerParams);
         } catch (Exception e) {
             Timber.e(e, "Error processing chimwemwe enrollment form");
             Toast.makeText(this, "Error saving enrollment. Please try again.", Toast.LENGTH_SHORT).show();
         }
     }
 
-    // ── ChimwemweRegisterContract.View ───────────────────────
-
     @Override
     public void toggleDialogVisibility(boolean showDialog) {
-        // Group saves are fast local operations; no blocking progress dialog needed
+        if (showDialog) {
+            showProgressDialog(R.string.saving_index);
+        } else {
+            hideProgressDialog();
+        }
     }
 
     @Override
     public void onGroupSaveComplete(String groupName) {
-        refreshList(FetchStatus.fetched);
         Toast.makeText(this,
                 "Group \"" + groupName + "\" enrolled. Add participants inside the group.",
                 Toast.LENGTH_LONG).show();
@@ -174,79 +185,15 @@ public class ChimwemweRegisterActivity extends BaseRegisterActivity
         Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show();
     }
 
-    // ── Form parsing ─────────────────────────────────────────
-
-    private HotspotGroupModel buildGroupModel(JSONObject form) {
-        JSONObject step1 = form.optJSONObject(STEP1);
-        JSONObject step2 = form.optJSONObject(STEP2);
-        JSONObject step3 = form.optJSONObject("step3");
-
-        String hotspotName = fieldValue(step1, "hotspot_name");
-        String groupName   = fieldValue(step1, "group_name");
-        if (hotspotName.isEmpty() || groupName.isEmpty()) return null;
-
-        HotspotGroupModel group = new HotspotGroupModel();
-
-        group.setGroupCode(generateGroupCode());
-        group.setHotspotName(hotspotName);
-        group.setGroupName(groupName);
-        group.setProvince(fieldValue(step1, "province"));
-        group.setDistrict(fieldValue(step1, "district"));
-        group.setLocationOfSession(fieldValue(step1, "location_of_session"));
-        group.setLocationGps(fieldValue(step1, "location_gps"));
-        group.setNearestHealthFacility(fieldValue(step1, "nearest_health_facility"));
-        group.setCreatedDate(LocalDate.now().toString());
-
-        group.setFacilitator1FirstName(fieldValue(step2, "facilitator_1_first_name"));
-        group.setFacilitator1Surname(fieldValue(step2,   "facilitator_1_surname"));
-        group.setFacilitator2FirstName(fieldValue(step2, "facilitator_2_first_name"));
-        group.setFacilitator2Surname(fieldValue(step2,   "facilitator_2_surname"));
-
-        group.setSession1Date(fieldValue(step3,  "session_1_date"));
-        group.setSession2Date(fieldValue(step3,  "session_2_date"));
-        group.setSession3Date(fieldValue(step3,  "session_3_date"));
-        group.setSession4Date(fieldValue(step3,  "session_4_date"));
-        group.setSession5Date(fieldValue(step3,  "session_5_date"));
-        group.setSession6Date(fieldValue(step3,  "session_6_date"));
-        group.setSession7Date(fieldValue(step3,  "session_7_date"));
-        group.setSession8Date(fieldValue(step3,  "session_8_date"));
-        group.setSession9Date(fieldValue(step3,  "session_9_date"));
-        group.setSession10Date(fieldValue(step3, "session_10_date"));
-        group.setSession11Date(fieldValue(step3, "session_11_date"));
-        group.setSession12Date(fieldValue(step3, "session_12_date"));
-        group.setSession13Date(fieldValue(step3, "session_13_date"));
-        group.setSession14Date(fieldValue(step3, "session_14_date"));
-
-        return group;
-    }
-
-    private static String generateGroupCode() {
-        return String.format("CHM%07d", new Random().nextInt(10_000_000));
-    }
-
-    private String fieldValue(JSONObject step, String key) {
-        if (step == null) return "";
-        try {
-            JSONArray stepFields = step.optJSONArray("fields");
-            if (stepFields == null) return "";
-            for (int i = 0; i < stepFields.length(); i++) {
-                JSONObject field = stepFields.getJSONObject(i);
-                if (key.equals(field.optString("key"))) {
-                    String v = field.optString("value", "").trim();
-                    return v.equals("null") ? "" : v;
-                }
-            }
-        } catch (Exception ignored) {}
-        return "";
-    }
-
     @Override
     public List<String> getViewIdentifiers() {
         return null;
     }
 
     @Override
-    public void startRegistration() {}
+    public void startRegistration() {
+        startFormActivity("chimwemwe_enrollment", null, "");
+    }
 
     @Override
     protected void registerBottomNavigation() {

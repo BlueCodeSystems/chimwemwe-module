@@ -107,6 +107,7 @@ import java.util.Map;
 import timber.log.Timber;
 
 public class ChwApplication extends CoreChwApplication implements SyncStatusBroadcastReceiver.SyncStatusListener, P2pProcessingStatusBroadcastReceiver.StatusUpdate {
+    private static final String CHIMWEMWE_GROUP_TABLE = "ec_chimwemwe_group";
 
     private static Flavor flavor = new ChwApplicationFlv();
     private AppExecutors appExecutors;
@@ -202,6 +203,30 @@ public class ChwApplication extends CoreChwApplication implements SyncStatusBroa
         return commonFtsObject;
     }
 
+    public static void registerChimwemweGroupRepository() {
+        if (Context.bindtypes == null) {
+            return;
+        }
+
+        for (CommonRepositoryInformationHolder holder : Context.bindtypes) {
+            if (CHIMWEMWE_GROUP_TABLE.equals(holder.getBindtypename())) {
+                return;
+            }
+        }
+
+        ColumnDetails[] groupCols = new ColumnDetails[]{
+                ColumnDetails.builder().name("hotspot_name").dataType("VARCHAR").build(),
+                ColumnDetails.builder().name("group_name").dataType("VARCHAR").build(),
+                ColumnDetails.builder().name("group_code").dataType("VARCHAR").build(),
+                ColumnDetails.builder().name("created_date").dataType("VARCHAR").build(),
+                ColumnDetails.builder().name("p_count").dataType("VARCHAR").build(),
+                ColumnDetails.builder().name("s_count").dataType("VARCHAR").build(),
+                ColumnDetails.builder().name("relationalid").dataType("VARCHAR").build(),
+                ColumnDetails.builder().name("sync_status").dataType("VARCHAR").build()
+        };
+        Context.bindtypes.add(new CommonRepositoryInformationHolder(CHIMWEMWE_GROUP_TABLE, groupCols));
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -233,18 +258,7 @@ public class ChwApplication extends CoreChwApplication implements SyncStatusBroa
         // Register ec_chimwemwe_group with CommonRepository (table is created by HotspotGroupDao,
         // not via ec_client_fields.json, so we add it to bindtypes programmatically here — after
         // assignbindtypes() has already run during ChwRepository construction inside initializeLibraries()).
-        if (Context.bindtypes != null) {
-            ColumnDetails[] groupCols = new ColumnDetails[]{
-                    ColumnDetails.builder().name("hotspot_name").dataType("VARCHAR").build(),
-                    ColumnDetails.builder().name("group_name").dataType("VARCHAR").build(),
-                    ColumnDetails.builder().name("created_date").dataType("VARCHAR").build(),
-                    ColumnDetails.builder().name("p_count").dataType("VARCHAR").build(),
-                    ColumnDetails.builder().name("s_count").dataType("VARCHAR").build(),
-                    ColumnDetails.builder().name("relationalid").dataType("VARCHAR").build(),
-                    ColumnDetails.builder().name("sync_status").dataType("VARCHAR").build()
-            };
-            Context.bindtypes.add(new CommonRepositoryInformationHolder("ec_chimwemwe_group", groupCols));
-        }
+        registerChimwemweGroupRepository();
 
         // init json helper
         this.jsonSpecHelper = new JsonSpecHelper(this);

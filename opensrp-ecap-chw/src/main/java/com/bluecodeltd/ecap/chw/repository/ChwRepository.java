@@ -26,6 +26,7 @@ public class ChwRepository extends CoreChwRepository {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
+        ChwApplication.registerChimwemweGroupRepository();
         super.onCreate(db);
         HotspotGroupDao.createTable(db);
         ParticipantDao.createTable(db);
@@ -38,6 +39,7 @@ public class ChwRepository extends CoreChwRepository {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         Timber.w(CoreChwRepository.class.getName(), "Upgrading database from version "
                 + oldVersion + " to " + newVersion + ", which will destroy all old data");
+        ChwApplication.registerChimwemweGroupRepository();
         ChwRepositoryFlv.onUpgrade(context, db, oldVersion, newVersion);
     }
 }

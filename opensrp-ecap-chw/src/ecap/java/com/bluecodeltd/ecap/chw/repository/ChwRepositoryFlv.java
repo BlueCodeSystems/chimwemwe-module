@@ -133,6 +133,9 @@ public class ChwRepositoryFlv {
                 case 33:
                     upgradeToVersion33(db);
                     break;
+                case 34:
+                    upgradeToVersion34(db);
+                    break;
                 default:
                     break;
             }
@@ -1235,6 +1238,18 @@ public class ChwRepositoryFlv {
             com.bluecodeltd.ecap.chw.dao.ChimwemweReferralDao.createTable(db);
         } catch (Exception e) {
             Timber.e(e, "upgradeToVersion33");
+        }
+    }
+
+    private static void upgradeToVersion34(SQLiteDatabase db) {
+        try {
+            DatabaseMigrationUtils.createAddedECTables(
+                    db,
+                    new HashSet<>(Arrays.asList("ec_chimwemwe_group")),
+                    ChwApplication.createCommonFtsObject()
+            );
+        } catch (Exception e) {
+            Timber.e(e, "upgradeToVersion34");
         }
     }
 
