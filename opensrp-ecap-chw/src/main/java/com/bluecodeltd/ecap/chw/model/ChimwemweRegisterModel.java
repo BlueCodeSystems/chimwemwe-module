@@ -14,8 +14,6 @@ import org.smartregister.domain.tag.FormTag;
 import org.smartregister.opd.utils.OpdUtils;
 
 import java.time.LocalDate;
-import java.util.Random;
-
 import timber.log.Timber;
 
 public class ChimwemweRegisterModel implements ChimwemweRegisterContract.Model {
@@ -66,10 +64,6 @@ public class ChimwemweRegisterModel implements ChimwemweRegisterContract.Model {
         HotspotGroupModel group = new HotspotGroupModel();
         String groupIdStr = fieldValue(step1, "group_id");
         group.setGroupId(groupIdStr);
-        if (!groupIdStr.isEmpty()) {
-            try { group.setId(Long.parseLong(groupIdStr)); } catch (NumberFormatException ignored) {}
-        }
-        group.setGroupCode(groupIdStr.isEmpty() ? generateGroupCode() : groupIdStr);
         group.setHotspotName(hotspotName);
         group.setGroupName(groupName);
         group.setProvince(fieldValue(step1, "province"));
@@ -84,11 +78,6 @@ public class ChimwemweRegisterModel implements ChimwemweRegisterContract.Model {
 
         return group;
     }
-
-    private static String generateGroupCode() {
-        return String.format("CHM%07d", new Random().nextInt(10_000_000));
-    }
-
     private String fieldValue(JSONObject step, String key) {
         if (step == null) return "";
         try {

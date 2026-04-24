@@ -97,4 +97,9 @@
     <dimen name="register_icon_inner">18dp</dimen>
     <dimen name="register_row_vertical_padding">14dp</dimen>
     <dimen name="register_row_horizontal_padding">16dp</dimen>
+
+    <!-- Navigation drawer — wider to prevent long labels truncating -->
+    <dimen name="nav_drawer_width">320dp</dimen>
+    <dimen name="nav_item_text_size">14sp</dimen>
+    <dimen name="nav_item_count_size">12sp</dimen>
 </resources>

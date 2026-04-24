@@ -3,7 +3,8 @@ package com.bluecodeltd.ecap.chw.model;
 public class MonthlyReviewModel {
 
     private long   id;
-    private long   groupId;
+    // Business identifier from ec_chimwemwe_group.group_id
+    private String groupId;
     private long   participantId;
     private String reviewQuarter;
     private String reviewDate;
@@ -15,8 +16,8 @@ public class MonthlyReviewModel {
     public long getId()                   { return id; }
     public void setId(long id)            { this.id = id; }
 
-    public long getGroupId()              { return groupId; }
-    public void setGroupId(long groupId)  { this.groupId = groupId; }
+    public String getGroupId()              { return groupId; }
+    public void setGroupId(String groupId)  { this.groupId = groupId; }
 
     public long getParticipantId()                   { return participantId; }
     public void setParticipantId(long participantId) { this.participantId = participantId; }

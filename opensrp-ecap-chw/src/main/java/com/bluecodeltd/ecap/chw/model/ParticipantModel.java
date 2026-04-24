@@ -3,7 +3,8 @@ package com.bluecodeltd.ecap.chw.model;
 public class ParticipantModel {
     private long id;
     private String participantId;
-    private long groupId;
+    // Business identifier from ec_chimwemwe_group.group_id
+    private String groupId;
     private int sn;
     private String caregiverFirstName;
     private String caregiverSurname;
@@ -33,8 +34,8 @@ public class ParticipantModel {
     public String getParticipantId()               { return participantId; }
     public void   setParticipantId(String v)        { this.participantId = v; }
 
-    public long getGroupId() { return groupId; }
-    public void setGroupId(long groupId) { this.groupId = groupId; }
+    public String getGroupId() { return groupId; }
+    public void setGroupId(String groupId) { this.groupId = groupId; }
 
     public int getSn() { return sn; }
     public void setSn(int sn) { this.sn = sn; }

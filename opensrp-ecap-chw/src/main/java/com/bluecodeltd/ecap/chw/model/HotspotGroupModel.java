@@ -4,7 +4,6 @@ public class HotspotGroupModel {
 
     private long   id;
     private String groupId;     // form/business identifier
-    private String groupCode;   // system-generated UUID
     private String hotspotName;
     private String groupName;
     private String createdDate;
@@ -47,9 +46,6 @@ public class HotspotGroupModel {
 
     public String getGroupId()                 { return groupId; }
     public void   setGroupId(String groupId)   { this.groupId = groupId; }
-
-    public String getGroupCode()                   { return groupCode; }
-    public void   setGroupCode(String groupCode)   { this.groupCode = groupCode; }
 
     public String getHotspotName()                     { return hotspotName; }
     public void   setHotspotName(String hotspotName)   { this.hotspotName = hotspotName; }

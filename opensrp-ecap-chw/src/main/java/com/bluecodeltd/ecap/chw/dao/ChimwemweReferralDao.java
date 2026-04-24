@@ -16,8 +16,11 @@ public class ChimwemweReferralDao extends AbstractDao {
     private static final String CREATE_TABLE_SQL =
             "CREATE TABLE IF NOT EXISTS " + TABLE + " (" +
             "  id                    INTEGER PRIMARY KEY AUTOINCREMENT," +
+            "  base_entity_id        TEXT," +
+            "  last_interacted_with  INTEGER," +
+            "  delete_status         TEXT," +
             "  participant_id        INTEGER NOT NULL," +
-            "  group_id              INTEGER NOT NULL," +
+            "  group_id              TEXT NOT NULL," +
             "  who_referred          TEXT," +
             "  service_referred_for  TEXT," +
             "  referral_date         TEXT," +
@@ -31,12 +34,23 @@ public class ChimwemweReferralDao extends AbstractDao {
         db.execSQL(CREATE_TABLE_SQL);
     }
 
+    /** OpenSRP standard delete_status column added in DB version 43. */
+    public static void migrateToV43(SQLiteDatabase db) {
+        try { db.execSQL("ALTER TABLE " + TABLE + " ADD COLUMN base_entity_id TEXT"); } catch (Exception ignored) {}
+        try { db.execSQL("ALTER TABLE " + TABLE + " ADD COLUMN last_interacted_with INTEGER"); } catch (Exception ignored) {}
+        try { db.execSQL("ALTER TABLE " + TABLE + " ADD COLUMN delete_status TEXT"); } catch (Exception ignored) {}
+        try {
+            db.execSQL("UPDATE " + TABLE + " SET base_entity_id='chimwemwe-referral-' || id " +
+                    "WHERE (base_entity_id IS NULL OR TRIM(base_entity_id)='')");
+        } catch (Exception ignored) {}
+    }
+
     public static long insertReferral(ChimwemweReferralModel m) {
         String sql = "INSERT INTO " + TABLE +
                 " (participant_id, group_id, who_referred, service_referred_for, referral_date, receiving_org, job_title, service_date, created_at)" +
                 " VALUES (" +
                 m.getParticipantId() + "," +
-                m.getGroupId() + "," +
+                q(m.getGroupId()) + "," +
                 q(m.getWhoReferred()) + "," +
                 q(m.getServiceReferredFor()) + "," +
                 q(m.getReferralDate()) + "," +
@@ -48,18 +62,25 @@ public class ChimwemweReferralDao extends AbstractDao {
         List<Long> ids = AbstractDao.readData(
                 "SELECT id FROM " + TABLE + " ORDER BY id DESC LIMIT 1",
                 cursor -> cursor.getLong(0));
-        return (ids != null && !ids.isEmpty()) ? ids.get(0) : -1L;
+        long id = (ids != null && !ids.isEmpty()) ? ids.get(0) : -1L;
+        if (id > 0) {
+            AbstractDao.updateDB("UPDATE " + TABLE + " SET base_entity_id=" + q("chimwemwe-referral-" + id) +
+                    " WHERE id=" + id);
+        }
+        return id;
     }
 
     public static List<ChimwemweReferralModel> getParticipantReferrals(long participantId) {
         String sql = "SELECT id, participant_id, group_id, who_referred, service_referred_for," +
                 " referral_date, receiving_org, job_title, service_date, created_at FROM " + TABLE +
-                " WHERE participant_id=" + participantId + " ORDER BY id DESC";
+                " WHERE participant_id=" + participantId +
+                " AND (delete_status IS NULL OR delete_status <> '1')" +
+                " ORDER BY id DESC";
         return AbstractDao.readData(sql, cursor -> {
             ChimwemweReferralModel m = new ChimwemweReferralModel();
             m.setId(cursor.getLong(0));
             m.setParticipantId(cursor.getLong(1));
-            m.setGroupId(cursor.getLong(2));
+            m.setGroupId(cursor.getString(2));
             m.setWhoReferred(cursor.getString(3));
             m.setServiceReferredFor(cursor.getString(4));
             m.setReferralDate(cursor.getString(5));
@@ -81,6 +102,11 @@ public class ChimwemweReferralDao extends AbstractDao {
                 "service_date="         + q(m.getServiceDate()) +
                 " WHERE id=" + m.getId();
         AbstractDao.updateDB(sql);
+    }
+
+    public static void deleteReferral(long id) {
+        if (id <= 0) return;
+        AbstractDao.updateDB("UPDATE " + TABLE + " SET delete_status='1' WHERE id=" + id);
     }
 
     private static String q(String s) {

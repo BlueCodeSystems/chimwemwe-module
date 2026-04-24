@@ -80,6 +80,8 @@ public class DashboardActivity extends AppCompatActivity implements GenerateCSVC
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         toolbar.getOverflowIcon().setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP);
 
+        binding.btnSync.setOnClickListener(v -> loadData());
+
         NavigationMenu.getInstance(this, null, toolbar);
 
         presenter = new GenerateCSVPresenter(this);
@@ -117,6 +119,9 @@ public class DashboardActivity extends AppCompatActivity implements GenerateCSVC
         // Observe Chimwemwe dashboard state
         dashboardViewModel = new ViewModelProvider(this).get(DashboardViewModel.class);
         dashboardViewModel.getState().observe(this, state -> {
+            if (binding.dashProgressbar != null) {
+                binding.dashProgressbar.setVisibility(android.view.View.GONE);
+            }
             if (state == null) return;
             try {
                 binding.statGroups.setText(String.valueOf(state.getGroupsCount()));
@@ -129,10 +134,6 @@ public class DashboardActivity extends AppCompatActivity implements GenerateCSVC
                 }
             } catch (Exception e) {
                 Timber.e(e, "DashboardActivity: state update failed");
-            } finally {
-                if (binding.dashProgressbar != null) {
-                    binding.dashProgressbar.setVisibility(android.view.View.GONE);
-                }
             }
         });
 
@@ -180,9 +181,7 @@ public class DashboardActivity extends AppCompatActivity implements GenerateCSVC
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.refresh) {
-            loadData();
-        } else if (id == R.id.generate_pdf) {
+        if (id == R.id.generate_pdf) {
             csvGenerator.generateCSVWithProgress(this, presenter, () ->
                     showCustomDialog(this,
                             getString(R.string.csv_generated_location, getString(R.string.app_name))));

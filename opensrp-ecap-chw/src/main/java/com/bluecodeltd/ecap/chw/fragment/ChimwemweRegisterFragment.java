@@ -163,21 +163,21 @@ public class ChimwemweRegisterFragment extends BaseSafeRegisterFragment
     }
 
     private String buildSqlFilter(String filterString) {
+        String base = "WHERE (ec_chimwemwe_group.delete_status IS NULL OR ec_chimwemwe_group.delete_status <> '1')";
         if (filterString == null || filterString.trim().isEmpty()) {
-            return "";
+            return base;
         }
 
         String escaped = filterString.trim()
                 .replace("'", "''")
                 .replace("%", "\\%")
                 .replace("_", "\\_");
-        // Qualify group_id and group_code with the table name to avoid ambiguity
-        // with the JOIN subquery aliases that also expose a group_id column.
-        return "WHERE 1=1 AND ("
+        // Qualify group_id with the table name to avoid ambiguity with the JOIN
+        // subquery aliases that also expose a group_id column.
+        return base + " AND ("
                 + "ec_chimwemwe_group.group_name LIKE '%" + escaped + "%' ESCAPE '\\' "
                 + "OR ec_chimwemwe_group.hotspot_name LIKE '%" + escaped + "%' ESCAPE '\\' "
                 + "OR ec_chimwemwe_group.group_id LIKE '%" + escaped + "%' ESCAPE '\\' "
-                + "OR ec_chimwemwe_group.group_code LIKE '%" + escaped + "%' ESCAPE '\\'"
                 + ")";
     }
 
@@ -235,9 +235,9 @@ public class ChimwemweRegisterFragment extends BaseSafeRegisterFragment
             try {
                 String joinClause =
                         " LEFT JOIN (SELECT group_id, COUNT(*) AS p_count FROM ec_chimwemwe_participant GROUP BY group_id) AS participant_counts" +
-                        " ON participant_counts.group_id = ec_chimwemwe_group.id" +
-                        " LEFT JOIN (SELECT group_id, COUNT(DISTINCT CASE WHEN caregiver_attendance!='' OR child_attendance!='' THEN session_number END) AS s_count FROM ec_chimwemwe_attendance GROUP BY group_id) AS attendance_counts" +
-                        " ON attendance_counts.group_id = ec_chimwemwe_group.id";
+                        " ON participant_counts.group_id = ec_chimwemwe_group.group_id" +
+                        " LEFT JOIN (SELECT group_id, COUNT(DISTINCT session_number) AS s_count FROM ec_chimwemwe_session_attendance GROUP BY group_id) AS attendance_counts" +
+                        " ON attendance_counts.group_id = ec_chimwemwe_group.group_id";
                 String filterClause = (filters == null || filters.isEmpty()) ? "" : " " + filters;
                 String query = "SELECT COUNT(*) FROM " + TABLE + joinClause + filterClause;
                 Cursor cursor = context().commonrepository(TABLE)
@@ -320,7 +320,7 @@ public class ChimwemweRegisterFragment extends BaseSafeRegisterFragment
 
     @Override
     protected String getMainCondition() {
-        return "1=1";
+        return "(ec_chimwemwe_group.delete_status IS NULL OR ec_chimwemwe_group.delete_status <> '1')";
     }
 
     @Override

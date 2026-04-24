@@ -1,6 +1,6 @@
 <resources>
-    <string name="app_name">Ecap II</string>
-    <string name="login_title">Case Management System</string>
+    <string name="app_name">Chimwemwe Parenting Program</string>
+    <string name="login_title">Chimwemwe Parenting Program</string>
     <string name="nav_logo">ECAP II</string>
     <string name="add_family">Add Household</string>
     <string name="menu_anc">ANC</string>

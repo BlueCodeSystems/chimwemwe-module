@@ -238,7 +238,7 @@ public class ChimwemweRegisterActivity extends BaseRegisterActivity
 
     @Override
     public void startRegistration() {
-        startFormActivity("chimwemwe_enrollment", null, "");
+        startFormActivity("chimwemwe_group_register", null, "");
     }
 
     @Override

@@ -1,43 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="8dp"
-    app:cardCornerRadius="12dp"
-    app:cardElevation="1dp"
-    app:cardBackgroundColor="#FFFFFF">
+    android:orientation="vertical"
+    android:background="@android:color/transparent"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground">
 
+    <!-- Main content row -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingStart="14dp"
-        android:paddingEnd="10dp"
-        android:paddingTop="12dp"
-        android:paddingBottom="12dp">
+        android:paddingStart="16dp"
+        android:paddingEnd="12dp"
+        android:paddingTop="14dp"
+        android:paddingBottom="10dp">
 
-        <!-- SN badge -->
-        <TextView
-            android:id="@+id/tv_sn"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
-            android:gravity="center"
-            android:text="1"
-            android:textSize="12sp"
-            android:textStyle="bold"
-            android:textColor="@color/chimwemwe_primary"
-            android:background="@drawable/bg_register_icon"
-            android:backgroundTint="#E0F7FA" />
+        <!-- Avatar circle with serial number -->
+        <FrameLayout
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:background="@drawable/bg_avatar_circle">
 
-        <!-- Names -->
+            <TextView
+                android:id="@+id/tv_sn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="01"
+                android:textColor="#FFFFFF"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+        </FrameLayout>
+
+        <!-- Names column -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_marginStart="10dp"
+            android:layout_marginStart="12dp"
             android:orientation="vertical">
 
             <TextView
@@ -45,54 +52,101 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Caregiver Name"
-                android:textSize="13sp"
+                android:textSize="14sp"
                 android:textStyle="bold"
-                android:textColor="@color/chimwemwe_text_primary" />
+                android:textColor="@color/chimwemwe_text_primary"
+                android:maxLines="1"
+                android:ellipsize="end" />
 
             <TextView
                 android:id="@+id/tv_child_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="1dp"
+                android:layout_marginTop="2dp"
                 android:text="Child Name"
                 android:textSize="12sp"
-                android:textColor="@color/chimwemwe_text_secondary" />
+                android:textColor="@color/chimwemwe_text_secondary"
+                android:maxLines="1"
+                android:ellipsize="end" />
 
         </LinearLayout>
 
-        <!-- Sessions completed badge -->
+        <!-- Session progress pill -->
         <TextView
             android:id="@+id/tv_sessions_done"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
+            android:layout_marginEnd="6dp"
             android:text="0/14"
-            android:textSize="12sp"
+            android:textSize="11sp"
             android:textStyle="bold"
-            android:textColor="@color/chimwemwe_primary" />
+            android:textColor="@color/chimwemwe_primary"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            android:background="@drawable/bg_sessions_pill" />
 
-        <!-- Edit -->
-        <ImageView
-            android:id="@+id/btn_edit_participant"
+        <!-- Edit action -->
+        <FrameLayout
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:padding="4dp"
-            android:src="@drawable/edit_icon"
+            android:layout_marginStart="2dp"
+            android:background="@drawable/bg_register_icon"
+            android:backgroundTint="#F1F5F9"
             android:clickable="true"
             android:focusable="true"
-            app:tint="@color/chimwemwe_text_secondary" />
+            android:id="@+id/btn_edit_participant">
 
-        <!-- Delete -->
-        <ImageView
-            android:id="@+id/btn_delete_participant"
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_gravity="center"
+                android:src="@drawable/edit_icon"
+                app:tint="@color/chimwemwe_text_secondary" />
+
+        </FrameLayout>
+
+        <!-- Delete action -->
+        <FrameLayout
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:padding="4dp"
-            android:src="@drawable/baseline_delete_24"
+            android:layout_marginStart="4dp"
+            android:background="@drawable/bg_register_icon"
+            android:backgroundTint="#FEE2E2"
             android:clickable="true"
             android:focusable="true"
-            app:tint="#EF4444" />
+            android:id="@+id/btn_delete_participant">
+
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_gravity="center"
+                android:src="@drawable/baseline_delete_24"
+                app:tint="#EF4444" />
+
+        </FrameLayout>
 
     </LinearLayout>
 
-</androidx.cardview.widget.CardView>
+    <!-- Session progress bar -->
+    <ProgressBar
+        android:id="@+id/pb_sessions"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="4dp"
+        android:layout_marginStart="72dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="12dp"
+        android:max="14"
+        android:progress="0"
+        android:progressDrawable="@drawable/progress_sessions" />
+
+    <!-- Row divider -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginStart="72dp"
+        android:background="@color/chimwemwe_surface" />
+
+</LinearLayout>

@@ -20,12 +20,13 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:background="#FFFFFF"
-        android:fitsSystemWindows="false">
+        android:fitsSystemWindows="true">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:fitsSystemWindows="true">
 
             <!-- ═══════════════════════════════
                  HEADER  —  chimwemwe gradient
@@ -121,6 +122,7 @@
                         android:layout_height="wrap_content"
                         android:paddingStart="8dp"
                         android:paddingEnd="8dp"
+                        android:paddingTop="32dp"
                         android:clipToPadding="false" />
 
                     <!-- Divider -->
@@ -274,6 +276,7 @@
                 android:id="@+id/rlSync"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
+                android:alpha="1"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
                 android:paddingStart="12dp"
@@ -295,9 +298,11 @@
                         android:layout_width="20dp"
                         android:layout_height="20dp"
                         android:layout_gravity="center"
+                        android:alpha="1"
                         android:clickable="true"
                         android:focusable="true"
-                        app:srcCompat="@mipmap/sidemenu_sync" />
+                        app:srcCompat="@mipmap/sidemenu_sync"
+                        app:tint="@color/chimwemwe_primary" />
 
                     <ProgressBar
                         android:id="@+id/pbSync"
@@ -319,6 +324,7 @@
                         android:id="@+id/tvSync"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:alpha="1"
                         android:text="@string/nav_sync"
                         android:textSize="14sp"
                         android:textStyle="bold"
@@ -335,6 +341,7 @@
                             android:id="@+id/tvSyncTimeTitle"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:alpha="1"
                             android:text="@string/nav_last"
                             android:textSize="11sp"
                             android:textColor="@color/chimwemwe_text_secondary" />
@@ -343,6 +350,7 @@
                             android:id="@+id/tvSyncTime"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:alpha="1"
                             android:text="@string/nav_last_sync_time"
                             android:textSize="11sp"
                             android:textColor="@color/chimwemwe_text_secondary" />

@@ -60,9 +60,11 @@ public class ChimwemweFormUtils {
                 return null;
             }
 
-            String resolvedEntityId = entityId;
+            // Do not override an existing entity_id (baseEntityId). For edits, the form should
+            // already carry the original entity_id; changing it creates a new Client record.
+            String resolvedEntityId = form.optString("entity_id", "").trim();
             if (resolvedEntityId == null || resolvedEntityId.trim().isEmpty()) {
-                resolvedEntityId = form.optString("entity_id", "");
+                resolvedEntityId = entityId;
             }
             if (resolvedEntityId == null || resolvedEntityId.trim().isEmpty()) {
                 resolvedEntityId = org.smartregister.util.JsonFormUtils.generateRandomUUIDString();
@@ -133,8 +135,76 @@ public class ChimwemweFormUtils {
         }
     }
 
-    public static String attendanceEntityId(long groupId, int sessionNumber) {
-        return "chimwemwe-attendance-" + groupId + "-" + sessionNumber;
+    public static void ensureFieldValue(JSONObject form, String key, String value) {
+        if (form == null || key == null || key.trim().isEmpty()) {
+            return;
+        }
+
+        try {
+            String normalizedValue = value == null ? "" : value;
+
+            if (setFieldValueInSteps(form, key, normalizedValue)) {
+                return;
+            }
+
+            // If the key doesn't exist in any step, add it to step1 so that subsequent calls
+            // to JsonFormUtils.fields(form) (used by event/client creation) will include it.
+            JSONObject step1 = form.optJSONObject("step1");
+            if (step1 == null) {
+                return;
+            }
+
+            JSONArray stepFields = step1.optJSONArray("fields");
+            if (stepFields == null) {
+                stepFields = new JSONArray();
+                step1.put("fields", stepFields);
+            }
+
+            JSONObject field = new JSONObject();
+            field.put("key", key);
+            field.put("openmrs_entity_parent", "");
+            field.put("openmrs_entity", "person_attribute");
+            field.put("openmrs_entity_id", key);
+            field.put("type", "hidden");
+            field.put("value", normalizedValue);
+            stepFields.put(field);
+        } catch (Exception e) {
+            Timber.e(e, "ChimwemweFormUtils.ensureFieldValue failed for %s", key);
+        }
+    }
+
+    private static boolean setFieldValueInSteps(JSONObject form, String key, String value) {
+        try {
+            java.util.Iterator<String> it = form.keys();
+            while (it.hasNext()) {
+                String stepKey = it.next();
+                if (stepKey == null || !stepKey.startsWith("step")) continue;
+                JSONObject step = form.optJSONObject(stepKey);
+                if (step == null) continue;
+                JSONArray fields = step.optJSONArray("fields");
+                if (fields == null) continue;
+
+                for (int i = 0; i < fields.length(); i++) {
+                    JSONObject field = fields.optJSONObject(i);
+                    if (field != null && key.equals(field.optString("key"))) {
+                        field.put("value", value);
+                        return true;
+                    }
+                }
+            }
+        } catch (Exception ignored) {
+        }
+        return false;
+    }
+
+    public static String attendanceEntityId(String groupId, int sessionNumber) {
+        String gid = groupId != null ? groupId.trim() : "";
+        return "chimwemwe-attendance-" + gid + "-" + sessionNumber;
+    }
+
+    public static String attendanceEntityId(String groupId, int sessionNumber, long participantId) {
+        String gid = groupId != null ? groupId.trim() : "";
+        return "chimwemwe-attendance-" + gid + "-" + sessionNumber + "-" + participantId;
     }
 
     public static String reviewEntityId(long reviewId) {

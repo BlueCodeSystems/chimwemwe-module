@@ -10,7 +10,8 @@ public class AttendanceModel {
     public static final String ABSENT     = "";
 
     private long id;
-    private long groupId;
+    // Business identifier from ec_chimwemwe_group.group_id
+    private String groupId;
     private long participantId;
     private int  sessionNumber;   // 1–14
     private String sessionDate;   // DD/MM/YY
@@ -20,8 +21,8 @@ public class AttendanceModel {
     public long getId() { return id; }
     public void setId(long id) { this.id = id; }
 
-    public long getGroupId() { return groupId; }
-    public void setGroupId(long groupId) { this.groupId = groupId; }
+    public String getGroupId() { return groupId; }
+    public void setGroupId(String groupId) { this.groupId = groupId; }
 
     public long getParticipantId() { return participantId; }
     public void setParticipantId(long participantId) { this.participantId = participantId; }

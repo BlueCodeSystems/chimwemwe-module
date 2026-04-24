@@ -103,12 +103,12 @@ public class AboveFiveChildProfileActivity extends CoreAboveFiveChildProfileActi
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case org.smartregister.chw.core.R.id.action_remove_member:
-                IndividualProfileRemoveActivity.startIndividualProfileActivity(AboveFiveChildProfileActivity.this, presenter().getChildClient(),
-                        ((AboveFiveChildProfilePresenter) presenter()).getFamilyID()
-                        , ((AboveFiveChildProfilePresenter) presenter()).getFamilyHeadID(), ((AboveFiveChildProfilePresenter) presenter()).getPrimaryCareGiverID(), ChildRegisterActivity.class.getCanonicalName());
+//            case R.id.action_remove_member:
+//                IndividualProfileRemoveActivity.startIndividualProfileActivity(AboveFiveChildProfileActivity.this, presenter().getChildClient(),
+//                        ((AboveFiveChildProfilePresenter) presenter()).getFamilyID()
+//                        , ((AboveFiveChildProfilePresenter) presenter()).getFamilyHeadID(), ((AboveFiveChildProfilePresenter) presenter()).getPrimaryCareGiverID(), ChildRegisterActivity.class.getCanonicalName());
 
-                return true;
+//                return true;
             default:
                 break;
         }

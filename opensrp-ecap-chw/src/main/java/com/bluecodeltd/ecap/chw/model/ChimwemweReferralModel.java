@@ -3,7 +3,8 @@ package com.bluecodeltd.ecap.chw.model;
 public class ChimwemweReferralModel {
     private long   id;
     private long   participantId;
-    private long   groupId;
+    // Business identifier from ec_chimwemwe_group.group_id
+    private String groupId;
     private String whoReferred;
     private String serviceReferredFor;
     private String referralDate;
@@ -18,8 +19,8 @@ public class ChimwemweReferralModel {
     public long getParticipantId()                   { return participantId; }
     public void setParticipantId(long participantId) { this.participantId = participantId; }
 
-    public long getGroupId()               { return groupId; }
-    public void setGroupId(long groupId)   { this.groupId = groupId; }
+    public String getGroupId()               { return groupId; }
+    public void setGroupId(String groupId)   { this.groupId = groupId; }
 
     public String getWhoReferred()                  { return whoReferred; }
     public void   setWhoReferred(String v)           { this.whoReferred = v; }

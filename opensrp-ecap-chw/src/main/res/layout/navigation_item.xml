@@ -2,7 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="52dp"
+    android:layout_height="wrap_content"
+    android:minHeight="52dp"
     android:orientation="horizontal"
     android:gravity="center_vertical"
     android:paddingStart="12dp"
@@ -38,7 +39,7 @@
         android:textSize="14sp"
         android:textStyle="bold"
         android:textColor="@color/chimwemwe_text_primary"
-        android:maxLines="1"
+        android:maxLines="2"
         android:ellipsize="end" />
 
     <!-- Count badge -->

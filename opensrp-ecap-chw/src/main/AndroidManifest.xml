@@ -104,7 +104,7 @@
             android:name=".activity.HotspotGroupDetailActivity"
             android:exported="false"
             android:label="Group Details"
-            android:theme="@style/ChwTheme.NoActionBar" />
+            android:theme="@style/ChwTheme.Material" />
         <activity
             android:name=".activity.AddParticipantActivity"
             android:exported="false"

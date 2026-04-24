@@ -5,8 +5,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#F0F4F8">
+    android:background="@color/chimwemwe_surface">
 
+    <!-- ── Toolbar ── -->
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -17,100 +18,144 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:title="Record Attendance"
             app:titleTextColor="#FFFFFF"
             app:navigationIconTint="#FFFFFF"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <!-- Session date header -->
+    <!-- ── Session info card ── -->
+    <androidx.cardview.widget.CardView
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="4dp"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="2dp"
+        app:cardBackgroundColor="#FFFFFF">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="14dp"
+            android:paddingBottom="14dp">
+
+            <!-- Session label -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tv_session_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Session 1"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/chimwemwe_text_primary" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Record who attended this session"
+                    android:textSize="11sp"
+                    android:textColor="@color/chimwemwe_text_secondary" />
+
+            </LinearLayout>
+
+            <!-- Date picker -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="end">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Session Date"
+                    android:textSize="10sp"
+                    android:textColor="@color/chimwemwe_text_secondary"
+                    android:layout_marginBottom="4dp" />
+
+                <EditText
+                    android:id="@+id/et_session_date"
+                    android:layout_width="120dp"
+                    android:layout_height="38dp"
+                    android:hint="DD/MM/YYYY"
+                    android:inputType="text"
+                    android:textSize="13sp"
+                    android:textColor="@color/chimwemwe_text_primary"
+                    android:textColorHint="#A8B2BB"
+                    android:background="@drawable/bg_login_field"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
+                    android:gravity="center" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
+    <!-- ── Column headers ── -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="center_vertical"
         android:background="#FFFFFF"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:paddingTop="12dp"
-        android:paddingBottom="12dp"
-        android:elevation="2dp">
-
-        <TextView
-            android:id="@+id/tv_session_label"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Session 1"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:textColor="@color/chimwemwe_text_primary" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Date: "
-            android:textSize="14sp"
-            android:textColor="@color/chimwemwe_text_secondary" />
-
-        <EditText
-            android:id="@+id/et_session_date"
-            android:layout_width="110dp"
-            android:layout_height="wrap_content"
-            android:hint="DD/MM/YY"
-            android:inputType="text"
-            android:textSize="14sp"
-            android:textColor="@color/chimwemwe_text_primary"
-            android:background="@drawable/rounded_corner_edit_text_bg"
-            android:padding="6dp"
-            android:gravity="center" />
-
-    </LinearLayout>
-
-    <!-- Column headers -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:background="#E0F2F1"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
+        android:paddingStart="68dp"
+        android:paddingEnd="12dp"
         android:paddingTop="8dp"
-        android:paddingBottom="8dp">
+        android:paddingBottom="8dp"
+        android:layout_marginTop="8dp">
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="2"
-            android:text="Participant"
-            android:textSize="11sp"
+            android:text="PARTICIPANT"
+            android:textSize="10sp"
             android:textStyle="bold"
-            android:textColor="@color/chimwemwe_primary" />
+            android:textColor="@color/chimwemwe_text_secondary"
+            android:letterSpacing="0.08" />
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Caregiver"
-            android:textSize="11sp"
+            android:text="CAREGIVER"
+            android:textSize="10sp"
             android:textStyle="bold"
-            android:textColor="@color/chimwemwe_primary"
-            android:gravity="center" />
+            android:textColor="@color/chimwemwe_text_secondary"
+            android:letterSpacing="0.08"
+            android:gravity="center"
+            android:layout_marginEnd="6dp" />
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Child"
-            android:textSize="11sp"
+            android:text="CHILD"
+            android:textSize="10sp"
             android:textStyle="bold"
-            android:textColor="@color/chimwemwe_primary"
+            android:textColor="@color/chimwemwe_text_secondary"
+            android:letterSpacing="0.08"
             android:gravity="center" />
 
     </LinearLayout>
 
-    <!-- Participant attendance list -->
+    <!-- ── Attendance list ── -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_attendance"
         android:layout_width="match_parent"
@@ -119,16 +164,28 @@
         android:clipToPadding="false"
         android:paddingBottom="8dp" />
 
-    <!-- Save button -->
-    <Button
-        android:id="@+id/btn_save_attendance"
+    <!-- ── Save button ── -->
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="54dp"
-        android:text="Save Attendance"
-        android:textAllCaps="false"
-        android:textSize="16sp"
-        android:textColor="#FFFFFF"
-        android:backgroundTint="@color/chimwemwe_primary"
-        />
+        android:layout_height="wrap_content"
+        android:background="#FFFFFF"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="16dp"
+        android:elevation="8dp">
+
+        <Button
+            android:id="@+id/btn_save_attendance"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:text="Save Attendance"
+            android:textAllCaps="false"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:background="@drawable/bg_login_btn_chimwemwe" />
+
+    </LinearLayout>
 
 </LinearLayout>

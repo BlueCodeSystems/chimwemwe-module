@@ -161,7 +161,7 @@ public class ChwBottomNavigationListener extends CoreBottomNavigationListener {
             if (context instanceof ChimwemweRegisterActivity) {
                 ChimwemweRegisterActivity chimwemweActivity = (ChimwemweRegisterActivity) context;
                 try {
-                    chimwemweActivity.startFormActivity("chimwemwe_enrollment", null, "");
+                    chimwemweActivity.startFormActivity("chimwemwe_group_register", null, "");
                 } catch (Exception e) {
                     Timber.e(e);
                 }

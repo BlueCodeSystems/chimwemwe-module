@@ -18,20 +18,22 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bluecodeltd.ecap.chw.R;
-import com.bluecodeltd.ecap.chw.dao.AttendanceDao;
 import com.bluecodeltd.ecap.chw.dao.ParticipantDao;
+import com.bluecodeltd.ecap.chw.dao.SessionAttendanceDao;
 import com.bluecodeltd.ecap.chw.model.AttendanceModel;
 import com.bluecodeltd.ecap.chw.model.ParticipantModel;
 import com.bluecodeltd.ecap.chw.util.ChimwemweFormUtils;
 import com.bluecodeltd.ecap.chw.util.Threading;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.smartregister.util.FormUtils;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class RecordAttendanceActivity extends AppCompatActivity {
@@ -41,7 +43,7 @@ public class RecordAttendanceActivity extends AppCompatActivity {
 
     private static final String[] ATTENDANCE_OPTIONS = {"Absent", "Group", "Home Visit"};
 
-    private long groupId;
+    private String groupId;
     private int  sessionNumber;
 
     private EditText    etDate;
@@ -52,7 +54,7 @@ public class RecordAttendanceActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_record_attendance);
 
-        groupId       = getIntent().getLongExtra(EXTRA_GROUP_ID, -1);
+        groupId       = getIntent().getStringExtra(EXTRA_GROUP_ID);
         sessionNumber = getIntent().getIntExtra(EXTRA_SESSION_NUMBER, 1);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -81,13 +83,8 @@ public class RecordAttendanceActivity extends AppCompatActivity {
     private void loadData() {
         Threading.io(() -> {
             List<ParticipantModel> participants = ParticipantDao.getParticipants(groupId);
-            List<AttendanceModel>  existing     = AttendanceDao.getSessionAttendance(groupId, sessionNumber);
-
-            // Map existing attendance by participant_id
-            Map<Long, AttendanceModel> existingMap = new HashMap<>();
-            for (AttendanceModel a : existing) {
-                existingMap.put(a.getParticipantId(), a);
-            }
+            Map<Long, AttendanceModel> existingMap =
+                    SessionAttendanceDao.getSessionAttendanceMap(groupId, sessionNumber);
 
             // Build combined list
             List<AttendanceRowItem> rows = new ArrayList<>();
@@ -99,10 +96,11 @@ public class RecordAttendanceActivity extends AppCompatActivity {
             }
 
             // Pre-fill date from first existing record
-            String existingDate = existing.isEmpty() ? null : existing.get(0).getSessionDate();
+            String existingDate = SessionAttendanceDao.getSessionDate(groupId, sessionNumber);
+            String defaultDate = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(new Date());
 
             Threading.main(() -> {
-                if (existingDate != null) etDate.setText(existingDate);
+                etDate.setText(existingDate != null && !existingDate.trim().isEmpty() ? existingDate : defaultDate);
                 adapter.setData(rows);
             });
         });
@@ -117,17 +115,7 @@ public class RecordAttendanceActivity extends AppCompatActivity {
 
         List<AttendanceRowItem> rows = adapter.getRows();
         Threading.io(() -> {
-            boolean isEditMode = !AttendanceDao.getSessionAttendance(groupId, sessionNumber).isEmpty();
-            for (AttendanceRowItem row : rows) {
-                AttendanceModel a = new AttendanceModel();
-                a.setGroupId(groupId);
-                a.setParticipantId(row.participant.getId());
-                a.setSessionNumber(sessionNumber);
-                a.setSessionDate(date);
-                a.setCaregiverAttendance(row.caregiverAttendance);
-                a.setChildAttendance(row.childAttendance);
-                AttendanceDao.saveAttendance(a);
-            }
+            boolean isEditMode = SessionAttendanceDao.hasSession(groupId, sessionNumber);
             saveFormEvent(date, rows, isEditMode);
             Threading.main(() -> {
                 Toast.makeText(this, "Attendance saved", Toast.LENGTH_SHORT).show();
@@ -141,14 +129,25 @@ public class RecordAttendanceActivity extends AppCompatActivity {
     private void saveFormEvent(String date, List<AttendanceRowItem> rows, boolean isEditMode) {
         try {
             FormUtils formUtils = new FormUtils(this);
-            JSONObject form = formUtils.getFormJson("chimwemwe_session_attendance");
-            if (form == null) return;
+            JSONObject template = formUtils.getFormJson("chimwemwe_session_attendance");
+            if (template == null) return;
 
-            // Populate session info fields
-            setFieldValue(form, "step1", "session_number", String.valueOf(sessionNumber));
-            setFieldValue(form, "step1", "session_date",   date);
+            // Persist the session snapshot form (ec_chimwemwe_session_attendance)
+            JSONObject sessionForm = new JSONObject(template.toString());
+            ChimwemweFormUtils.ensureFieldValue(sessionForm, "group_id", groupId);
+            ChimwemweFormUtils.ensureFieldValue(sessionForm, "session_number", String.valueOf(sessionNumber));
+            ChimwemweFormUtils.ensureFieldValue(sessionForm, "session_date", date);
 
-            // Populate per-participant attendance into p1..p20 slots
+            String sessionType = "Group Session";
+            for (AttendanceRowItem row : rows) {
+                if ("Home Visit".equalsIgnoreCase(row.caregiverAttendance) ||
+                        "Home Visit".equalsIgnoreCase(row.childAttendance)) {
+                    sessionType = "Home Visit";
+                    break;
+                }
+            }
+            ChimwemweFormUtils.ensureFieldValue(sessionForm, "session_type", sessionType);
+
             String[] steps = {"step2", "step3"};
             for (int i = 0; i < rows.size() && i < 20; i++) {
                 AttendanceRowItem row = rows.get(i);
@@ -156,37 +155,21 @@ public class RecordAttendanceActivity extends AppCompatActivity {
                 String step = slot <= 10 ? steps[0] : steps[1];
                 String fullName = row.participant.getCaregiverFullName()
                         + " / " + row.participant.getChildFullName();
-                setFieldValue(form, step, "p" + slot + "_label",          fullName);
-                setFieldValue(form, step, "p" + slot + "_cg_attendance",   row.caregiverAttendance);
-                setFieldValue(form, step, "p" + slot + "_child_attendance", row.childAttendance);
+                ChimwemweFormUtils.ensureFieldValue(sessionForm, "p" + slot + "_label", fullName);
+                ChimwemweFormUtils.ensureFieldValue(sessionForm, "p" + slot + "_participant_id", String.valueOf(row.participant.getId()));
+                ChimwemweFormUtils.ensureFieldValue(sessionForm, "p" + slot + "_cg_attendance", row.caregiverAttendance);
+                ChimwemweFormUtils.ensureFieldValue(sessionForm, "p" + slot + "_child_attendance", row.childAttendance);
             }
 
-            ChimwemweFormUtils.ProcessedForm processedForm = ChimwemweFormUtils.processRegistration(
-                    form,
+            ChimwemweFormUtils.ProcessedForm processedSessionForm = ChimwemweFormUtils.processRegistration(
+                    sessionForm,
                     "ec_chimwemwe_session_attendance",
                     ChimwemweFormUtils.attendanceEntityId(groupId, sessionNumber)
             );
-            ChimwemweFormUtils.saveRegistration(processedForm, isEditMode);
+            ChimwemweFormUtils.saveRegistration(processedSessionForm, isEditMode);
         } catch (Exception e) {
             timber.log.Timber.e(e, "saveFormEvent failed for session attendance");
         }
-    }
-
-    private void setFieldValue(JSONObject form, String stepKey, String fieldKey, String value) {
-        if (value == null) return;
-        try {
-            JSONObject step = form.optJSONObject(stepKey);
-            if (step == null) return;
-            JSONArray fields = step.optJSONArray("fields");
-            if (fields == null) return;
-            for (int i = 0; i < fields.length(); i++) {
-                JSONObject field = fields.getJSONObject(i);
-                if (fieldKey.equals(field.optString("key"))) {
-                    field.put("value", value);
-                    return;
-                }
-            }
-        } catch (Exception ignored) {}
     }
 
     // ── Data holder ──────────────────────────────────────────

@@ -11,7 +11,11 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.tabs.TabLayout;
 
@@ -38,12 +42,14 @@ import timber.log.Timber;
 public class ChimwemweParticipantProfileActivity extends AppCompatActivity {
 
     public static final String EXTRA_PARTICIPANT_ID = "participant_id";
+    public static final String EXTRA_PARTICIPANT_CODE = "participant_code";
 
     private static final int REQ_PARTICIPANT = 3001;
     private static final int REQ_REVIEW      = 3002;
     private static final int REQ_REFERRAL    = 3003;
 
     private long             participantId;
+    private String           participantCode;
     private ParticipantModel participant;
     private long             pendingEditReviewId   = -1;
     private long             pendingEditReferralId = -1;
@@ -51,11 +57,17 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity {
     private TextView     tvCaregiverName, tvChildName, tvSessionsBadge, tvOvcBadge;
     private TextView     tvChildDob, tvChildSex, tvVcaId, tvCaregiverId;
     private TextView     tvGroupName, tvHotspotName, tvProvinceDistrict, tvSessionLocation, tvHealthFacility, tvFacilitators;
+    private TextView tvEmptyReviews, tvEmptyReferrals;
+    private RecyclerView recyclerReviews, recyclerReferrals;
+    // Legacy placeholders kept only so old code blocks (now guarded) compile.
     private LinearLayout llReviews, llReferrals;
     private LinearLayout tabDetails, tabReviews, tabReferrals;
-    private android.widget.ImageButton fabAdd;
+    private View fabAdd;
     private TabLayout tabLayout;
     private int currentTab = 0;
+
+    private ReviewAdapter reviewAdapter;
+    private ReferralAdapter referralAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +80,7 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity {
         toolbar.setNavigationOnClickListener(v -> finish());
 
         participantId = getIntent().getLongExtra(EXTRA_PARTICIPANT_ID, -1);
+        participantCode = getIntent().getStringExtra(EXTRA_PARTICIPANT_CODE);
 
         tvCaregiverName = findViewById(R.id.tv_caregiver_name);
         tvChildName     = findViewById(R.id.tv_child_name);
@@ -83,11 +96,23 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity {
         tvSessionLocation    = findViewById(R.id.tv_session_location);
         tvHealthFacility     = findViewById(R.id.tv_health_facility);
         tvFacilitators       = findViewById(R.id.tv_facilitators);
-        llReviews       = findViewById(R.id.ll_reviews);
-        llReferrals     = findViewById(R.id.ll_referrals);
+        tvEmptyReviews   = findViewById(R.id.tv_empty_reviews);
+        tvEmptyReferrals = findViewById(R.id.tv_empty_referrals);
+        recyclerReviews   = findViewById(R.id.recycler_reviews);
+        recyclerReferrals = findViewById(R.id.recycler_referrals);
         tabDetails      = findViewById(R.id.tab_details);
         tabReviews      = findViewById(R.id.tab_reviews);
         tabReferrals    = findViewById(R.id.tab_referrals);
+
+        reviewAdapter = new ReviewAdapter();
+        recyclerReviews.setLayoutManager(new LinearLayoutManager(this));
+        recyclerReviews.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
+        recyclerReviews.setAdapter(reviewAdapter);
+
+        referralAdapter = new ReferralAdapter();
+        recyclerReferrals.setLayoutManager(new LinearLayoutManager(this));
+        recyclerReferrals.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
+        recyclerReferrals.setAdapter(referralAdapter);
 
         tabLayout = findViewById(R.id.tab_layout);
         tabLayout.addTab(tabLayout.newTab());
@@ -108,9 +133,74 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity {
             @Override public void onTabReselected(@NonNull TabLayout.Tab tab) {}
         });
 
-        findViewById(R.id.btn_edit_participant).setOnClickListener(v -> launchParticipantForm());
+        // Edit is accessible via the toolbar options menu (edit_record)
 
         loadData();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(android.view.Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_chimwemwe_participant_profile, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull android.view.MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.edit_record) {
+            launchParticipantForm();
+            return true;
+        }
+        if (id == R.id.delete_record) {
+            promptDeleteParticipant();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void promptDeleteParticipant() {
+        if (participantId <= 0) {
+            return;
+        }
+        new AlertDialog.Builder(this)
+                .setTitle("Delete participant?")
+                .setMessage("This will remove the participant and clear any attendance, reviews and referrals linked to them.")
+                .setNegativeButton("Cancel", null)
+                .setPositiveButton("Delete", (d, w) -> Threading.io(() -> {
+                    try {
+                        String pidCode = participant != null ? participant.getParticipantId() : null;
+                        String gid = participant != null ? participant.getGroupId() : null;
+
+                        // Soft delete locally (also clears attendance snapshots slots)
+                        ParticipantDao.deleteParticipant(participantId);
+
+                        // Save OpenSRP-standard delete event (do not override base_entity_id)
+                        if (pidCode != null && !pidCode.trim().isEmpty()) {
+                            try {
+                                FormUtils formUtils = new FormUtils(this);
+                                JSONObject form = formUtils.getFormJson("chimwemwe_participant_register");
+                                if (form != null) {
+                                    form.put("entity_id", pidCode);
+                                    ChimwemweFormUtils.ensureFieldValue(form, "participant_id", pidCode);
+                                    ChimwemweFormUtils.ensureFieldValue(form, "group_id", gid != null ? gid : "");
+                                    ChimwemweFormUtils.ensureFieldValue(form, "sn",
+                                            participant != null ? String.valueOf(participant.getSn()) : "");
+                                    ChimwemweFormUtils.ensureFieldValue(form, "delete_status", "1");
+                                    ChimwemweFormUtils.saveRegistration(
+                                            ChimwemweFormUtils.processRegistration(form, "ec_chimwemwe_participant", pidCode),
+                                            true
+                                    );
+                                }
+                            } catch (Exception e) {
+                                Timber.e(e, "Save participant delete event failed");
+                            }
+                        }
+                    } catch (Exception e) {
+                        Timber.e(e, "Delete participant failed");
+                    }
+                    Threading.main(this::finish);
+                }))
+                .show();
     }
 
     @Override
@@ -121,13 +211,19 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity {
 
     private void loadData() {
         Threading.io(() -> {
-            participant = ParticipantDao.getParticipant(participantId);
-            List<MonthlyReviewModel>    reviews   = MonthlyReviewDao.getParticipantReviews(participantId);
-            List<ChimwemweReferralModel> referrals = ChimwemweReferralDao.getParticipantReferrals(participantId);
+            ParticipantModel resolved = participantId > 0 ? ParticipantDao.getParticipant(participantId) : null;
+            if (resolved == null && participantCode != null && !participantCode.trim().isEmpty()) {
+                resolved = ParticipantDao.getParticipantByCode(participantCode);
+            }
+            final long resolvedRowId = resolved != null ? resolved.getId() : participantId;
+            participant = resolved;
+            List<MonthlyReviewModel>    reviews   = MonthlyReviewDao.getParticipantReviews(resolvedRowId);
+            List<ChimwemweReferralModel> referrals = ChimwemweReferralDao.getParticipantReferrals(resolvedRowId);
             HotspotGroupModel group = (participant != null)
-                    ? HotspotGroupDao.getGroup(participant.getGroupId()) : null;
+                    ? HotspotGroupDao.getGroupByBusinessId(participant.getGroupId()) : null;
             Threading.main(() -> {
                 if (participant == null) { finish(); return; }
+                participantId = resolvedRowId;
                 bindParticipant();
                 bindGroup(group);
                 buildReviewList(reviews);
@@ -142,15 +238,16 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity {
         String childFull     = participant.getChildFullName();
         String caregiverFull = participant.getCaregiverFullName();
         tvCaregiverName.setText(caregiverFull.isEmpty() ? "—" : caregiverFull);
-        tvChildName.setText(childFull.isEmpty() ? "—" : childFull);
-        tvSessionsBadge.setText(participant.getSessionsCompleted() + "/14 sessions");
+        tvChildName.setText(childFull.isEmpty() ? "—" : "Child: " + childFull);
+        int sessionsCompleted = participant.getSessionsCompleted();
+        tvSessionsBadge.setText(sessionsCompleted + " / 14 sessions");
         if ("yes".equalsIgnoreCase(participant.getIsEnrolledOvc())) tvOvcBadge.setVisibility(View.VISIBLE);
         tvChildDob.setText(orDash(participant.getChildDob()));
         tvChildSex.setText(orDash(participant.getChildSex()));
         tvVcaId.setText(orDash(participant.getVcaId()));
         tvCaregiverId.setText(orDash(participant.getCaregiverId()));
-        TextView tvAvatar = findViewById(R.id.tv_avatar);
-        tvAvatar.setText(initials(caregiverFull.isEmpty() ? childFull : caregiverFull));
+        android.widget.ProgressBar pbProfile = findViewById(R.id.pb_sessions_profile);
+        if (pbProfile != null) pbProfile.setProgress(sessionsCompleted);
     }
 
     private void updateTabTitles(int reviewCount, int referralCount) {
@@ -201,7 +298,13 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity {
     // ── Reviews list ─────────────────────────────────────────
 
     private void buildReviewList(List<MonthlyReviewModel> reviews) {
-        llReviews.removeAllViews();
+        reviewAdapter.setData(reviews);
+        boolean empty = reviews == null || reviews.isEmpty();
+        tvEmptyReviews.setVisibility(empty ? View.VISIBLE : View.GONE);
+        recyclerReviews.setVisibility(empty ? View.GONE : View.VISIBLE);
+
+        if (false) {
+            llReviews.removeAllViews();
         if (reviews == null || reviews.isEmpty()) {
             llReviews.addView(emptyHint("No reviews recorded yet"));
             return;
@@ -217,12 +320,19 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity {
             card.findViewById(R.id.btn_edit_record).setOnClickListener(v -> launchReviewForm(r));
             llReviews.addView(card);
         }
+        }
     }
 
     // ── Referrals list ───────────────────────────────────────
 
     private void buildReferralList(List<ChimwemweReferralModel> referrals) {
-        llReferrals.removeAllViews();
+        referralAdapter.setData(referrals);
+        boolean empty = referrals == null || referrals.isEmpty();
+        tvEmptyReferrals.setVisibility(empty ? View.VISIBLE : View.GONE);
+        recyclerReferrals.setVisibility(empty ? View.GONE : View.VISIBLE);
+
+        if (false) {
+            llReferrals.removeAllViews();
         if (referrals == null || referrals.isEmpty()) {
             llReferrals.addView(emptyHint("No referrals recorded yet"));
             return;
@@ -236,6 +346,7 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity {
             card.findViewById(R.id.btn_edit_record).setOnClickListener(v -> launchReferralForm(r));
             llReferrals.addView(card);
         }
+        }
     }
 
     private TextView emptyHint(String text) {
@@ -245,6 +356,156 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity {
         tv.setTextColor(Color.parseColor("#9E9E9E"));
         tv.setPadding(4, 8, 4, 12);
         return tv;
+    }
+
+    private class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.VH> {
+        private List<MonthlyReviewModel> items;
+
+        void setData(List<MonthlyReviewModel> data) {
+            items = data;
+            notifyDataSetChanged();
+        }
+
+        @NonNull
+        @Override
+        public VH onCreateViewHolder(@NonNull android.view.ViewGroup parent, int viewType) {
+            View v = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.item_record_card, parent, false);
+            return new VH(v);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull VH h, int position) {
+            if (items == null) return;
+            MonthlyReviewModel r = items.get(position);
+            h.title.setText((r.getReviewQuarter() != null ? r.getReviewQuarter() + " \u2014 " : "") + orDash(r.getReviewDate()));
+            h.subtitle.setText("Reviewer: " + orDash(r.getReviewerName()));
+            h.detail.setText("Register accurate: " + orDash(r.getRegisterAccurate()));
+            h.btnEdit.setOnClickListener(v -> launchReviewForm(r));
+            h.btnDelete.setOnClickListener(v -> new AlertDialog.Builder(ChimwemweParticipantProfileActivity.this)
+                    .setTitle("Delete review?")
+                    .setMessage("This will permanently delete this review.")
+                    .setNegativeButton("Cancel", null)
+                    .setPositiveButton("Delete", (d, w) -> Threading.io(() -> {
+                        MonthlyReviewDao.deleteReview(r.getId());
+                        try {
+                            FormUtils formUtils = new FormUtils(ChimwemweParticipantProfileActivity.this);
+                            JSONObject form = formUtils.getFormJson("chimwemwe_monthly_review");
+                            if (form != null) {
+                                String entityId = ChimwemweFormUtils.reviewEntityId(r.getId());
+                                form.put("entity_id", entityId);
+                                ChimwemweFormUtils.ensureFieldValue(form, "group_id",
+                                        participant != null ? participant.getGroupId() : "");
+                                ChimwemweFormUtils.ensureFieldValue(form, "participant_id",
+                                        participant != null ? participant.getParticipantId() : "");
+                                ChimwemweFormUtils.ensureFieldValue(form, "delete_status", "1");
+                                ChimwemweFormUtils.saveRegistration(
+                                        ChimwemweFormUtils.processRegistration(form, "ec_chimwemwe_monthly_review", entityId),
+                                        true
+                                );
+                            }
+                        } catch (Exception e) {
+                            Timber.e(e, "Save review delete event failed");
+                        }
+                        Threading.main(ChimwemweParticipantProfileActivity.this::loadData);
+                    }))
+                    .show());
+        }
+
+        @Override
+        public int getItemCount() {
+            return items == null ? 0 : items.size();
+        }
+
+        class VH extends RecyclerView.ViewHolder {
+            TextView title, subtitle, detail;
+            View btnEdit;
+            View btnDelete;
+
+            VH(@NonNull View itemView) {
+                super(itemView);
+                title = itemView.findViewById(R.id.tv_record_title);
+                subtitle = itemView.findViewById(R.id.tv_record_subtitle);
+                detail = itemView.findViewById(R.id.tv_record_detail);
+                btnEdit = itemView.findViewById(R.id.btn_edit_record);
+                btnDelete = itemView.findViewById(R.id.btn_delete_record);
+            }
+        }
+    }
+
+    private class ReferralAdapter extends RecyclerView.Adapter<ReferralAdapter.VH> {
+        private List<ChimwemweReferralModel> items;
+
+        void setData(List<ChimwemweReferralModel> data) {
+            items = data;
+            notifyDataSetChanged();
+        }
+
+        @NonNull
+        @Override
+        public VH onCreateViewHolder(@NonNull android.view.ViewGroup parent, int viewType) {
+            View v = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.item_record_card, parent, false);
+            return new VH(v);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull VH h, int position) {
+            if (items == null) return;
+            ChimwemweReferralModel r = items.get(position);
+            h.title.setText(orDash(r.getServiceReferredFor()));
+            h.subtitle.setText("Referred: " + orDash(r.getWhoReferred()) + "  \u2022  Date: " + orDash(r.getReferralDate()));
+            h.detail.setText("To: " + orDash(r.getReceivingOrg()));
+            h.btnEdit.setOnClickListener(v -> launchReferralForm(r));
+            h.btnDelete.setOnClickListener(v -> new AlertDialog.Builder(ChimwemweParticipantProfileActivity.this)
+                    .setTitle("Delete referral?")
+                    .setMessage("This will permanently delete this referral.")
+                    .setNegativeButton("Cancel", null)
+                    .setPositiveButton("Delete", (d, w) -> Threading.io(() -> {
+                        ChimwemweReferralDao.deleteReferral(r.getId());
+                        try {
+                            FormUtils formUtils = new FormUtils(ChimwemweParticipantProfileActivity.this);
+                            JSONObject form = formUtils.getFormJson("chimwemwe_referral");
+                            if (form != null) {
+                                String entityId = ChimwemweFormUtils.referralEntityId(r.getId());
+                                form.put("entity_id", entityId);
+                                ChimwemweFormUtils.ensureFieldValue(form, "group_id",
+                                        participant != null ? participant.getGroupId() : "");
+                                ChimwemweFormUtils.ensureFieldValue(form, "participant_id",
+                                        participant != null ? participant.getParticipantId() : "");
+                                ChimwemweFormUtils.ensureFieldValue(form, "delete_status", "1");
+                                ChimwemweFormUtils.saveRegistration(
+                                        ChimwemweFormUtils.processRegistration(form, "ec_chimwemwe_referral", entityId),
+                                        true
+                                );
+                            }
+                        } catch (Exception e) {
+                            Timber.e(e, "Save referral delete event failed");
+                        }
+                        Threading.main(ChimwemweParticipantProfileActivity.this::loadData);
+                    }))
+                    .show());
+        }
+
+        @Override
+        public int getItemCount() {
+            return items == null ? 0 : items.size();
+        }
+
+        class VH extends RecyclerView.ViewHolder {
+            TextView title, subtitle, detail;
+            View btnEdit;
+            View btnDelete;
+
+            VH(@NonNull View itemView) {
+                super(itemView);
+                title = itemView.findViewById(R.id.tv_record_title);
+                subtitle = itemView.findViewById(R.id.tv_record_subtitle);
+                detail = itemView.findViewById(R.id.tv_record_detail);
+                btnEdit = itemView.findViewById(R.id.btn_edit_record);
+                btnDelete = itemView.findViewById(R.id.btn_delete_record);
+            }
+        }
     }
 
     // ── Form launchers ───────────────────────────────────────
@@ -275,7 +536,8 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity {
                 if (participantCode == null || participantCode.trim().isEmpty()) {
                     participantCode = "CHIM-" + participantId;
                 }
-                form.put("entity_id", participantCode);
+                setFieldValue(form, "step1", "group_id", participant.getGroupId());
+                setFieldValue(form, "step1", "participant_id", participantCode);
                 form.put("_sn", participant.getSn());
                 form.put("_participant_id", participant.getId());
                 final JSONObject finalForm = form;
@@ -310,13 +572,16 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity {
                 FormUtils formUtils = new FormUtils(this);
                 JSONObject form = formUtils.getFormJson("chimwemwe_monthly_review");
                 if (form == null) return;
+                if (participant != null) {
+                    setFieldValue(form, "step1", "group_id", participant.getGroupId());
+                    setFieldValue(form, "step1", "participant_id", participant.getParticipantId());
+                }
                 if (existing != null) {
                     setFieldValue(form, "step1", "review_quarter",    existing.getReviewQuarter());
                     setFieldValue(form, "step1", "review_date",       existing.getReviewDate());
                     setFieldValue(form, "step1", "reviewer_name",     existing.getReviewerName());
                     setFieldValue(form, "step1", "register_accurate", existing.getRegisterAccurate());
                     setFieldValue(form, "step1", "reviewer_notes",    existing.getReviewerNotes());
-                    form.put("entity_id", ChimwemweFormUtils.reviewEntityId(existing.getId()));
                 }
                 launchJsonForm(form, REQ_REVIEW);
             } catch (Exception e) {
@@ -332,6 +597,10 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity {
                 FormUtils formUtils = new FormUtils(this);
                 JSONObject form = formUtils.getFormJson("chimwemwe_referral");
                 if (form == null) return;
+                if (participant != null) {
+                    setFieldValue(form, "step1", "group_id", participant.getGroupId());
+                    setFieldValue(form, "step1", "participant_id", participant.getParticipantId());
+                }
                 if (existing != null) {
                     setFieldValue(form, "step1", "who_referred",          existing.getWhoReferred());
                     setFieldValue(form, "step1", "service_referred_for",  existing.getServiceReferredFor());
@@ -339,7 +608,6 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity {
                     setFieldValue(form, "step1", "receiving_org",         existing.getReceivingOrg());
                     setFieldValue(form, "step1", "job_title",             existing.getJobTitle());
                     setFieldValue(form, "step1", "service_date",          existing.getServiceDate());
-                    form.put("entity_id", ChimwemweFormUtils.referralEntityId(existing.getId()));
                 }
                 launchJsonForm(form, REQ_REFERRAL);
             } catch (Exception e) {
@@ -354,7 +622,14 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity {
                 Intent intent = new Intent(this,
                         org.smartregister.family.util.Utils.metadata().familyFormActivity);
                 com.vijay.jsonwizard.domain.Form cfg = new com.vijay.jsonwizard.domain.Form();
-                cfg.setWizard(false);
+                // Use wizard mode to guarantee bottom navigation with the submit button,
+                // consistent with group + participant flows.
+                cfg.setWizard(true);
+                cfg.setHideSaveLabel(true);
+                cfg.setNextLabel(getString(R.string.next));
+                cfg.setPreviousLabel(getString(R.string.previous));
+                cfg.setSaveLabel(getString(R.string.submit));
+                cfg.setNavigationBackground(R.color.chimwemwe_primary);
                 intent.putExtra(com.vijay.jsonwizard.constants.JsonFormConstants.JSON_FORM_KEY.FORM, cfg);
                 intent.putExtra(com.vijay.jsonwizard.constants.JsonFormConstants.JSON_FORM_KEY.JSON, form.toString());
                 startActivityForResult(intent, requestCode);
@@ -387,7 +662,10 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity {
                         participantCode = "chm-participant-" + participantId;
                     }
                     updated.setParticipantId(participantCode);
-                    ParticipantDao.updateParticipant(updated);
+                    // Standard OpenSRP save only: the client processor writes to ec_chimwemwe_participant via ec_client_fields.json.
+                    ChimwemweFormUtils.ensureFieldValue(form, "group_id", participant.getGroupId());
+                    ChimwemweFormUtils.ensureFieldValue(form, "sn", String.valueOf(participant.getSn()));
+                    ChimwemweFormUtils.ensureFieldValue(form, "participant_id", participantCode);
                     ChimwemweFormUtils.saveRegistration(
                             ChimwemweFormUtils.processRegistration(
                                     form,
@@ -405,6 +683,9 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity {
                     } else {
                         m.setId(MonthlyReviewDao.insertReview(m));
                     }
+                    ChimwemweFormUtils.ensureFieldValue(form, "group_id", m.getGroupId());
+                    ChimwemweFormUtils.ensureFieldValue(form, "participant_id",
+                            participant != null ? participant.getParticipantId() : "");
                     ChimwemweFormUtils.saveRegistration(
                             ChimwemweFormUtils.processRegistration(
                                     form,
@@ -422,6 +703,9 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity {
                     } else {
                         r.setId(ChimwemweReferralDao.insertReferral(r));
                     }
+                    ChimwemweFormUtils.ensureFieldValue(form, "group_id", r.getGroupId());
+                    ChimwemweFormUtils.ensureFieldValue(form, "participant_id",
+                            participant != null ? participant.getParticipantId() : "");
                     ChimwemweFormUtils.saveRegistration(
                             ChimwemweFormUtils.processRegistration(
                                     form,
@@ -466,7 +750,7 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity {
     private MonthlyReviewModel buildReviewModel(JSONObject form) {
         MonthlyReviewModel m = new MonthlyReviewModel();
         m.setParticipantId(participantId);
-        m.setGroupId(participant != null ? participant.getGroupId() : 0);
+        m.setGroupId(participant != null ? participant.getGroupId() : "");
         m.setReviewQuarter(fieldValue(form, "step1", "review_quarter"));
         m.setReviewDate(fieldValue(form, "step1", "review_date"));
         m.setReviewerName(fieldValue(form, "step1", "reviewer_name"));
@@ -478,7 +762,7 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity {
     private ChimwemweReferralModel buildReferralModel(JSONObject form) {
         ChimwemweReferralModel r = new ChimwemweReferralModel();
         r.setParticipantId(participantId);
-        r.setGroupId(participant != null ? participant.getGroupId() : 0);
+        r.setGroupId(participant != null ? participant.getGroupId() : "");
         r.setWhoReferred(fieldValue(form, "step1", "who_referred"));
         r.setServiceReferredFor(fieldValue(form, "step1", "service_referred_for"));
         r.setReferralDate(fieldValue(form, "step1", "referral_date"));

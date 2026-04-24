@@ -15,8 +15,11 @@ public class ParticipantDao extends AbstractDao {
     private static final String CREATE_TABLE_SQL =
             "CREATE TABLE IF NOT EXISTS " + TABLE + " (" +
             "  id                   INTEGER PRIMARY KEY AUTOINCREMENT," +
+            "  base_entity_id       TEXT," +
+            "  last_interacted_with INTEGER," +
+            "  delete_status        TEXT," +
             "  participant_id     TEXT," +
-            "  group_id             INTEGER NOT NULL," +
+            "  group_id             TEXT NOT NULL," +
             "  sn                   INTEGER," +
             "  caregiver_first_name TEXT," +
             "  caregiver_surname    TEXT," +
@@ -38,7 +41,7 @@ public class ParticipantDao extends AbstractDao {
     /** Add group_id column to existing installs that were created without it (DB v35). */
     public static void migrateToV35(SQLiteDatabase db) {
         try {
-            db.execSQL("ALTER TABLE " + TABLE + " ADD COLUMN group_id INTEGER DEFAULT 0");
+            db.execSQL("ALTER TABLE " + TABLE + " ADD COLUMN group_id TEXT DEFAULT ''");
         } catch (Exception ignored) {
             // Column already exists
         }
@@ -78,6 +81,18 @@ public class ParticipantDao extends AbstractDao {
         db.execSQL(CREATE_TABLE_SQL);
     }
 
+    /** OpenSRP standard delete_status column added in DB version 43. */
+    public static void migrateToV43(SQLiteDatabase db) {
+        try { db.execSQL("ALTER TABLE " + TABLE + " ADD COLUMN base_entity_id TEXT"); } catch (Exception ignored) {}
+        try { db.execSQL("ALTER TABLE " + TABLE + " ADD COLUMN last_interacted_with INTEGER"); } catch (Exception ignored) {}
+        try { db.execSQL("ALTER TABLE " + TABLE + " ADD COLUMN delete_status TEXT"); } catch (Exception ignored) {}
+        try {
+            db.execSQL("UPDATE " + TABLE + " SET base_entity_id=participant_id " +
+                    "WHERE (base_entity_id IS NULL OR TRIM(base_entity_id)='') " +
+                    "AND (participant_id IS NOT NULL AND TRIM(participant_id)!='')");
+        } catch (Exception ignored) {}
+    }
+
     public static long insertParticipant(ParticipantModel m) {
         String sql = "INSERT INTO " + TABLE +
                 " (participant_id, group_id, sn, caregiver_first_name, caregiver_surname," +
@@ -86,7 +101,7 @@ public class ParticipantDao extends AbstractDao {
                 "  who_referred, service_referred_for, referral_date," +
                 "  receiving_org, job_title, service_date) VALUES (" +
                 q(m.getParticipantId()) + "," +
-                m.getGroupId() + "," +
+                q(m.getGroupId()) + "," +
                 m.getSn() + "," +
                 q(m.getCaregiverFirstName()) + "," +
                 q(m.getCaregiverSurname()) + "," +
@@ -105,7 +120,7 @@ public class ParticipantDao extends AbstractDao {
                 q(m.getServiceDate()) + ")";
         AbstractDao.updateDB(sql);
         List<Long> ids = AbstractDao.readData(
-                "SELECT id FROM " + TABLE + " WHERE group_id=" + m.getGroupId() +
+                "SELECT id FROM " + TABLE + " WHERE group_id=" + q(m.getGroupId()) +
                 " ORDER BY id DESC LIMIT 1",
                 cursor -> cursor.getLong(0));
         return (ids != null && !ids.isEmpty()) ? ids.get(0) : -1L;
@@ -114,6 +129,8 @@ public class ParticipantDao extends AbstractDao {
     public static void updateParticipant(ParticipantModel m) {
         String sql = "UPDATE " + TABLE + " SET " +
                 "participant_id="     + q(m.getParticipantId()) + "," +
+                "group_id="           + q(m.getGroupId()) + "," +
+                "sn="                 + m.getSn() + "," +
                 "caregiver_first_name=" + q(m.getCaregiverFirstName()) + "," +
                 "caregiver_surname="    + q(m.getCaregiverSurname()) + "," +
                 "child_first_name="     + q(m.getChildFirstName()) + "," +
@@ -134,15 +151,16 @@ public class ParticipantDao extends AbstractDao {
     }
 
     /** Load all participants for a group, ordered by sn. Includes sessions_completed count. */
-    public static List<ParticipantModel> getParticipants(long groupId) {
+    public static List<ParticipantModel> getParticipants(String groupId) {
         String sql = "SELECT p.id, p.participant_id, p.group_id, p.sn, p.caregiver_first_name, p.caregiver_surname," +
                 "  p.child_first_name, p.child_surname, p.child_dob, p.child_sex," +
                 "  p.is_enrolled_ovc, p.caregiver_id, p.vca_id," +
                 "  p.who_referred, p.service_referred_for, p.referral_date," +
                 "  p.receiving_org, p.job_title, p.service_date," +
-                "  (SELECT COUNT(*) FROM ec_chimwemwe_attendance a" +
-                "   WHERE a.participant_id=p.id AND (a.caregiver_attendance!='' OR a.child_attendance!='')) AS sessions_done" +
-                " FROM " + TABLE + " p WHERE p.group_id=" + groupId + " ORDER BY p.sn ASC";
+                sessionsDoneSelect() +
+                " FROM " + TABLE + " p WHERE p.group_id=" + q(groupId) +
+                " AND (p.delete_status IS NULL OR p.delete_status <> '1')" +
+                " ORDER BY p.sn ASC";
         return AbstractDao.readData(sql, cursor -> {
             ParticipantModel m = mapParticipant(cursor);
             int done = cursor.getInt(19);
@@ -158,9 +176,9 @@ public class ParticipantDao extends AbstractDao {
                 " p.is_enrolled_ovc, p.caregiver_id, p.vca_id," +
                 " p.who_referred, p.service_referred_for, p.referral_date," +
                 " p.receiving_org, p.job_title, p.service_date," +
-                " (SELECT COUNT(*) FROM ec_chimwemwe_attendance a" +
-                "  WHERE a.participant_id=p.id AND (a.caregiver_attendance!='' OR a.child_attendance!='')) AS sessions_done" +
-                " FROM " + TABLE + " p WHERE p.id=" + id;
+                sessionsDoneSelect() +
+                " FROM " + TABLE + " p WHERE p.id=" + id +
+                " AND (p.delete_status IS NULL OR p.delete_status <> '1')";
         List<ParticipantModel> list = AbstractDao.readData(sql, cursor -> {
             ParticipantModel m = mapParticipant(cursor);
             int done = cursor.getInt(19);
@@ -171,11 +189,48 @@ public class ParticipantDao extends AbstractDao {
         return (list != null && !list.isEmpty()) ? list.get(0) : null;
     }
 
+    public static ParticipantModel getParticipantByCode(String participantIdCode) {
+        if (participantIdCode == null || participantIdCode.trim().isEmpty()) return null;
+        String code = participantIdCode.trim();
+        String sql = "SELECT p.id, p.participant_id, p.group_id, p.sn, p.caregiver_first_name, p.caregiver_surname," +
+                " p.child_first_name, p.child_surname, p.child_dob, p.child_sex," +
+                " p.is_enrolled_ovc, p.caregiver_id, p.vca_id," +
+                " p.who_referred, p.service_referred_for, p.referral_date," +
+                " p.receiving_org, p.job_title, p.service_date," +
+                sessionsDoneSelect() +
+                " FROM " + TABLE + " p WHERE p.participant_id=" + q(code) +
+                " AND (p.delete_status IS NULL OR p.delete_status <> '1')" +
+                " ORDER BY p.id DESC LIMIT 1";
+        List<ParticipantModel> list = AbstractDao.readData(sql, cursor -> {
+            ParticipantModel m = mapParticipant(cursor);
+            int done = cursor.getInt(19);
+            m.setSessionsCompleted(done);
+            m.setCompletedProgram(done >= 14);
+            return m;
+        });
+        return (list != null && !list.isEmpty()) ? list.get(0) : null;
+    }
+
+    private static String sessionsDoneSelect() {
+        String pidExpr = "CAST(p.id AS TEXT)";
+        StringBuilder sb = new StringBuilder();
+        sb.append(" (SELECT COUNT(DISTINCT sa.session_number) FROM ec_chimwemwe_session_attendance sa");
+        sb.append("  WHERE sa.group_id=p.group_id AND (sa.delete_status IS NULL OR sa.delete_status <> '1') AND (");
+        for (int i = 1; i <= 20; i++) {
+            if (i > 1) sb.append(" OR ");
+            sb.append("(sa.p").append(i).append("_participant_id=").append(pidExpr);
+            sb.append(" AND (IFNULL(sa.p").append(i).append("_cg_attendance,'')!=''");
+            sb.append(" OR IFNULL(sa.p").append(i).append("_child_attendance,'')!=''))");
+        }
+        sb.append(")) AS sessions_done");
+        return sb.toString();
+    }
+
     private static ParticipantModel mapParticipant(android.database.Cursor cursor) {
         ParticipantModel m = new ParticipantModel();
         m.setId(cursor.getLong(0));
         m.setParticipantId(cursor.getString(1));
-        m.setGroupId(cursor.getLong(2));
+        m.setGroupId(cursor.getString(2));
         m.setSn(cursor.getInt(3));
         m.setCaregiverFirstName(cursor.getString(4));
         m.setCaregiverSurname(cursor.getString(5));
@@ -195,39 +250,56 @@ public class ParticipantDao extends AbstractDao {
         return m;
     }
 
-    public static int countParticipants(long groupId) {
+    public static int countParticipants(String groupId) {
         List<Integer> res = AbstractDao.readData(
-                "SELECT COUNT(*) FROM " + TABLE + " WHERE group_id=" + groupId,
+                "SELECT COUNT(*) FROM " + TABLE + " WHERE group_id=" + q(groupId) +
+                        " AND (delete_status IS NULL OR delete_status <> '1')",
                 cursor -> cursor.getInt(0));
         return (res != null && !res.isEmpty()) ? res.get(0) : 0;
     }
 
     public static int countAllParticipants() {
         List<Integer> res = AbstractDao.readData(
-                "SELECT COUNT(*) FROM " + TABLE,
+                "SELECT COUNT(*) FROM " + TABLE + " WHERE (delete_status IS NULL OR delete_status <> '1')",
                 cursor -> cursor.getInt(0));
         return (res != null && !res.isEmpty()) ? res.get(0) : 0;
     }
 
     public static int countCompletedParticipants() {
-        String sql = "SELECT COUNT(*) FROM " + TABLE + " p WHERE " +
-                "(SELECT COUNT(*) FROM ec_chimwemwe_attendance a " +
-                " WHERE a.participant_id=p.id AND (a.caregiver_attendance!='' OR a.child_attendance!='')) >= 14";
-        List<Integer> res = AbstractDao.readData(sql, cursor -> cursor.getInt(0));
-        return (res != null && !res.isEmpty()) ? res.get(0) : 0;
+        try {
+            String sql = "SELECT COUNT(*) FROM " + TABLE + " p WHERE (" +
+                    sessionsDoneSelect().replace(" AS sessions_done", "") + ") >= 14";
+            List<Integer> res = AbstractDao.readData(sql, cursor -> cursor.getInt(0));
+            return (res != null && !res.isEmpty()) ? res.get(0) : 0;
+        } catch (Exception e) {
+            return 0;
+        }
     }
 
     /** Returns MAX(sn)+1 for the group, safe against deletions creating duplicate S/N values. */
-    public static int nextSn(long groupId) {
+    public static int nextSn(String groupId) {
         List<Integer> res = AbstractDao.readData(
-                "SELECT COALESCE(MAX(sn), 0) + 1 FROM " + TABLE + " WHERE group_id=" + groupId,
+                "SELECT COALESCE(MAX(sn), 0) + 1 FROM " + TABLE + " WHERE group_id=" + q(groupId) +
+                        " AND (delete_status IS NULL OR delete_status <> '1')",
                 cursor -> cursor.getInt(0));
         return (res != null && !res.isEmpty()) ? res.get(0) : 1;
     }
 
     public static void deleteParticipant(long id) {
-        AbstractDao.updateDB("DELETE FROM ec_chimwemwe_attendance WHERE participant_id=" + id);
-        AbstractDao.updateDB("DELETE FROM " + TABLE + " WHERE id=" + id);
+        ParticipantModel p = null;
+        try {
+            p = getParticipant(id);
+        } catch (Exception ignored) {}
+
+        String groupId = p != null ? p.getGroupId() : null;
+        if (groupId != null && !groupId.trim().isEmpty()) {
+            SessionAttendanceDao.removeParticipantFromGroupSessions(groupId.trim(), id);
+        }
+
+        AbstractDao.updateDB("UPDATE ec_chimwemwe_attendance SET delete_status='1' WHERE participant_id=" + q(String.valueOf(id)));
+        AbstractDao.updateDB("UPDATE ec_chimwemwe_review     SET delete_status='1' WHERE participant_id=" + id);
+        AbstractDao.updateDB("UPDATE ec_chimwemwe_referral   SET delete_status='1' WHERE participant_id=" + id);
+        AbstractDao.updateDB("UPDATE " + TABLE + " SET delete_status='1' WHERE id=" + id);
     }
 
     private static String q(String s) {

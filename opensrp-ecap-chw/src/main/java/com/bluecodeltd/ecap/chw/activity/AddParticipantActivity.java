@@ -29,7 +29,7 @@ public class AddParticipantActivity extends AppCompatActivity {
     public static final String EXTRA_PARTICIPANT_ID = "participant_id";
     public static final String EXTRA_SN             = "sn";
 
-    private long groupId;
+    private String groupId;
     private long participantId = -1;
     private int  sn;
 
@@ -47,7 +47,7 @@ public class AddParticipantActivity extends AppCompatActivity {
         if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         toolbar.setNavigationOnClickListener(v -> finish());
 
-        groupId       = getIntent().getLongExtra(EXTRA_GROUP_ID, -1);
+        groupId       = getIntent().getStringExtra(EXTRA_GROUP_ID);
         participantId = getIntent().getLongExtra(EXTRA_PARTICIPANT_ID, -1);
         sn            = getIntent().getIntExtra(EXTRA_SN, 1);
 

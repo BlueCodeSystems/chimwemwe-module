@@ -24,7 +24,7 @@ public class NavigationModelFlv implements NavigationModel.Flavor {
                     R.mipmap.sidemenu_landd_active,
                     R.string.nav_home,
                     CoreConstants.DrawerMenu.REPORTS,
-                    0);
+                    -1);
             navigationOptions.add(homeOption);
 
             NavigationOption chimwemweOption = new NavigationOption(

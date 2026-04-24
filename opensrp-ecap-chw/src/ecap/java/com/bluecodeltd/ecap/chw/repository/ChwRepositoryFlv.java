@@ -154,6 +154,15 @@ public class ChwRepositoryFlv {
                 case 40:
                     upgradeToVersion40(db);
                     break;
+                case 41:
+                    upgradeToVersion41(db);
+                    break;
+                case 42:
+                    upgradeToVersion42(db);
+                    break;
+                case 43:
+                    upgradeToVersion43(db);
+                    break;
                 default:
                     break;
             }
@@ -1282,14 +1291,6 @@ public class ChwRepositoryFlv {
         } catch (Exception e) {
             Timber.e(e, "upgradeToVersion36 HotspotGroupDao");
         }
-        // Add new facilitator columns to the OpenSRP-managed shadow table as well.
-        String[] enrollmentAlters = {
-                "ALTER TABLE ec_chimwemwe_enrollment ADD COLUMN facilitator_name_1 TEXT",
-                "ALTER TABLE ec_chimwemwe_enrollment ADD COLUMN facilitator_name_2 TEXT"
-        };
-        for (String sql : enrollmentAlters) {
-            try { db.execSQL(sql); } catch (Exception ignored) {}
-        }
     }
 
     private static void upgradeToVersion34(SQLiteDatabase db) {
@@ -1326,6 +1327,43 @@ public class ChwRepositoryFlv {
         Timber.i("DB upgradeToVersion40: done");
     }
 
+    private static void upgradeToVersion41(SQLiteDatabase db) {
+        try {
+            com.bluecodeltd.ecap.chw.dao.AttendanceDao.migrateToV41(db);
+        } catch (Exception e) {
+            Timber.e(e, "upgradeToVersion41 AttendanceDao");
+        }
+    }
+
+    private static void upgradeToVersion42(SQLiteDatabase db) {
+        try {
+            com.bluecodeltd.ecap.chw.dao.SessionAttendanceDao.migrateToV42(db);
+        } catch (Exception e) {
+            Timber.e(e, "upgradeToVersion42 SessionAttendanceDao");
+        }
+    }
+
+    private static void upgradeToVersion43(SQLiteDatabase db) {
+        try { com.bluecodeltd.ecap.chw.dao.HotspotGroupDao.migrateToV43(db); } catch (Exception e) {
+            Timber.e(e, "upgradeToVersion43 HotspotGroupDao");
+        }
+        try { com.bluecodeltd.ecap.chw.dao.ParticipantDao.migrateToV43(db); } catch (Exception e) {
+            Timber.e(e, "upgradeToVersion43 ParticipantDao");
+        }
+        try { com.bluecodeltd.ecap.chw.dao.AttendanceDao.migrateToV43(db); } catch (Exception e) {
+            Timber.e(e, "upgradeToVersion43 AttendanceDao");
+        }
+        try { com.bluecodeltd.ecap.chw.dao.SessionAttendanceDao.migrateToV43(db); } catch (Exception e) {
+            Timber.e(e, "upgradeToVersion43 SessionAttendanceDao");
+        }
+        try { com.bluecodeltd.ecap.chw.dao.MonthlyReviewDao.migrateToV43(db); } catch (Exception e) {
+            Timber.e(e, "upgradeToVersion43 MonthlyReviewDao");
+        }
+        try { com.bluecodeltd.ecap.chw.dao.ChimwemweReferralDao.migrateToV43(db); } catch (Exception e) {
+            Timber.e(e, "upgradeToVersion43 ChimwemweReferralDao");
+        }
+    }
+
     private static void upgradeToVersion39(SQLiteDatabase db) {
         Timber.i("DB upgradeToVersion39: start");
         try {
@@ -1344,13 +1382,7 @@ public class ChwRepositoryFlv {
     }
 
     private static void upgradeToVersion37(SQLiteDatabase db) {
-        String[] alters = {
-                "ALTER TABLE ec_chimwemwe_enrollment ADD COLUMN group_id TEXT",
-                "ALTER TABLE ec_chimwemwe_group ADD COLUMN group_id TEXT"
-        };
-        for (String sql : alters) {
-            try { db.execSQL(sql); } catch (Exception ignored) {}
-        }
+        try { db.execSQL("ALTER TABLE ec_chimwemwe_group ADD COLUMN group_id TEXT"); } catch (Exception ignored) {}
         try {
             com.bluecodeltd.ecap.chw.dao.HotspotGroupDao.migrateToV37(db);
         } catch (Exception e) {

@@ -8,6 +8,7 @@ import com.bluecodeltd.ecap.chw.dao.AttendanceDao;
 import com.bluecodeltd.ecap.chw.dao.HotspotGroupDao;
 import com.bluecodeltd.ecap.chw.dao.MonthlyReviewDao;
 import com.bluecodeltd.ecap.chw.dao.ParticipantDao;
+import com.bluecodeltd.ecap.chw.dao.SessionAttendanceDao;
 
 import net.sqlcipher.database.SQLiteDatabase;
 
@@ -31,6 +32,7 @@ public class ChwRepository extends CoreChwRepository {
         HotspotGroupDao.createTable(db);
         ParticipantDao.createTable(db);
         AttendanceDao.createTable(db);
+        SessionAttendanceDao.createTable(db);
         MonthlyReviewDao.createTable(db);
         com.bluecodeltd.ecap.chw.dao.ChimwemweReferralDao.createTable(db);
     }

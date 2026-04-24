@@ -14,6 +14,7 @@ public class ChimwemweGroupViewHolder extends RecyclerView.ViewHolder {
 
     public final View        viewStatusBar;
     public final FrameLayout flGroupIcon;
+    public final TextView    tvGroupInitials;
     public final TextView    tvGroupName;
     public final TextView    tvGroupId;
     public final TextView    tvHotspotName;
@@ -26,6 +27,7 @@ public class ChimwemweGroupViewHolder extends RecyclerView.ViewHolder {
         super(itemView);
         viewStatusBar      = itemView.findViewById(R.id.view_status_bar);
         flGroupIcon        = itemView.findViewById(R.id.fl_group_icon);
+        tvGroupInitials    = itemView.findViewById(R.id.tv_group_initials);
         tvGroupName        = itemView.findViewById(R.id.tv_group_name);
         tvGroupId          = itemView.findViewById(R.id.tv_group_id);
         tvHotspotName      = itemView.findViewById(R.id.tv_hotspot_name);

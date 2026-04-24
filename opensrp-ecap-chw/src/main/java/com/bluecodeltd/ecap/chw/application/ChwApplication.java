@@ -219,7 +219,6 @@ public class ChwApplication extends CoreChwApplication implements SyncStatusBroa
                 ColumnDetails.builder().name("group_id").dataType("VARCHAR").build(),
                 ColumnDetails.builder().name("hotspot_name").dataType("VARCHAR").build(),
                 ColumnDetails.builder().name("group_name").dataType("VARCHAR").build(),
-                ColumnDetails.builder().name("group_code").dataType("VARCHAR").build(),
                 ColumnDetails.builder().name("created_date").dataType("VARCHAR").build(),
                 ColumnDetails.builder().name("p_count").dataType("VARCHAR").build(),
                 ColumnDetails.builder().name("s_count").dataType("VARCHAR").build(),

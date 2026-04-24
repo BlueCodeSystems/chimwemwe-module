@@ -2,6 +2,7 @@ package com.bluecodeltd.ecap.chw.activity;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -21,10 +22,10 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.bluecodeltd.ecap.chw.R;
 import com.bluecodeltd.ecap.chw.adapter.ViewPager2Adapter;
-import com.bluecodeltd.ecap.chw.dao.AttendanceDao;
 import com.bluecodeltd.ecap.chw.dao.HotspotGroupDao;
 import com.bluecodeltd.ecap.chw.dao.MonthlyReviewDao;
 import com.bluecodeltd.ecap.chw.dao.ParticipantDao;
+import com.bluecodeltd.ecap.chw.dao.SessionAttendanceDao;
 import com.bluecodeltd.ecap.chw.fragment.HotspotGroupOverviewFragment;
 import com.bluecodeltd.ecap.chw.fragment.HotspotGroupParticipantsFragment;
 import com.bluecodeltd.ecap.chw.fragment.HotspotGroupSessionsFragment;
@@ -36,13 +37,21 @@ import com.bluecodeltd.ecap.chw.util.ChimwemweFormUtils;
 import com.bluecodeltd.ecap.chw.util.Threading;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
+import com.vijay.jsonwizard.constants.JsonFormConstants;
+import com.vijay.jsonwizard.domain.Form;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.smartregister.family.util.Utils;
 import org.smartregister.opd.utils.OpdConstants;
 import org.smartregister.util.FormUtils;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Random;
 import androidx.preference.PreferenceManager;
@@ -58,7 +67,9 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
     private static final int REQUEST_CODE_OVC_SEARCH      = 2003;
     private static final int REQUEST_CODE_GROUP_FORM      = 2004;
 
-    private long         groupId = -1;
+    // Internal SQLite row id for ec_chimwemwe_group (only used as a legacy fallback)
+    private long         groupDbId = -1;
+    // Business identifier (ec_chimwemwe_group.group_id) used for opening the profile and linking child tables
     private String       groupIdentifier;
     private int          pendingNextSn = 1;
     private HotspotGroupModel currentGroup;
@@ -84,12 +95,86 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
         viewPager = findViewById(R.id.viewpager);
         setupViewPager();
 
-        if (groupId != -1 || (groupIdentifier != null && !groupIdentifier.isEmpty())) {
+        if (groupDbId != -1 || (groupIdentifier != null && !groupIdentifier.isEmpty())) {
             if (getSupportActionBar() != null) getSupportActionBar().setTitle("Group Details");
             loadGroup();
         } else {
             notifySectionFragments();
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(android.view.Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_hotspot_group_detail, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(android.view.MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.edit_record) {
+            launchGroupEditForm();
+            return true;
+        }
+        if (id == R.id.delete_record) {
+            promptDeleteGroup();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void promptDeleteGroup() {
+        final String gid = groupIdentifier != null ? groupIdentifier.trim() : "";
+        if (gid.isEmpty()) {
+            Toast.makeText(this, "Missing group id", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        int participantCount = ParticipantDao.countParticipants(gid);
+        if (participantCount > 0) {
+            new AlertDialog.Builder(this)
+                    .setTitle("Cannot delete group")
+                    .setMessage("This group has " + participantCount + " participant(s). Remove participants first.")
+                    .setPositiveButton("OK", null)
+                    .show();
+            return;
+        }
+
+        new AlertDialog.Builder(this)
+                .setTitle("Delete group?")
+                .setMessage("This will delete the group and all its session attendance and review records.")
+                .setNegativeButton("Cancel", null)
+                .setPositiveButton("Delete", (d, w) -> Threading.io(() -> {
+                    try {
+                        // Mark deleted locally (soft delete)
+                        if (groupDbId > 0) HotspotGroupDao.deleteGroup(groupDbId);
+                        else HotspotGroupDao.deleteGroupByBusinessId(gid);
+
+                        // Save OpenSRP-standard delete event (do not override base_entity_id)
+                        try {
+                            FormUtils formUtils = new FormUtils(this);
+                            JSONObject form = formUtils.getFormJson("chimwemwe_group_register");
+                            if (form != null) {
+                                form.put("entity_id", gid);
+                                ChimwemweFormUtils.ensureFieldValue(form, "group_id", gid);
+                                ChimwemweFormUtils.ensureFieldValue(form, "delete_status", "1");
+                                ChimwemweFormUtils.saveRegistration(
+                                        ChimwemweFormUtils.processRegistration(form, "ec_chimwemwe_group", gid),
+                                        true
+                                );
+                            }
+                        } catch (Exception e) {
+                            Timber.e(e, "Save group delete event failed");
+                        }
+                    } catch (Exception e) {
+                        Timber.e(e, "Delete group failed");
+                    }
+                    Threading.main(() -> {
+                        Toast.makeText(this, "Group deleted", Toast.LENGTH_SHORT).show();
+                        finish();
+                    });
+                }))
+                .show();
     }
 
     @Override
@@ -104,33 +189,37 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (groupId != -1 || (groupIdentifier != null && !groupIdentifier.isEmpty())) loadGroup();
+        if (groupDbId != -1 || (groupIdentifier != null && !groupIdentifier.isEmpty())) loadGroup();
     }
 
     private void loadGroup() {
         Threading.io(() -> {
-            HotspotGroupModel group = groupId != -1
-                    ? HotspotGroupDao.getGroup(groupId)
+            HotspotGroupModel group = groupDbId != -1
+                    ? HotspotGroupDao.getGroup(groupDbId)
                     : HotspotGroupDao.getGroupByBusinessId(groupIdentifier);
-            long resolvedGroupId = group != null ? group.getId() : -1L;
-            List<ParticipantModel> loadedParticipants = resolvedGroupId != -1
-                    ? ParticipantDao.getParticipants(resolvedGroupId)
+            long resolvedDbId = group != null ? group.getId() : -1L;
+            String tmpGroupIdentifier = group != null ? group.getGroupId() : groupIdentifier;
+            if (tmpGroupIdentifier != null) tmpGroupIdentifier = tmpGroupIdentifier.trim();
+            final String resolvedGroupIdentifier = tmpGroupIdentifier;
+
+            List<ParticipantModel> loadedParticipants =
+                    (resolvedGroupIdentifier != null && !resolvedGroupIdentifier.isEmpty())
+                    ? ParticipantDao.getParticipants(resolvedGroupIdentifier)
                     : Collections.emptyList();
-            List<MonthlyReviewModel> loadedReviews = resolvedGroupId != -1
-                    ? MonthlyReviewDao.getReviews(resolvedGroupId)
+            List<MonthlyReviewModel> loadedReviews =
+                    (resolvedGroupIdentifier != null && !resolvedGroupIdentifier.isEmpty())
+                    ? MonthlyReviewDao.getReviews(resolvedGroupIdentifier)
                     : Collections.emptyList();
             String[] loadedSessionDates = new String[14];
             for (int i = 1; i <= 14; i++) {
-                loadedSessionDates[i - 1] = resolvedGroupId != -1
-                        ? AttendanceDao.getSessionDate(resolvedGroupId, i)
+                loadedSessionDates[i - 1] = (resolvedGroupIdentifier != null && !resolvedGroupIdentifier.isEmpty())
+                        ? SessionAttendanceDao.getSessionDate(resolvedGroupIdentifier, i)
                         : null;
             }
 
             Threading.main(() -> {
-                groupId = resolvedGroupId;
-                if (group != null && group.getGroupId() != null && !group.getGroupId().trim().isEmpty()) {
-                    groupIdentifier = group.getGroupId();
-                }
+                groupDbId = resolvedDbId;
+                groupIdentifier = resolvedGroupIdentifier;
                 currentGroup = group;
                 participants = loadedParticipants != null ? loadedParticipants : Collections.emptyList();
                 reviews = loadedReviews != null ? loadedReviews : Collections.emptyList();
@@ -146,15 +235,14 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
         TextView tvAvatar    = findViewById(R.id.tv_group_avatar);
         TextView tvName      = findViewById(R.id.tv_header_group_name);
         TextView tvHotspot   = findViewById(R.id.tv_header_hotspot);
-        TextView tvCode      = findViewById(R.id.tv_header_group_code);
+        TextView tvCode      = findViewById(R.id.tv_header_group_id);
         if (g == null) return;
         String name = g.getGroupName() != null ? g.getGroupName() : "";
         tvAvatar.setText(initials(name));
         tvName.setText(name.isEmpty() ? "—" : name);
         tvHotspot.setText(g.getHotspotName() != null ? g.getHotspotName() : "");
-        String displayId = g.getGroupId() != null && !g.getGroupId().trim().isEmpty()
-                ? g.getGroupId() : g.getGroupCode();
-        tvCode.setText(displayId != null ? displayId : "");
+        String displayId = g.getGroupId() != null ? g.getGroupId().trim() : "";
+        tvCode.setText(displayId);
     }
 
     private String initials(String name) {
@@ -165,7 +253,7 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
     }
 
     private void setupViewPager() {
-        List<Fragment> fragments = java.util.Arrays.asList(
+        List<Fragment> fragments = Arrays.asList(
                 new HotspotGroupOverviewFragment(),
                 new HotspotGroupSessionsFragment(),
                 new HotspotGroupParticipantsFragment()
@@ -194,14 +282,14 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
     private void setTabTitle(int position, String title, int count) {
         TabLayout.Tab tab = tabLayout.getTabAt(position);
         if (tab == null) return;
-        android.view.View custom = LayoutInflater.from(this)
+        View custom = LayoutInflater.from(this)
                 .inflate(R.layout.item_chimwemwe_group_tab, null);
         ((TextView) custom.findViewById(R.id.tab_title)).setText(title);
         TextView tvCount = custom.findViewById(R.id.tab_count);
         if (count >= 0) {
             tvCount.setText(String.valueOf(count));
         } else {
-            tvCount.setVisibility(android.view.View.GONE);
+            tvCount.setVisibility(View.GONE);
         }
         tab.setCustomView(custom);
     }
@@ -249,7 +337,7 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
             if (tvFacilitators != null)    tvFacilitators.setText(orDash(""));
         }
 
-        android.content.SharedPreferences cp =
+        SharedPreferences cp =
                 PreferenceManager.getDefaultSharedPreferences(this);
         if (tvCaseworkerName != null)
             tvCaseworkerName.setText(orDash(cp.getString("caseworker_name", null)));
@@ -261,12 +349,30 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
 
     public void bindSessions(View root) {
         if (root == null) return;
+        int recorded = 0;
+        for (String d : sessionDates) if (d != null && !d.isEmpty()) recorded++;
+        TextView tvDone = root.findViewById(R.id.tv_sessions_done);
+        TextView tvRemaining = root.findViewById(R.id.tv_sessions_remaining);
+        if (tvDone != null) tvDone.setText(String.valueOf(recorded));
+        if (tvRemaining != null) tvRemaining.setText(String.valueOf(14 - recorded));
         buildSessionGrid(root.findViewById(R.id.grid_sessions), sessionDates);
     }
 
     public void bindParticipants(View root) {
         if (root == null) return;
         root.findViewById(R.id.btn_add_participant).setOnClickListener(v -> openAddParticipant());
+
+        int total = participants.size();
+        int completed = 0;
+        for (ParticipantModel p : participants) if (p.isCompletedProgram()) completed++;
+
+        TextView tvTotal = root.findViewById(R.id.tv_participant_count);
+        TextView tvCompleted = root.findViewById(R.id.tv_completed_count);
+        TextView tvInProgress = root.findViewById(R.id.tv_inprogress_count);
+        if (tvTotal != null) tvTotal.setText(String.valueOf(total));
+        if (tvCompleted != null) tvCompleted.setText(String.valueOf(completed));
+        if (tvInProgress != null) tvInProgress.setText(String.valueOf(total - completed));
+
         buildParticipantList(root.findViewById(R.id.ll_participants), participants);
     }
 
@@ -286,7 +392,7 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
         Threading.io(() -> {
             try {
                 FormUtils formUtils = new FormUtils(this);
-                JSONObject form = formUtils.getFormJson("chimwemwe_enrollment");
+                JSONObject form = formUtils.getFormJson("chimwemwe_group_register");
                 if (form == null) return;
                 populateGroupEditForm(form);
                 launchJsonWizardForm(form, REQUEST_CODE_GROUP_FORM, true, "launchGroupEditForm intent");
@@ -314,11 +420,11 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
             btn.setLines(2);
 
             if (hasDate) {
-                btn.setBackgroundColor(Color.parseColor("#0D5C73"));
+                btn.setBackground(androidx.core.content.ContextCompat.getDrawable(this, R.drawable.bg_session_recorded));
                 btn.setTextColor(Color.WHITE);
             } else {
-                btn.setBackgroundColor(Color.parseColor("#E0F7FA"));
-                btn.setTextColor(Color.parseColor("#0D5C73"));
+                btn.setBackground(androidx.core.content.ContextCompat.getDrawable(this, R.drawable.bg_session_pending));
+                btn.setTextColor(androidx.core.content.ContextCompat.getColor(this, R.color.chimwemwe_primary));
             }
 
             GridLayout.LayoutParams params = new GridLayout.LayoutParams();
@@ -330,7 +436,7 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
             btn.setLayoutParams(params);
 
             btn.setOnClickListener(v -> {
-                if (groupId == -1) {
+                if (groupIdentifier == null || groupIdentifier.trim().isEmpty()) {
                     Toast.makeText(this, "Save the group first", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -346,10 +452,11 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
         llParticipants.removeAllViews();
         if (participants == null || participants.isEmpty()) {
             TextView tv = new TextView(this);
-            tv.setText("No participants yet. Tap '+ Add' to add participants.");
-            tv.setTextColor(Color.parseColor("#607D8B"));
+            tv.setText("No participants yet. Tap '+ Add' to enrol participants.");
+            tv.setTextColor(androidx.core.content.ContextCompat.getColor(this, R.color.chimwemwe_text_secondary));
             tv.setTextSize(13f);
-            tv.setPadding(8, 8, 8, 8);
+            int pad = (int) (16 * getResources().getDisplayMetrics().density);
+            tv.setPadding(pad, pad, pad, pad);
             llParticipants.addView(tv);
             return;
         }
@@ -364,14 +471,23 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
                     p.getChildFullName().isEmpty() ? "—" : p.getChildFullName());
 
             TextView tvDone = row.findViewById(R.id.tv_sessions_done);
-            tvDone.setText(p.getSessionsCompleted() + "/14");
+            int sessionsCompleted = p.getSessionsCompleted();
+            tvDone.setText(sessionsCompleted + "/14");
             if (p.isCompletedProgram()) {
-                tvDone.setTextColor(Color.parseColor("#2E7D32"));
+                tvDone.setTextColor(Color.parseColor("#16A34A"));
+                tvDone.setBackground(androidx.core.content.ContextCompat.getDrawable(this, R.drawable.bg_sessions_pill_complete));
+            } else {
+                tvDone.setTextColor(androidx.core.content.ContextCompat.getColor(this, R.color.chimwemwe_primary));
+                tvDone.setBackground(androidx.core.content.ContextCompat.getDrawable(this, R.drawable.bg_sessions_pill));
             }
+
+            android.widget.ProgressBar pb = row.findViewById(R.id.pb_sessions);
+            if (pb != null) pb.setProgress(sessionsCompleted);
 
             row.setOnClickListener(v -> {
                 Intent profileIntent = new Intent(this, ChimwemweParticipantProfileActivity.class);
                 profileIntent.putExtra(ChimwemweParticipantProfileActivity.EXTRA_PARTICIPANT_ID, p.getId());
+                profileIntent.putExtra(ChimwemweParticipantProfileActivity.EXTRA_PARTICIPANT_CODE, p.getParticipantId());
                 startActivity(profileIntent);
             });
 
@@ -396,16 +512,16 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
     // ── Participant form ──────────────────────────────────────
 
     void openAddParticipant() {
-        if (groupId == -1) {
+        if (groupIdentifier == null || groupIdentifier.trim().isEmpty()) {
             Toast.makeText(this, "Save the group first", Toast.LENGTH_SHORT).show();
             return;
         }
         Threading.io(() -> {
-            List<ParticipantModel> existing = ParticipantDao.getParticipants(groupId);
-            int nextSn = ParticipantDao.nextSn(groupId);
+            List<ParticipantModel> existing = ParticipantDao.getParticipants(groupIdentifier);
+            int nextSn = ParticipantDao.nextSn(groupIdentifier);
 
             // Deduplicate caregivers by full name for the picker list
-            java.util.LinkedHashMap<String, ParticipantModel> uniqueCaregivers = new java.util.LinkedHashMap<>();
+            LinkedHashMap<String, ParticipantModel> uniqueCaregivers = new LinkedHashMap<>();
             for (ParticipantModel p : existing) {
                 String name = p.getCaregiverFullName().trim();
                 if (!name.isEmpty() && !uniqueCaregivers.containsKey(name)) {
@@ -415,7 +531,7 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
 
             Threading.main(() ->
                     showOvcEnrollmentDialog(
-                            new java.util.ArrayList<>(uniqueCaregivers.values()), nextSn));
+                            new ArrayList<>(uniqueCaregivers.values()), nextSn));
         });
     }
 
@@ -524,12 +640,12 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
                 "yyyy-MM-dd", "dd-MM-yyyy", "dd/MM/yyyy", "MM/dd/yyyy",
                 "yyyy/MM/dd", "dd.MM.yyyy", "yyyy.MM.dd"
         };
-        java.time.format.DateTimeFormatter out =
-                java.time.format.DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        DateTimeFormatter out =
+                DateTimeFormatter.ofPattern("dd-MM-yyyy");
         for (String fmt : inputFormats) {
             try {
-                java.time.LocalDate d = java.time.LocalDate.parse(
-                        datePart, java.time.format.DateTimeFormatter.ofPattern(fmt));
+                LocalDate d = LocalDate.parse(
+                        datePart, DateTimeFormatter.ofPattern(fmt));
                 return d.format(out);
             } catch (Exception ignored) {}
         }
@@ -551,13 +667,12 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
                     JSONObject step2 = form.optJSONObject("step2");
                     JSONObject step3 = form.optJSONObject("step3");
                     HotspotGroupModel m = currentGroup != null ? currentGroup : new HotspotGroupModel();
-                    m.setId(groupId);
+                    m.setId(groupDbId);
                     String editedGroupId = fieldValue(step1, "group_id");
                     if (editedGroupId == null || editedGroupId.trim().isEmpty()) {
                         editedGroupId = m.getGroupId();
                     }
                     m.setGroupId(editedGroupId);
-                    m.setGroupCode(editedGroupId);
                     m.setGroupName(fieldValue(step1,             "group_name"));
                     m.setHotspotName(fieldValue(step1,           "hotspot_name"));
                     m.setProvince(fieldValue(step1,              "province"));
@@ -579,6 +694,8 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
                     m.setSession13Date(fieldValue(step3, "session_13_date"));
                     m.setSession14Date(fieldValue(step3, "session_14_date"));
                     HotspotGroupDao.updateGroup(m);
+                    ChimwemweFormUtils.ensureFieldValue(form, "group_id", m.getGroupId());
+                    ChimwemweFormUtils.ensureFieldValue(form, "created_date", m.getCreatedDate());
                     ChimwemweFormUtils.saveRegistration(
                             ChimwemweFormUtils.processRegistration(
                                     form,
@@ -607,13 +724,14 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
                     JSONObject step1 = form.optJSONObject("step1");
 
                     MonthlyReviewModel r = new MonthlyReviewModel();
-                    r.setGroupId(groupId);
+                    r.setGroupId(groupIdentifier);
                     r.setReviewQuarter(fieldValue(step1,    "review_quarter"));
                     r.setReviewDate(fieldValue(step1,       "review_date"));
                     r.setReviewerName(fieldValue(step1,     "reviewer_name"));
                     r.setRegisterAccurate(fieldValue(step1, "register_accurate"));
                     r.setReviewerNotes(fieldValue(step1,    "reviewer_notes"));
                     r.setId(MonthlyReviewDao.insertReview(r));
+                    ChimwemweFormUtils.ensureFieldValue(form, "group_id", groupIdentifier);
                     ChimwemweFormUtils.saveRegistration(
                             ChimwemweFormUtils.processRegistration(
                                     form,
@@ -672,7 +790,7 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
 
                 ParticipantModel m = new ParticipantModel();
                 m.setId(participantId);
-                m.setGroupId(groupId);
+                m.setGroupId(groupIdentifier);
                 m.setSn(sn);
                 // step2 may be absent when the form is single-step; fall back to step1
                 JSONObject childStep = step2 != null ? step2 : step1;
@@ -714,11 +832,10 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
                 }
                 m.setParticipantId(participantIdCode);
 
-                if (participantId == -1L) {
-                    ParticipantDao.insertParticipant(m);
-                } else {
-                    ParticipantDao.updateParticipant(m);
-                }
+                // Standard OpenSRP save only: the client processor writes to ec_chimwemwe_participant via ec_client_fields.json.
+                ChimwemweFormUtils.ensureFieldValue(form, "group_id", groupIdentifier);
+                ChimwemweFormUtils.ensureFieldValue(form, "sn", String.valueOf(sn));
+                ChimwemweFormUtils.ensureFieldValue(form, "participant_id", participantIdCode);
                 ChimwemweFormUtils.saveRegistration(
                         ChimwemweFormUtils.processRegistration(
                                 form,
@@ -795,11 +912,6 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
         setFieldValue(form, "step1", "nearest_health_facility", currentGroup.getNearestHealthFacility());
         setFieldValue(form, "step1", "facilitator_name_1", currentGroup.getFacilitatorName1());
         setFieldValue(form, "step1", "facilitator_name_2", currentGroup.getFacilitatorName2());
-        try {
-            if (currentGroup.getGroupId() != null) {
-                form.put("entity_id", currentGroup.getGroupId());
-            }
-        } catch (Exception ignored) {}
     }
 
     private void populateParticipantForm(JSONObject form, ParticipantModel existing, int sn)
@@ -837,8 +949,8 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
             setFieldValue(form, "step2", "caregiver_id", generateNumericIdentifier());
         }
 
+        setFieldValue(form, "step1", "group_id", groupIdentifier);
         setFieldValue(form, "step1", "participant_id", participantCode);
-        form.put("entity_id", participantCode);
         form.put("_sn", sn);
         form.put("_participant_id", existing != null ? existing.getId() : -1L);
     }
@@ -846,6 +958,7 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
     private void populateOvcParticipantForm(JSONObject form, ChimwemweIndexModel ovcRecord, int sn)
             throws Exception {
         if (form == null || ovcRecord == null) return;
+        setFieldValue(form, "step1", "group_id", groupIdentifier);
         setFieldValue(form, "step1", "child_first_name", ovcRecord.getFirstName());
         setFieldValue(form, "step1", "child_surname", ovcRecord.getLastName());
         setFieldValue(form, "step1", "child_dob", normalizeDob(ovcRecord.getBirthdate()));
@@ -855,7 +968,6 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
         setFieldValue(form, "step1", "caregiver_id", ovcRecord.getHouseholdId());
         String newParticipantId = "CHIM-" + System.currentTimeMillis();
         setFieldValue(form, "step1", "participant_id", newParticipantId);
-        form.put("entity_id", newParticipantId);
         form.put("_sn", sn);
         form.put("_participant_id", -1L);
     }
@@ -870,20 +982,16 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
 
         Object raw = extras.get(EXTRA_GROUP_ID);
         if (raw instanceof Number) {
-            groupId = ((Number) raw).longValue();
-            groupIdentifier = String.valueOf(groupId);
+            groupDbId = ((Number) raw).longValue();
+            groupIdentifier = null;
             return;
         }
 
         if (raw instanceof String) {
             groupIdentifier = ((String) raw).trim();
-            if (!groupIdentifier.isEmpty()) {
-                try {
-                    groupId = Long.parseLong(groupIdentifier);
-                } catch (NumberFormatException ignored) {
-                    groupId = -1L;
-                }
-            }
+            // Treat string extras as business IDs (group_id), even if numeric.
+            // Numeric parsing here causes us to incorrectly load by internal row id.
+            groupDbId = -1L;
         }
     }
 
@@ -893,12 +1001,12 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
         Threading.main(() -> {
             try {
                 Intent intent = new Intent(
-                        this, org.smartregister.family.util.Utils.metadata().familyFormActivity);
+                        this, Utils.metadata().familyFormActivity);
                 intent.putExtra(
-                        com.vijay.jsonwizard.constants.JsonFormConstants.JSON_FORM_KEY.FORM,
+                        JsonFormConstants.JSON_FORM_KEY.FORM,
                         createJsonWizardConfig(wizard));
                 intent.putExtra(
-                        com.vijay.jsonwizard.constants.JsonFormConstants.JSON_FORM_KEY.JSON,
+                        JsonFormConstants.JSON_FORM_KEY.JSON,
                         finalForm.toString());
                 startActivityForResult(intent, requestCode);
             } catch (Exception e) {
@@ -907,8 +1015,8 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
         });
     }
 
-    private com.vijay.jsonwizard.domain.Form createJsonWizardConfig(boolean wizard) {
-        com.vijay.jsonwizard.domain.Form cfg = new com.vijay.jsonwizard.domain.Form();
+    private Form createJsonWizardConfig(boolean wizard) {
+        Form cfg = new Form();
         cfg.setWizard(wizard);
         cfg.setHideSaveLabel(true);
         cfg.setSaveLabel(getString(R.string.submit));
@@ -923,7 +1031,7 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
     // ── Monthly review ───────────────────────────────────────
 
     void openMonthlyReview() {
-        if (groupId == -1) {
+        if (groupIdentifier == null || groupIdentifier.trim().isEmpty()) {
             Toast.makeText(this, "Save the group first", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -943,7 +1051,7 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
 
     void openRecordAttendance(int sessionNum) {
         Threading.io(() -> {
-            int count = ParticipantDao.countParticipants(groupId);
+            int count = ParticipantDao.countParticipants(groupIdentifier);
             Threading.main(() -> {
                 if (count == 0) {
                     Toast.makeText(this, "Add participants before recording attendance",
@@ -951,7 +1059,7 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
                     return;
                 }
                 Intent intent = new Intent(this, RecordAttendanceActivity.class);
-                intent.putExtra(RecordAttendanceActivity.EXTRA_GROUP_ID, groupId);
+                intent.putExtra(RecordAttendanceActivity.EXTRA_GROUP_ID, groupIdentifier);
                 intent.putExtra(RecordAttendanceActivity.EXTRA_SESSION_NUMBER, sessionNum);
                 startActivity(intent);
             });

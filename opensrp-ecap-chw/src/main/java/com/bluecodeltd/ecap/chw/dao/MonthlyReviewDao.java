@@ -18,7 +18,10 @@ public class MonthlyReviewDao extends AbstractDao {
     private static final String CREATE_TABLE_SQL =
             "CREATE TABLE IF NOT EXISTS " + TABLE + " (" +
             "  id                INTEGER PRIMARY KEY AUTOINCREMENT," +
-            "  group_id          INTEGER NOT NULL," +
+            "  base_entity_id    TEXT," +
+            "  last_interacted_with INTEGER," +
+            "  delete_status     TEXT," +
+            "  group_id          TEXT NOT NULL," +
             "  participant_id    INTEGER," +
             "  review_quarter    TEXT," +
             "  review_date       TEXT," +
@@ -46,11 +49,22 @@ public class MonthlyReviewDao extends AbstractDao {
         db.execSQL(CREATE_TABLE_SQL);
     }
 
+    /** OpenSRP standard delete_status column added in DB version 43. */
+    public static void migrateToV43(SQLiteDatabase db) {
+        try { db.execSQL("ALTER TABLE " + TABLE + " ADD COLUMN base_entity_id TEXT"); } catch (Exception ignored) {}
+        try { db.execSQL("ALTER TABLE " + TABLE + " ADD COLUMN last_interacted_with INTEGER"); } catch (Exception ignored) {}
+        try { db.execSQL("ALTER TABLE " + TABLE + " ADD COLUMN delete_status TEXT"); } catch (Exception ignored) {}
+        try {
+            db.execSQL("UPDATE " + TABLE + " SET base_entity_id='chimwemwe-review-' || id " +
+                    "WHERE (base_entity_id IS NULL OR TRIM(base_entity_id)='')");
+        } catch (Exception ignored) {}
+    }
+
     public static long insertReview(MonthlyReviewModel m) {
         String sql = "INSERT INTO " + TABLE +
                 " (group_id, participant_id, review_quarter, review_date, reviewer_name, register_accurate, reviewer_notes, created_at)" +
                 " VALUES (" +
-                m.getGroupId() + "," +
+                q(m.getGroupId()) + "," +
                 m.getParticipantId() + "," +
                 q(m.getReviewQuarter()) + "," +
                 q(m.getReviewDate()) + "," +
@@ -62,14 +76,21 @@ public class MonthlyReviewDao extends AbstractDao {
         List<Long> ids = AbstractDao.readData(
                 "SELECT id FROM " + TABLE + " ORDER BY id DESC LIMIT 1",
                 cursor -> cursor.getLong(0));
-        return (ids != null && !ids.isEmpty()) ? ids.get(0) : -1L;
+        long id = (ids != null && !ids.isEmpty()) ? ids.get(0) : -1L;
+        if (id > 0) {
+            AbstractDao.updateDB("UPDATE " + TABLE + " SET base_entity_id=" + q("chimwemwe-review-" + id) +
+                    " WHERE id=" + id);
+        }
+        return id;
     }
 
     /** Returns all reviews for a group, most recent first. */
-    public static List<MonthlyReviewModel> getReviews(long groupId) {
+    public static List<MonthlyReviewModel> getReviews(String groupId) {
         String sql = "SELECT id, group_id, participant_id, review_quarter, review_date, reviewer_name, register_accurate," +
                 " reviewer_notes, created_at FROM " + TABLE +
-                " WHERE group_id=" + groupId + " ORDER BY id DESC";
+                " WHERE group_id=" + q(groupId) +
+                " AND (delete_status IS NULL OR delete_status <> '1')" +
+                " ORDER BY id DESC";
         return AbstractDao.readData(sql, MonthlyReviewDao::mapRow);
     }
 
@@ -77,7 +98,9 @@ public class MonthlyReviewDao extends AbstractDao {
     public static List<MonthlyReviewModel> getParticipantReviews(long participantId) {
         String sql = "SELECT id, group_id, participant_id, review_quarter, review_date, reviewer_name, register_accurate," +
                 " reviewer_notes, created_at FROM " + TABLE +
-                " WHERE participant_id=" + participantId + " ORDER BY id DESC";
+                " WHERE participant_id=" + participantId +
+                " AND (delete_status IS NULL OR delete_status <> '1')" +
+                " ORDER BY id DESC";
         return AbstractDao.readData(sql, MonthlyReviewDao::mapRow);
     }
 
@@ -92,10 +115,15 @@ public class MonthlyReviewDao extends AbstractDao {
         AbstractDao.updateDB(sql);
     }
 
+    public static void deleteReview(long id) {
+        if (id <= 0) return;
+        AbstractDao.updateDB("UPDATE " + TABLE + " SET delete_status='1' WHERE id=" + id);
+    }
+
     private static MonthlyReviewModel mapRow(android.database.Cursor cursor) {
         MonthlyReviewModel m = new MonthlyReviewModel();
         m.setId(cursor.getLong(0));
-        m.setGroupId(cursor.getLong(1));
+        m.setGroupId(cursor.getString(1));
         m.setParticipantId(cursor.getLong(2));
         m.setReviewQuarter(cursor.getString(3));
         m.setReviewDate(cursor.getString(4));

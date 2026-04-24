@@ -3,7 +3,6 @@ package com.bluecodeltd.ecap.chw.interactor;
 import androidx.annotation.NonNull;
 
 import com.bluecodeltd.ecap.chw.contract.ChimwemweRegisterContract;
-import com.bluecodeltd.ecap.chw.dao.HotspotGroupDao;
 import com.bluecodeltd.ecap.chw.model.HotspotGroupModel;
 import com.bluecodeltd.ecap.chw.util.ChimwemweFormUtils;
 
@@ -26,15 +25,22 @@ public class ChimwemweRegisterInteractor implements ChimwemweRegisterContract.In
 
         new AppExecutors().diskIO().execute(() -> {
             try {
-                long groupId = HotspotGroupDao.insertGroup(group);
-                if (groupId == -1) {
+                if (group.getGroupId() == null || group.getGroupId().trim().isEmpty()) {
                     callback.onSaveError("Failed to save group. Please try again.");
                     return;
                 }
 
+                ChimwemweFormUtils.ensureFieldValue(form, "group_id", group.getGroupId());
+                ChimwemweFormUtils.ensureFieldValue(form, "created_date", group.getCreatedDate());
+                form.put("encounter_type", "Chimwemwe Group Registration");
+
                 ChimwemweFormUtils.ProcessedForm processedForm = ChimwemweFormUtils.processRegistration(
-                        form, "ec_chimwemwe_group", group.getGroupCode());
-                ChimwemweFormUtils.saveRegistration(processedForm, registerParams.isEditMode());
+                        form, "ec_chimwemwe_group", group.getGroupId());
+                boolean saved = ChimwemweFormUtils.saveRegistration(processedForm, registerParams.isEditMode());
+                if (!saved) {
+                    callback.onSaveError("Failed to save group. Please try again.");
+                    return;
+                }
 
                 callback.onRegistrationSaved(registerParams.isEditMode(), groupName);
             } catch (Exception e) {
