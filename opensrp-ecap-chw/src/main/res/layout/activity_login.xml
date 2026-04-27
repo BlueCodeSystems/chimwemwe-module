@@ -10,87 +10,68 @@
         android:id="@+id/login_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#FFFFFF">
+        android:layout_weight="1.0"
+        android:background="#FFFFFF"
+        android:paddingBottom="@dimen/login_bottom_margin">
 
-        <!-- ══════════ TOP — branding ══════════ -->
+        <!-- Top section -->
         <LinearLayout
             android:id="@+id/top_section"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:orientation="vertical"
-            android:gravity="center_horizontal"
-            android:paddingTop="40dp"
-            android:paddingBottom="28dp"
-            android:paddingStart="24dp"
-            android:paddingEnd="24dp"
-            android:background="@drawable/chimwemwe_header_bg">
+            android:paddingTop="@dimen/login_logo_top_padding">
 
             <ImageView
                 android:id="@+id/login_logo"
-                android:layout_width="110dp"
-                android:layout_height="110dp"
-                android:src="@drawable/chimwemwe"
+                android:layout_width="308dp"
+                android:layout_height="@dimen/login_logo_height"
+                android:layout_gravity="center"
+                android:layout_marginTop="60dp"
+                android:layout_marginBottom="20dp"
+                android:contentDescription="@string/logo"
                 android:scaleType="fitCenter"
-                android:adjustViewBounds="true"
-                android:contentDescription="@string/logo" />
+                android:src="@drawable/chimwemwe" />
 
             <TextView
                 android:id="@+id/login_title_text_view"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
+                android:layout_margin="5dp"
+                android:gravity="center_horizontal"
                 android:text="@string/login_title"
-                android:textColor="#FFFFFF"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:gravity="center" />
+                android:textColor="@color/chimwemwe_text_primary"
+                android:textSize="@dimen/login_title_text_size"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/login_build_text_view"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
+                android:layout_marginBottom="5dp"
+                android:gravity="center_horizontal"
                 android:text="@string/app_version"
-                android:textColor="#99FFFFFF"
-                android:textSize="11sp" />
+                android:textColor="#999999"
+                android:textSize="@dimen/login_build_text_view_textSize" />
 
         </LinearLayout>
 
-        <!-- ══════════ MIDDLE — login form ══════════ -->
+        <!-- Middle section -->
         <LinearLayout
             android:id="@+id/middle_section"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/top_section"
+            android:layout_marginTop="@dimen/login_middle_section_padding_top"
             android:orientation="vertical"
-            android:background="@drawable/bg_login_form_card"
-            android:paddingStart="24dp"
-            android:paddingEnd="24dp"
-            android:paddingTop="28dp"
-            android:paddingBottom="20dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Sign in to continue"
-                android:textColor="@color/chimwemwe_text_primary"
-                android:textSize="17sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="4dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Enter your credentials below"
-                android:textColor="@color/chimwemwe_text_secondary"
-                android:textSize="13sp"
-                android:layout_marginBottom="20dp" />
+            android:paddingStart="@dimen/login_horizontal_margin"
+            android:paddingEnd="@dimen/login_horizontal_margin">
 
             <EditText
                 android:id="@+id/login_user_name_edit_text"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
+                android:layout_height="@dimen/login_view_component_height"
                 android:background="@drawable/bg_login_field"
                 android:hint="@string/username"
                 android:imeOptions="actionNext"
@@ -99,15 +80,15 @@
                 android:paddingStart="14dp"
                 android:paddingEnd="14dp"
                 android:textColor="@color/chimwemwe_text_primary"
-                android:textColorHint="#A8B2BB"
+                android:textColorHint="#bfbfbf"
                 android:textCursorDrawable="@null"
-                android:textSize="14sp" />
+                android:textSize="@dimen/login_edit_text_textSize" />
 
             <EditText
                 android:id="@+id/login_password_edit_text"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:layout_marginTop="10dp"
+                android:layout_height="@dimen/login_view_component_height"
+                android:layout_marginTop="15dp"
                 android:background="@drawable/bg_login_field"
                 android:hint="@string/password"
                 android:imeActionId="@integer/login"
@@ -116,21 +97,21 @@
                 android:paddingStart="14dp"
                 android:paddingEnd="14dp"
                 android:textColor="@color/chimwemwe_text_primary"
-                android:textColorHint="#A8B2BB"
+                android:textColorHint="#bfbfbf"
                 android:textCursorDrawable="@null"
-                android:textSize="14sp" />
+                android:textSize="@dimen/login_edit_text_textSize" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:layout_marginTop="10dp">
+                android:layout_marginTop="12dp">
 
                 <CheckBox
                     android:id="@+id/login_show_password_checkbox"
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
                     android:button="@drawable/white_checkbox_bg_selector" />
 
                 <TextView
@@ -139,8 +120,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
                     android:text="@string/show_password_text"
-                    android:textColor="@color/chimwemwe_text_secondary"
-                    android:textSize="13sp" />
+                    android:textColor="#585858"
+                    android:textSize="@dimen/login_edit_text_textSize" />
 
             </LinearLayout>
 
@@ -148,19 +129,17 @@
                 android:id="@+id/login_login_btn"
                 android:onClick="onClick"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:layout_marginTop="20dp"
+                android:layout_height="55dp"
+                android:layout_marginTop="36dp"
                 android:background="@drawable/bg_login_btn_chimwemwe"
                 android:text="@string/login_text"
                 android:textAllCaps="true"
                 android:textColor="#FFFFFF"
-                android:textSize="15sp"
-                android:textStyle="bold"
-                android:letterSpacing="0.06" />
+                android:textSize="18sp" />
 
         </LinearLayout>
 
-        <!-- ══════════ BOTTOM — partner / funder logos ══════════ -->
+        <!-- Bottom section -->
         <LinearLayout
             android:id="@+id/bottom_section"
             android:layout_width="match_parent"
@@ -168,28 +147,16 @@
             android:layout_below="@id/middle_section"
             android:layout_alignParentBottom="true"
             android:orientation="vertical"
-            android:background="#FFFFFF"
-            android:gravity="center_horizontal"
-            android:paddingTop="12dp"
-            android:paddingBottom="16dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Supported by"
-                android:textColor="#AAAAAA"
-                android:textSize="10sp"
-                android:textAllCaps="true"
-                android:letterSpacing="0.12"
-                android:layout_marginBottom="8dp" />
+            android:paddingTop="30dp">
 
             <ImageView
                 android:id="@+id/opensrp_logo_image_view"
                 android:layout_width="wrap_content"
-                android:layout_height="50dp"
+                android:layout_height="@dimen/login_opensrp_logo_height"
+                android:layout_gravity="center_horizontal"
                 android:scaleType="centerInside"
                 android:adjustViewBounds="true"
-                android:src="@drawable/coat_of_arms_of_zambia_ecap" />
+                android:src="@drawable/coat_of_arms_recommended" />
 
         </LinearLayout>
 

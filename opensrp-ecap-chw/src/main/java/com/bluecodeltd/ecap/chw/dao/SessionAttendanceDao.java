@@ -94,6 +94,11 @@ public class SessionAttendanceDao extends AbstractDao {
         try { db.execSQL("ALTER TABLE " + TABLE + " ADD COLUMN delete_status TEXT"); } catch (Exception ignored) {}
     }
 
+    /** GPS coordinates captured at the time the session is recorded (DB v44). */
+    public static void migrateToV44(SQLiteDatabase db) {
+        try { db.execSQL("ALTER TABLE " + TABLE + " ADD COLUMN session_gps TEXT"); } catch (Exception ignored) {}
+    }
+
     public static boolean hasSession(String groupId, int sessionNumber) {
         List<Integer> res = AbstractDao.readData(
                 "SELECT COUNT(*) FROM " + TABLE +
@@ -101,6 +106,15 @@ public class SessionAttendanceDao extends AbstractDao {
                         " AND (delete_status IS NULL OR delete_status <> '1')",
                 cursor -> cursor.getInt(0));
         return res != null && !res.isEmpty() && res.get(0) > 0;
+    }
+
+    public static String getSessionGps(String groupId, int sessionNumber) {
+        List<String> res = AbstractDao.readData(
+                "SELECT session_gps FROM " + TABLE +
+                        " WHERE group_id=" + q(groupId) + " AND session_number=" + sessionNumber +
+                        " ORDER BY last_interacted_with DESC LIMIT 1",
+                cursor -> cursor.getString(0));
+        return (res != null && !res.isEmpty()) ? res.get(0) : null;
     }
 
     public static String getSessionDate(String groupId, int sessionNumber) {

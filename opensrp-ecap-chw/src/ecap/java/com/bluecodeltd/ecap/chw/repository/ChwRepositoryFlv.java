@@ -163,6 +163,9 @@ public class ChwRepositoryFlv {
                 case 43:
                     upgradeToVersion43(db);
                     break;
+                case 44:
+                    upgradeToVersion44(db);
+                    break;
                 default:
                     break;
             }
@@ -1340,6 +1343,14 @@ public class ChwRepositoryFlv {
             com.bluecodeltd.ecap.chw.dao.SessionAttendanceDao.migrateToV42(db);
         } catch (Exception e) {
             Timber.e(e, "upgradeToVersion42 SessionAttendanceDao");
+        }
+    }
+
+    private static void upgradeToVersion44(SQLiteDatabase db) {
+        try {
+            com.bluecodeltd.ecap.chw.dao.SessionAttendanceDao.migrateToV44(db);
+        } catch (Exception e) {
+            Timber.e(e, "upgradeToVersion44 SessionAttendanceDao");
         }
     }
 

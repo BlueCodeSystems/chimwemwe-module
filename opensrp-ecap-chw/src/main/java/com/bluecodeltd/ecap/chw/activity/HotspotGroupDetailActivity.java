@@ -267,8 +267,8 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
         tabMediator.attach();
         // Show initial labels before async load
         setTabTitle(0, "Overview",     -1);
-        setTabTitle(1, "Sessions",      0);
-        setTabTitle(2, "Participants",  0);
+        setTabTitle(1, "Participants",  0);
+        setTabTitle(2, "Sessions",      0);
     }
 
     private void updateTabTitles() {

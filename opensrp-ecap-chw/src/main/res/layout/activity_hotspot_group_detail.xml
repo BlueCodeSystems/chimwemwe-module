@@ -91,16 +91,14 @@
             android:paddingTop="6dp"
             android:paddingEnd="12dp"
             android:paddingBottom="10dp"
-            app:tabBackground="@drawable/bg_hotspot_group_tab"
             app:tabGravity="fill"
             app:tabIndicatorColor="@android:color/transparent"
             app:tabIndicatorHeight="0dp"
             app:tabInlineLabel="true"
             app:tabMode="fixed"
-            app:tabRippleColor="@android:color/transparent"
-            app:tabSelectedTextColor="@color/chimwemwe_primary"
-            app:tabTextColor="#E6FFFFFF"
-            app:tabTextAppearance="@style/CustomFontTextViewStyle.tabIndicator.sub.white" />
+            app:tabRippleColor="#D76024"
+            app:tabSelectedTextColor="#D76024"
+            app:tabTextColor="#E6FFFFFF" />
 
     </com.google.android.material.appbar.AppBarLayout>
 

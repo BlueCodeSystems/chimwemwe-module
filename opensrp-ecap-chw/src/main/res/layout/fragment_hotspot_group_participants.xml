@@ -146,7 +146,6 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/chimwemwe_header_bg"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
                     android:paddingStart="18dp"
@@ -164,7 +163,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="PARTICIPANTS"
-                            android:textColor="#FFFFFF"
+                            android:textColor="@color/chimwemwe_primary"
                             android:textSize="12sp"
                             android:textStyle="bold"
                             android:letterSpacing="0.08" />
@@ -174,7 +173,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
                             android:text="Tap a participant to view their profile"
-                            android:textColor="#CCffffff"
+                            android:textColor="@color/chimwemwe_primary"
                             android:textSize="11sp" />
 
                     </LinearLayout>
@@ -186,7 +185,7 @@
                         android:layout_height="36dp"
                         android:gravity="center"
                         android:text="+ Add Participant"
-                        android:textColor="@color/chimwemwe_primary"
+                        android:textColor="@color/colorWhite"
                         android:textSize="12sp"
                         android:textStyle="bold"
                         android:paddingStart="14dp"

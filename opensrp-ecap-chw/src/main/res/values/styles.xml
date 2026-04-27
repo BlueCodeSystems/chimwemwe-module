@@ -72,6 +72,9 @@
         <!-- Ensure ActionBar is present for BaseLoginActivity -->
         <item name="windowActionBar">true</item>
         <item name="windowNoTitle">false</item>
+        <!-- White status bar with dark icons to match white login background -->
+        <item name="android:statusBarColor">#FFFFFF</item>
+        <item name="android:windowLightStatusBar">true</item>
     </style>
 
     <!-- Dedicated AppCompat theme for Login, in case BaseLoginActivity requires AppCompat specifically -->
@@ -81,7 +84,8 @@
         <item name="colorAccent">@color/chimwemwe_primary_light</item>
         <item name="windowActionBar">true</item>
         <item name="windowNoTitle">false</item>
-        <item name="android:statusBarColor">@color/chimwemwe_header_start</item>
+        <item name="android:statusBarColor">#FFFFFF</item>
+        <item name="android:windowLightStatusBar">true</item>
     </style>
 
     <style name="ChwTheme.AppBarOverlay.NavigationDrawerStyle">

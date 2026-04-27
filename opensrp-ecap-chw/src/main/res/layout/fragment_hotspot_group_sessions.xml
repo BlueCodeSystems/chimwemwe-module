@@ -145,7 +145,6 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/chimwemwe_header_bg"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
                     android:paddingStart="18dp"
@@ -163,7 +162,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="PROGRAMME SESSIONS"
-                            android:textColor="#FFFFFF"
+                            android:textColor="@color/chimwemwe_primary"
                             android:textSize="12sp"
                             android:textStyle="bold"
                             android:letterSpacing="0.08" />
@@ -173,7 +172,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
                             android:text="Tap a session to record attendance"
-                            android:textColor="#CCffffff"
+                            android:textColor="@color/chimwemwe_primary"
                             android:textSize="11sp" />
 
                     </LinearLayout>

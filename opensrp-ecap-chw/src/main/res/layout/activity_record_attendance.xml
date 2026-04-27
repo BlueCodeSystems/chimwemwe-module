@@ -26,7 +26,6 @@
 
     <!-- ── Session info card ── -->
     <androidx.cardview.widget.CardView
-        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -37,76 +36,177 @@
         app:cardElevation="2dp"
         app:cardBackgroundColor="#FFFFFF">
 
+        <!-- Single child wrapping both rows -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
+            android:orientation="vertical"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
             android:paddingTop="14dp"
             android:paddingBottom="14dp">
 
-            <!-- Session label -->
+            <!-- Session label + date row -->
             <LinearLayout
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
 
-                <TextView
-                    android:id="@+id/tv_session_label"
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tv_session_label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Session 1"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/chimwemwe_text_primary" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="Record who attended this session"
+                        android:textSize="11sp"
+                        android:textColor="@color/chimwemwe_text_secondary" />
+
+                </LinearLayout>
+
+                <!-- Date -->
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Session 1"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/chimwemwe_text_primary" />
+                    android:orientation="vertical"
+                    android:gravity="end">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:text="Record who attended this session"
-                    android:textSize="11sp"
-                    android:textColor="@color/chimwemwe_text_secondary" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Session Date"
+                        android:textSize="10sp"
+                        android:textColor="@color/chimwemwe_text_secondary"
+                        android:layout_marginBottom="4dp" />
+
+                    <TextView
+                        android:id="@+id/et_session_date"
+                        android:layout_width="120dp"
+                        android:layout_height="38dp"
+                        android:textSize="13sp"
+                        android:textColor="@color/chimwemwe_text_primary"
+                        android:background="@drawable/bg_login_field"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="10dp"
+                        android:gravity="center" />
+
+                </LinearLayout>
 
             </LinearLayout>
 
-            <!-- Date picker -->
+            <!-- GPS row -->
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:gravity="end">
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="10dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="Session Date"
-                    android:textSize="10sp"
-                    android:textColor="@color/chimwemwe_text_secondary"
-                    android:layout_marginBottom="4dp" />
+                    android:layout_weight="1"
+                    android:orientation="vertical">
 
-                <EditText
-                    android:id="@+id/et_session_date"
-                    android:layout_width="120dp"
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="GPS Location"
+                        android:textSize="10sp"
+                        android:textColor="@color/chimwemwe_text_secondary"
+                        android:layout_marginBottom="4dp" />
+
+                    <TextView
+                        android:id="@+id/tv_gps_coords"
+                        android:layout_width="match_parent"
+                        android:layout_height="38dp"
+                        android:hint="Not captured"
+                        android:textSize="12sp"
+                        android:textColor="@color/chimwemwe_text_primary"
+                        android:textColorHint="#A8B2BB"
+                        android:background="@drawable/bg_login_field"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="10dp"
+                        android:gravity="center_vertical"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:singleLine="true" />
+
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/btn_get_gps"
+                    android:layout_width="wrap_content"
                     android:layout_height="38dp"
-                    android:hint="DD/MM/YYYY"
-                    android:inputType="text"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginTop="18dp"
+                    android:text="Locate"
+                    android:textAllCaps="false"
                     android:textSize="13sp"
-                    android:textColor="@color/chimwemwe_text_primary"
-                    android:textColorHint="#A8B2BB"
-                    android:background="@drawable/bg_login_field"
-                    android:paddingStart="10dp"
-                    android:paddingEnd="10dp"
-                    android:gravity="center" />
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold"
+                    android:background="@drawable/bg_login_btn_chimwemwe"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp" />
 
             </LinearLayout>
 
         </LinearLayout>
 
     </androidx.cardview.widget.CardView>
+
+    <!-- ── Search bar ── -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="#FFFFFF"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="4dp"
+        android:layout_marginTop="8dp">
+
+        <ImageView
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:src="@drawable/ic_action_search"
+            android:layout_marginEnd="8dp"
+            app:tint="@color/chimwemwe_text_secondary"
+            android:contentDescription="Search" />
+
+        <EditText
+            android:id="@+id/et_search_participant"
+            android:layout_width="0dp"
+            android:layout_height="36dp"
+            android:layout_weight="1"
+            android:hint="Search participant…"
+            android:textSize="13sp"
+            android:textColor="@color/chimwemwe_text_primary"
+            android:textColorHint="#A8B2BB"
+            android:background="@android:color/transparent"
+            android:inputType="textPersonName"
+            android:imeOptions="actionSearch"
+            android:maxLines="1"
+            android:singleLine="true"
+            android:paddingStart="0dp" />
+
+    </LinearLayout>
 
     <!-- ── Column headers ── -->
     <LinearLayout
