@@ -25,68 +25,84 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:fitsSystemWindows="true">
+            android:orientation="vertical">
 
             <!-- ═══════════════════════════════
                  HEADER  —  chimwemwe gradient
+                 Fixed-height container so the profile
+                 block can be deterministically anchored
+                 inside it (no padding-math drift).
                  ═══════════════════════════════ -->
-            <LinearLayout
+            <FrameLayout
+                android:id="@+id/drawer_header"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/chimwemwe_header_bg"
-                android:orientation="horizontal"
-                android:padding="20dp"
-                android:paddingTop="36dp"
-                android:paddingBottom="20dp"
-                android:gravity="center_vertical">
+                android:layout_height="156dp"
+                android:background="@drawable/chimwemwe_header_bg">
 
-                <!-- Avatar circle -->
-                <TextView
-                    android:layout_width="52dp"
-                    android:layout_height="52dp"
-                    android:gravity="center"
-                    android:background="@drawable/bg_icon_circle_white"
-                    android:text="CH"
-                    android:textColor="#FFFFFF"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
-
-                <!-- Programme title + subtitle -->
+                <!-- Profile block — bottom-anchored inside the blue area.
+                     Sits low in the header with a small breathing-room gap
+                     before MENU. Status-bar inset is applied to the
+                     FrameLayout's paddingTop by NavigationMenu — bottom
+                     gravity makes that inset visually disappear into the
+                     empty top of the gradient instead of pushing content. -->
                 <LinearLayout
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:layout_marginStart="14dp">
+                    android:layout_gravity="bottom|start"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingStart="20dp"
+                    android:paddingEnd="20dp"
+                    android:paddingBottom="18dp">
 
+                    <!-- Avatar circle -->
                     <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Chimwemwe"
+                        android:layout_width="52dp"
+                        android:layout_height="52dp"
+                        android:gravity="center"
+                        android:background="@drawable/bg_icon_circle_white"
+                        android:text="CH"
                         android:textColor="#FFFFFF"
-                        android:textSize="18sp"
+                        android:textSize="16sp"
                         android:textStyle="bold" />
 
-                    <!-- tvLogo is set to R.string.nav_logo ("ECAP II") by NavigationMenu -->
-                    <TextView
-                        android:id="@+id/tvLogo"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:textColor="#B3FFFFFF"
-                        android:textSize="13sp" />
-
-                    <!-- ivLogo — required by NavigationMenu; kept hidden -->
-                    <ImageView
-                        android:id="@+id/ivLogo"
+                    <!-- Programme title + subtitle -->
+                    <LinearLayout
                         android:layout_width="0dp"
-                        android:layout_height="0dp"
-                        android:visibility="gone" />
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:layout_marginStart="14dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Chimwemwe"
+                            android:textColor="#FFFFFF"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
+
+                        <!-- tvLogo is set to R.string.nav_logo ("ECAP II") by NavigationMenu -->
+                        <TextView
+                            android:id="@+id/tvLogo"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:textColor="#B3FFFFFF"
+                            android:textSize="13sp" />
+
+                    </LinearLayout>
 
                 </LinearLayout>
 
-            </LinearLayout>
+                <!-- ivLogo — required by NavigationMenu; kept hidden -->
+                <ImageView
+                    android:id="@+id/ivLogo"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:visibility="gone" />
+
+            </FrameLayout>
 
             <!-- ═══════════════════════════════
                  SCROLLABLE MIDDLE SECTION
@@ -122,7 +138,7 @@
                         android:layout_height="wrap_content"
                         android:paddingStart="8dp"
                         android:paddingEnd="8dp"
-                        android:paddingTop="32dp"
+                        android:paddingTop="12dp"
                         android:clipToPadding="false" />
 
                     <!-- Divider -->

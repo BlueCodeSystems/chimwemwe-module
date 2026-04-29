@@ -18,6 +18,9 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.DefaultItemAnimator;
@@ -192,6 +195,8 @@ public class NavigationMenu implements NavigationContract.View, SyncStatusBroadc
         TextView tvLogo = rootView.findViewById(R.id.tvLogo);
         tvLogo.setText(activity.getString(R.string.nav_logo));
 
+        applyResponsiveHeaderInset();
+
         if (syncProgressBar != null) {
             syncProgressBar.setIndeterminate(true);
         }
@@ -215,6 +220,30 @@ public class NavigationMenu implements NavigationContract.View, SyncStatusBroadc
         
         // Check if sync is already in progress on initialization
         refreshSyncProgressSpinner();
+    }
+
+    private void applyResponsiveHeaderInset() {
+        if (rootView == null) {
+            return;
+        }
+
+        View headerView = rootView.findViewById(R.id.drawer_header);
+        if (headerView == null) {
+            return;
+        }
+
+        final int baseTopPadding = headerView.getPaddingTop();
+        ViewCompat.setOnApplyWindowInsetsListener(headerView, (view, windowInsets) -> {
+            Insets statusBars = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars());
+            view.setPadding(
+                    view.getPaddingLeft(),
+                    baseTopPadding + statusBars.top,
+                    view.getPaddingRight(),
+                    view.getPaddingBottom()
+            );
+            return windowInsets;
+        });
+        ViewCompat.requestApplyInsets(headerView);
     }
 
     @Override
