@@ -4,8 +4,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="#F0F4F8">
+    android:background="@color/chimwemwe_surface"
+    android:orientation="vertical">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
@@ -17,221 +17,95 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:title="Group Details"
-            app:titleTextColor="#FFFFFF"
+            android:title=""
             app:navigationIconTint="#FFFFFF"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+            app:titleTextColor="#FFFFFF" />
 
-    </com.google.android.material.appbar.AppBarLayout>
-
-    <androidx.core.widget.NestedScrollView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:clipToPadding="false">
-
+        <!-- Group header -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
+            android:orientation="horizontal"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
-            android:paddingTop="16dp"
-            android:paddingBottom="32dp">
+            android:paddingBottom="14dp"
+            android:gravity="center_vertical">
 
-            <!-- ── Group Info Card ── -->
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="14dp"
-                app:cardElevation="2dp"
-                app:cardBackgroundColor="#FFFFFF">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="GROUP INFORMATION"
-                        android:textSize="10sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/chimwemwe_text_secondary"
-                        android:letterSpacing="0.12" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="14dp"
-                        android:text="Name of Hotspot"
-                        android:textSize="12sp"
-                        android:textColor="@color/chimwemwe_text_secondary" />
-
-                    <EditText
-                        android:id="@+id/et_hotspot_name"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="Enter hotspot name"
-                        android:inputType="textCapWords"
-                        android:textSize="15sp"
-                        android:textColor="@color/chimwemwe_text_primary"
-                        android:background="@drawable/rounded_corner_edit_text_bg"
-                        android:padding="10dp"
-                        android:layout_marginTop="4dp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:text="Group Name"
-                        android:textSize="12sp"
-                        android:textColor="@color/chimwemwe_text_secondary" />
-
-                    <EditText
-                        android:id="@+id/et_group_name"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="Enter group name"
-                        android:inputType="textCapWords"
-                        android:textSize="15sp"
-                        android:textColor="@color/chimwemwe_text_primary"
-                        android:background="@drawable/rounded_corner_edit_text_bg"
-                        android:padding="10dp"
-                        android:layout_marginTop="4dp" />
-
-                    <Button
-                        android:id="@+id/btn_save_group"
-                        android:layout_width="match_parent"
-                        android:layout_height="48dp"
-                        android:layout_marginTop="16dp"
-                        android:text="Save Group"
-                        android:textAllCaps="false"
-                        android:backgroundTint="@color/chimwemwe_primary"
-                        android:textColor="#FFFFFF"
-                        android:textSize="15sp" />
-
-                </LinearLayout>
-
-            </androidx.cardview.widget.CardView>
-
-            <!-- ── Sessions Grid ── -->
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:layout_marginBottom="10dp"
-                android:text="SESSIONS (tap to record attendance)"
-                android:textSize="10sp"
-                android:textStyle="bold"
-                android:textColor="@color/chimwemwe_text_secondary"
-                android:letterSpacing="0.12" />
+                android:id="@+id/tv_group_avatar"
+                android:layout_width="52dp"
+                android:layout_height="52dp"
+                android:gravity="center"
+                android:background="@drawable/bg_icon_circle_white"
+                android:textColor="#FFFFFF"
+                android:textSize="18sp"
+                android:textStyle="bold" />
 
-            <GridLayout
-                android:id="@+id/grid_sessions"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:columnCount="4"
-                android:rowCount="4"
-                android:useDefaultMargins="false" />
-
-            <!-- ── Participants ── -->
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginStart="14dp">
 
                 <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="PARTICIPANTS"
-                    android:textSize="10sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/chimwemwe_text_secondary"
-                    android:letterSpacing="0.12" />
-
-                <Button
-                    android:id="@+id/btn_add_participant"
+                    android:id="@+id/tv_header_group_name"
                     android:layout_width="wrap_content"
-                    android:layout_height="36dp"
-                    android:text="+ Add"
-                    android:textAllCaps="false"
-                    android:textSize="13sp"
+                    android:layout_height="wrap_content"
                     android:textColor="#FFFFFF"
-                    android:backgroundTint="@color/chimwemwe_primary"
-                    android:paddingStart="14dp"
-                    android:paddingEnd="14dp" />
+                    android:textSize="17sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_header_hotspot"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#B3FFFFFF"
+                    android:textSize="13sp"
+                    android:layout_marginTop="2dp" />
+
+                <TextView
+                    android:id="@+id/tv_header_group_id"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="7dp"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
+                    android:paddingTop="3dp"
+                    android:paddingBottom="3dp"
+                    android:background="@drawable/bg_pill_translucent"
+                    android:textColor="#FFFFFF"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
 
             </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/ll_participants"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:orientation="vertical" />
-
-            <!-- ── Monthly Review ── -->
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginTop="28dp"
-                android:layout_marginBottom="12dp"
-                android:background="#E0E0E0" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="MONTHLY SUPERVISOR REVIEW"
-                        android:textSize="10sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/chimwemwe_text_secondary"
-                        android:letterSpacing="0.12" />
-
-                    <TextView
-                        android:id="@+id/tv_last_review"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:text="No reviews recorded"
-                        android:textSize="12sp"
-                        android:textColor="@color/chimwemwe_text_secondary" />
-
-                </LinearLayout>
-
-                <Button
-                    android:id="@+id/btn_monthly_review"
-                    android:layout_width="wrap_content"
-                    android:layout_height="36dp"
-                    android:text="+ Review"
-                    android:textAllCaps="false"
-                    android:textSize="13sp"
-                    android:textColor="#FFFFFF"
-                    android:backgroundTint="@color/chimwemwe_primary"
-                    android:paddingStart="14dp"
-                    android:paddingEnd="14dp" />
-
-            </LinearLayout>
-
         </LinearLayout>
 
-    </androidx.core.widget.NestedScrollView>
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tabs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:paddingStart="12dp"
+            android:paddingTop="6dp"
+            android:paddingEnd="12dp"
+            android:paddingBottom="10dp"
+            app:tabGravity="fill"
+            app:tabIndicatorColor="@android:color/transparent"
+            app:tabIndicatorHeight="0dp"
+            app:tabInlineLabel="true"
+            app:tabMode="fixed"
+            app:tabRippleColor="#D76024"
+            app:tabSelectedTextColor="#D76024"
+            app:tabTextColor="#E6FFFFFF" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/viewpager"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
 
 </LinearLayout>

@@ -15804,41 +15804,18 @@
       "columns": [
         { "column_name": "base_entity_id", "type": "Client", "json_mapping": { "field": "baseEntityId" } },
         { "column_name": "last_interacted_with", "type": "Event", "json_mapping": { "field": "version" } },
+        { "column_name": "delete_status", "type": "Client", "json_mapping": { "field": "attributes.delete_status" } },
+        { "column_name": "group_id", "type": "Client", "json_mapping": { "field": "attributes.group_id" } },
         { "column_name": "group_name", "type": "Client", "json_mapping": { "field": "attributes.group_name" } },
         { "column_name": "hotspot_name", "type": "Client", "json_mapping": { "field": "attributes.hotspot_name" } },
-        { "column_name": "created_date", "type": "Client", "json_mapping": { "field": "attributes.created_date" } }
-      ]
-    },
-    {
-      "name": "ec_chimwemwe_enrollment",
-      "columns": [
-        { "column_name": "base_entity_id", "type": "Client", "json_mapping": { "field": "baseEntityId" } },
-        { "column_name": "last_interacted_with", "type": "Event", "json_mapping": { "field": "version" } },
+        { "column_name": "created_date", "type": "Client", "json_mapping": { "field": "attributes.created_date" } },
         { "column_name": "province", "type": "Client", "json_mapping": { "field": "attributes.province" } },
         { "column_name": "district", "type": "Client", "json_mapping": { "field": "attributes.district" } },
-        { "column_name": "hotspot_name", "type": "Client", "json_mapping": { "field": "attributes.hotspot_name" } },
-        { "column_name": "group_name", "type": "Client", "json_mapping": { "field": "attributes.group_name" } },
         { "column_name": "location_of_session", "type": "Client", "json_mapping": { "field": "attributes.location_of_session" } },
         { "column_name": "location_gps", "type": "Client", "json_mapping": { "field": "attributes.location_gps" } },
         { "column_name": "nearest_health_facility", "type": "Client", "json_mapping": { "field": "attributes.nearest_health_facility" } },
-        { "column_name": "facilitator_1_first_name", "type": "Client", "json_mapping": { "field": "attributes.facilitator_1_first_name" } },
-        { "column_name": "facilitator_1_surname", "type": "Client", "json_mapping": { "field": "attributes.facilitator_1_surname" } },
-        { "column_name": "facilitator_2_first_name", "type": "Client", "json_mapping": { "field": "attributes.facilitator_2_first_name" } },
-        { "column_name": "facilitator_2_surname", "type": "Client", "json_mapping": { "field": "attributes.facilitator_2_surname" } },
-        { "column_name": "session_1_date", "type": "Client", "json_mapping": { "field": "attributes.session_1_date" } },
-        { "column_name": "session_2_date", "type": "Client", "json_mapping": { "field": "attributes.session_2_date" } },
-        { "column_name": "session_3_date", "type": "Client", "json_mapping": { "field": "attributes.session_3_date" } },
-        { "column_name": "session_4_date", "type": "Client", "json_mapping": { "field": "attributes.session_4_date" } },
-        { "column_name": "session_5_date", "type": "Client", "json_mapping": { "field": "attributes.session_5_date" } },
-        { "column_name": "session_6_date", "type": "Client", "json_mapping": { "field": "attributes.session_6_date" } },
-        { "column_name": "session_7_date", "type": "Client", "json_mapping": { "field": "attributes.session_7_date" } },
-        { "column_name": "session_8_date", "type": "Client", "json_mapping": { "field": "attributes.session_8_date" } },
-        { "column_name": "session_9_date", "type": "Client", "json_mapping": { "field": "attributes.session_9_date" } },
-        { "column_name": "session_10_date", "type": "Client", "json_mapping": { "field": "attributes.session_10_date" } },
-        { "column_name": "session_11_date", "type": "Client", "json_mapping": { "field": "attributes.session_11_date" } },
-        { "column_name": "session_12_date", "type": "Client", "json_mapping": { "field": "attributes.session_12_date" } },
-        { "column_name": "session_13_date", "type": "Client", "json_mapping": { "field": "attributes.session_13_date" } },
-        { "column_name": "session_14_date", "type": "Client", "json_mapping": { "field": "attributes.session_14_date" } }
+        { "column_name": "facilitator_name_1", "type": "Client", "json_mapping": { "field": "attributes.facilitator_name_1" } },
+        { "column_name": "facilitator_name_2", "type": "Client", "json_mapping": { "field": "attributes.facilitator_name_2" } }
       ]
     },
     {
@@ -15846,6 +15823,10 @@
       "columns": [
         { "column_name": "base_entity_id", "type": "Client", "json_mapping": { "field": "baseEntityId" } },
         { "column_name": "last_interacted_with", "type": "Event", "json_mapping": { "field": "version" } },
+        { "column_name": "delete_status", "type": "Client", "json_mapping": { "field": "attributes.delete_status" } },
+        { "column_name": "participant_id", "type": "Client", "json_mapping": { "field": "attributes.participant_id" } },
+        { "column_name": "group_id", "type": "Client", "json_mapping": { "field": "attributes.group_id" } },
+        { "column_name": "sn", "type": "Client", "json_mapping": { "field": "attributes.sn" } },
         { "column_name": "caregiver_first_name", "type": "Client", "json_mapping": { "field": "attributes.caregiver_first_name" } },
         { "column_name": "caregiver_surname", "type": "Client", "json_mapping": { "field": "attributes.caregiver_surname" } },
         { "column_name": "child_first_name", "type": "Client", "json_mapping": { "field": "attributes.child_first_name" } },
@@ -15864,13 +15845,48 @@
       ]
     },
     {
+      "name": "ec_chimwemwe_attendance",
+      "columns": [
+        { "column_name": "base_entity_id", "type": "Client", "json_mapping": { "field": "baseEntityId" } },
+        { "column_name": "last_interacted_with", "type": "Event", "json_mapping": { "field": "version" } },
+        { "column_name": "delete_status", "type": "Client", "json_mapping": { "field": "attributes.delete_status" } },
+        { "column_name": "group_id", "type": "Client", "json_mapping": { "field": "attributes.group_id" } },
+        { "column_name": "session_number", "type": "Client", "json_mapping": { "field": "attributes.session_number" } },
+        { "column_name": "session_date", "type": "Client", "json_mapping": { "field": "attributes.session_date" } },
+        { "column_name": "caregiver_attendance", "type": "Client", "json_mapping": { "field": "attributes.caregiver_attendance" } },
+        { "column_name": "child_attendance", "type": "Client", "json_mapping": { "field": "attributes.child_attendance" } },
+        { "column_name": "participant_id", "type": "Client", "json_mapping": { "field": "attributes.participant_id" } }
+      ]
+    },
+    {
       "name": "ec_chimwemwe_session_attendance",
       "columns": [
         { "column_name": "base_entity_id", "type": "Client", "json_mapping": { "field": "baseEntityId" } },
         { "column_name": "last_interacted_with", "type": "Event", "json_mapping": { "field": "version" } },
+        { "column_name": "group_id", "type": "Client", "json_mapping": { "field": "attributes.group_id" } },
         { "column_name": "session_number", "type": "Client", "json_mapping": { "field": "attributes.session_number" } },
         { "column_name": "session_date", "type": "Client", "json_mapping": { "field": "attributes.session_date" } },
         { "column_name": "session_type", "type": "Client", "json_mapping": { "field": "attributes.session_type" } },
+        { "column_name": "p1_participant_id", "type": "Client", "json_mapping": { "field": "attributes.p1_participant_id" } },
+        { "column_name": "p2_participant_id", "type": "Client", "json_mapping": { "field": "attributes.p2_participant_id" } },
+        { "column_name": "p3_participant_id", "type": "Client", "json_mapping": { "field": "attributes.p3_participant_id" } },
+        { "column_name": "p4_participant_id", "type": "Client", "json_mapping": { "field": "attributes.p4_participant_id" } },
+        { "column_name": "p5_participant_id", "type": "Client", "json_mapping": { "field": "attributes.p5_participant_id" } },
+        { "column_name": "p6_participant_id", "type": "Client", "json_mapping": { "field": "attributes.p6_participant_id" } },
+        { "column_name": "p7_participant_id", "type": "Client", "json_mapping": { "field": "attributes.p7_participant_id" } },
+        { "column_name": "p8_participant_id", "type": "Client", "json_mapping": { "field": "attributes.p8_participant_id" } },
+        { "column_name": "p9_participant_id", "type": "Client", "json_mapping": { "field": "attributes.p9_participant_id" } },
+        { "column_name": "p10_participant_id", "type": "Client", "json_mapping": { "field": "attributes.p10_participant_id" } },
+        { "column_name": "p11_participant_id", "type": "Client", "json_mapping": { "field": "attributes.p11_participant_id" } },
+        { "column_name": "p12_participant_id", "type": "Client", "json_mapping": { "field": "attributes.p12_participant_id" } },
+        { "column_name": "p13_participant_id", "type": "Client", "json_mapping": { "field": "attributes.p13_participant_id" } },
+        { "column_name": "p14_participant_id", "type": "Client", "json_mapping": { "field": "attributes.p14_participant_id" } },
+        { "column_name": "p15_participant_id", "type": "Client", "json_mapping": { "field": "attributes.p15_participant_id" } },
+        { "column_name": "p16_participant_id", "type": "Client", "json_mapping": { "field": "attributes.p16_participant_id" } },
+        { "column_name": "p17_participant_id", "type": "Client", "json_mapping": { "field": "attributes.p17_participant_id" } },
+        { "column_name": "p18_participant_id", "type": "Client", "json_mapping": { "field": "attributes.p18_participant_id" } },
+        { "column_name": "p19_participant_id", "type": "Client", "json_mapping": { "field": "attributes.p19_participant_id" } },
+        { "column_name": "p20_participant_id", "type": "Client", "json_mapping": { "field": "attributes.p20_participant_id" } },
         { "column_name": "p1_cg_attendance", "type": "Client", "json_mapping": { "field": "attributes.p1_cg_attendance" } },
         { "column_name": "p1_child_attendance", "type": "Client", "json_mapping": { "field": "attributes.p1_child_attendance" } },
         { "column_name": "p2_cg_attendance", "type": "Client", "json_mapping": { "field": "attributes.p2_cg_attendance" } },
@@ -15910,7 +15926,8 @@
         { "column_name": "p19_cg_attendance", "type": "Client", "json_mapping": { "field": "attributes.p19_cg_attendance" } },
         { "column_name": "p19_child_attendance", "type": "Client", "json_mapping": { "field": "attributes.p19_child_attendance" } },
         { "column_name": "p20_cg_attendance", "type": "Client", "json_mapping": { "field": "attributes.p20_cg_attendance" } },
-        { "column_name": "p20_child_attendance", "type": "Client", "json_mapping": { "field": "attributes.p20_child_attendance" } }
+        { "column_name": "p20_child_attendance", "type": "Client", "json_mapping": { "field": "attributes.p20_child_attendance" } },
+        { "column_name": "session_gps", "type": "Client", "json_mapping": { "field": "attributes.session_gps" } }
       ]
     },
     {
@@ -15918,11 +15935,30 @@
       "columns": [
         { "column_name": "base_entity_id", "type": "Client", "json_mapping": { "field": "baseEntityId" } },
         { "column_name": "last_interacted_with", "type": "Event", "json_mapping": { "field": "version" } },
+        { "column_name": "delete_status", "type": "Client", "json_mapping": { "field": "attributes.delete_status" } },
+        { "column_name": "participant_id", "type": "Client", "json_mapping": { "field": "attributes.participant_id" } },
+        { "column_name": "group_id", "type": "Client", "json_mapping": { "field": "attributes.group_id" } },
         { "column_name": "review_quarter", "type": "Client", "json_mapping": { "field": "attributes.review_quarter" } },
         { "column_name": "review_date", "type": "Client", "json_mapping": { "field": "attributes.review_date" } },
         { "column_name": "reviewer_name", "type": "Client", "json_mapping": { "field": "attributes.reviewer_name" } },
         { "column_name": "register_accurate", "type": "Client", "json_mapping": { "field": "attributes.register_accurate" } },
         { "column_name": "reviewer_notes", "type": "Client", "json_mapping": { "field": "attributes.reviewer_notes" } }
+      ]
+    },
+    {
+      "name": "ec_chimwemwe_referral",
+      "columns": [
+        { "column_name": "base_entity_id", "type": "Client", "json_mapping": { "field": "baseEntityId" } },
+        { "column_name": "last_interacted_with", "type": "Event", "json_mapping": { "field": "version" } },
+        { "column_name": "delete_status", "type": "Client", "json_mapping": { "field": "attributes.delete_status" } },
+        { "column_name": "participant_id", "type": "Client", "json_mapping": { "field": "attributes.participant_id" } },
+        { "column_name": "group_id", "type": "Client", "json_mapping": { "field": "attributes.group_id" } },
+        { "column_name": "who_referred", "type": "Client", "json_mapping": { "field": "attributes.who_referred" } },
+        { "column_name": "service_referred_for", "type": "Client", "json_mapping": { "field": "attributes.service_referred_for" } },
+        { "column_name": "referral_date", "type": "Client", "json_mapping": { "field": "attributes.referral_date" } },
+        { "column_name": "receiving_org", "type": "Client", "json_mapping": { "field": "attributes.receiving_org" } },
+        { "column_name": "job_title", "type": "Client", "json_mapping": { "field": "attributes.job_title" } },
+        { "column_name": "service_date", "type": "Client", "json_mapping": { "field": "attributes.service_date" } }
       ]
     }
   ]

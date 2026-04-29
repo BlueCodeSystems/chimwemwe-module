@@ -130,6 +130,42 @@ public class ChwRepositoryFlv {
                 case 32:
                     upgradeToVersion32(db);
                     break;
+                case 33:
+                    upgradeToVersion33(db);
+                    break;
+                case 34:
+                    upgradeToVersion34(db);
+                    break;
+                case 35:
+                    upgradeToVersion35(db);
+                    break;
+                case 36:
+                    upgradeToVersion36(db);
+                    break;
+                case 37:
+                    upgradeToVersion37(db);
+                    break;
+                case 38:
+                    upgradeToVersion38(db);
+                    break;
+                case 39:
+                    upgradeToVersion39(db);
+                    break;
+                case 40:
+                    upgradeToVersion40(db);
+                    break;
+                case 41:
+                    upgradeToVersion41(db);
+                    break;
+                case 42:
+                    upgradeToVersion42(db);
+                    break;
+                case 43:
+                    upgradeToVersion43(db);
+                    break;
+                case 44:
+                    upgradeToVersion44(db);
+                    break;
                 default:
                     break;
             }
@@ -1180,6 +1216,14 @@ public class ChwRepositoryFlv {
         } catch (Exception e) {
             Timber.e(e, "upgradeToVersion28");
         }
+        // Ensure group_id exists — createTable uses IF NOT EXISTS so tables that
+        // already existed (without group_id) are not recreated. Add it explicitly.
+        try {
+            db.execSQL("ALTER TABLE ec_chimwemwe_participant ADD COLUMN group_id INTEGER DEFAULT 0");
+        } catch (Exception ignored) {}
+        try {
+            db.execSQL("ALTER TABLE ec_chimwemwe_attendance ADD COLUMN group_id INTEGER DEFAULT 0");
+        } catch (Exception ignored) {}
     }
 
     private static void upgradeToVersion29(SQLiteDatabase db) {
@@ -1221,6 +1265,139 @@ public class ChwRepositoryFlv {
             com.bluecodeltd.ecap.chw.dao.ParticipantDao.migrateToV32(db);
         } catch (Exception e) {
             Timber.e(e, "upgradeToVersion32");
+        }
+    }
+
+    private static void upgradeToVersion33(SQLiteDatabase db) {
+        try {
+            // Add participant_id column to ec_chimwemwe_review
+            com.bluecodeltd.ecap.chw.dao.MonthlyReviewDao.migrateToV33(db);
+            // Create ec_chimwemwe_referral table
+            com.bluecodeltd.ecap.chw.dao.ChimwemweReferralDao.createTable(db);
+        } catch (Exception e) {
+            Timber.e(e, "upgradeToVersion33");
+        }
+    }
+
+    private static void upgradeToVersion35(SQLiteDatabase db) {
+        try {
+            com.bluecodeltd.ecap.chw.dao.ParticipantDao.migrateToV35(db);
+            com.bluecodeltd.ecap.chw.dao.AttendanceDao.migrateToV35(db);
+        } catch (Exception e) {
+            Timber.e(e, "upgradeToVersion35");
+        }
+    }
+
+    private static void upgradeToVersion36(SQLiteDatabase db) {
+        try {
+            com.bluecodeltd.ecap.chw.dao.HotspotGroupDao.migrateToV36(db);
+        } catch (Exception e) {
+            Timber.e(e, "upgradeToVersion36 HotspotGroupDao");
+        }
+    }
+
+    private static void upgradeToVersion34(SQLiteDatabase db) {
+        try {
+            DatabaseMigrationUtils.createAddedECTables(
+                    db,
+                    new HashSet<>(Arrays.asList("ec_chimwemwe_group")),
+                    ChwApplication.createCommonFtsObject()
+            );
+        } catch (Exception e) {
+            Timber.e(e, "upgradeToVersion34");
+        }
+    }
+
+    private static void upgradeToVersion38(SQLiteDatabase db) {
+        try {
+            db.execSQL("ALTER TABLE ec_chimwemwe_participant ADD COLUMN sn INTEGER");
+        } catch (Exception ignored) {}
+        try {
+            db.execSQL("ALTER TABLE ec_chimwemwe_attendance ADD COLUMN participant_id TEXT");
+        } catch (Exception ignored) {}
+    }
+
+    private static void upgradeToVersion40(SQLiteDatabase db) {
+        Timber.i("DB upgradeToVersion40: start");
+        try {
+            db.execSQL("ALTER TABLE ec_chimwemwe_participant ADD COLUMN participant_id TEXT");
+            Timber.i("DB upgradeToVersion40: added participant_id column");
+        } catch (Exception e) { Timber.w("upgradeToVersion40 add col: %s", e.getMessage()); }
+        try {
+            db.execSQL("UPDATE ec_chimwemwe_participant SET participant_id = participant_code WHERE participant_id IS NULL");
+            Timber.i("DB upgradeToVersion40: copied participant_code -> participant_id");
+        } catch (Exception e) { Timber.w("upgradeToVersion40 copy: %s", e.getMessage()); }
+        Timber.i("DB upgradeToVersion40: done");
+    }
+
+    private static void upgradeToVersion41(SQLiteDatabase db) {
+        try {
+            com.bluecodeltd.ecap.chw.dao.AttendanceDao.migrateToV41(db);
+        } catch (Exception e) {
+            Timber.e(e, "upgradeToVersion41 AttendanceDao");
+        }
+    }
+
+    private static void upgradeToVersion42(SQLiteDatabase db) {
+        try {
+            com.bluecodeltd.ecap.chw.dao.SessionAttendanceDao.migrateToV42(db);
+        } catch (Exception e) {
+            Timber.e(e, "upgradeToVersion42 SessionAttendanceDao");
+        }
+    }
+
+    private static void upgradeToVersion44(SQLiteDatabase db) {
+        try {
+            com.bluecodeltd.ecap.chw.dao.SessionAttendanceDao.migrateToV44(db);
+        } catch (Exception e) {
+            Timber.e(e, "upgradeToVersion44 SessionAttendanceDao");
+        }
+    }
+
+    private static void upgradeToVersion43(SQLiteDatabase db) {
+        try { com.bluecodeltd.ecap.chw.dao.HotspotGroupDao.migrateToV43(db); } catch (Exception e) {
+            Timber.e(e, "upgradeToVersion43 HotspotGroupDao");
+        }
+        try { com.bluecodeltd.ecap.chw.dao.ParticipantDao.migrateToV43(db); } catch (Exception e) {
+            Timber.e(e, "upgradeToVersion43 ParticipantDao");
+        }
+        try { com.bluecodeltd.ecap.chw.dao.AttendanceDao.migrateToV43(db); } catch (Exception e) {
+            Timber.e(e, "upgradeToVersion43 AttendanceDao");
+        }
+        try { com.bluecodeltd.ecap.chw.dao.SessionAttendanceDao.migrateToV43(db); } catch (Exception e) {
+            Timber.e(e, "upgradeToVersion43 SessionAttendanceDao");
+        }
+        try { com.bluecodeltd.ecap.chw.dao.MonthlyReviewDao.migrateToV43(db); } catch (Exception e) {
+            Timber.e(e, "upgradeToVersion43 MonthlyReviewDao");
+        }
+        try { com.bluecodeltd.ecap.chw.dao.ChimwemweReferralDao.migrateToV43(db); } catch (Exception e) {
+            Timber.e(e, "upgradeToVersion43 ChimwemweReferralDao");
+        }
+    }
+
+    private static void upgradeToVersion39(SQLiteDatabase db) {
+        Timber.i("DB upgradeToVersion39: start");
+        try {
+            db.execSQL("ALTER TABLE ec_chimwemwe_attendance ADD COLUMN participant_id TEXT");
+            Timber.i("DB upgradeToVersion39: added attendance.participant_id");
+        } catch (Exception e) { Timber.w("upgradeToVersion39 attendance: %s", e.getMessage()); }
+        try {
+            db.execSQL("ALTER TABLE ec_chimwemwe_referral ADD COLUMN participant_id INTEGER");
+            Timber.i("DB upgradeToVersion39: added referral.participant_id");
+        } catch (Exception e) { Timber.w("upgradeToVersion39 referral pid: %s", e.getMessage()); }
+        try {
+            db.execSQL("ALTER TABLE ec_chimwemwe_referral ADD COLUMN group_id INTEGER");
+            Timber.i("DB upgradeToVersion39: added referral.group_id");
+        } catch (Exception e) { Timber.w("upgradeToVersion39 referral gid: %s", e.getMessage()); }
+        Timber.i("DB upgradeToVersion39: done");
+    }
+
+    private static void upgradeToVersion37(SQLiteDatabase db) {
+        try { db.execSQL("ALTER TABLE ec_chimwemwe_group ADD COLUMN group_id TEXT"); } catch (Exception ignored) {}
+        try {
+            com.bluecodeltd.ecap.chw.dao.HotspotGroupDao.migrateToV37(db);
+        } catch (Exception e) {
+            Timber.e(e, "upgradeToVersion37 HotspotGroupDao");
         }
     }
 

@@ -3,6 +3,7 @@ package org.smartregister.chw.core.custom_views;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.PorterDuff;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -318,9 +319,36 @@ public class NavigationMenu implements NavigationContract.View, SyncStatusBroadc
 
     private void registerSync(final Activity parentActivity) {
 
+        View rlSync = rootView.findViewById(R.id.rlSync);
         TextView tvSync = rootView.findViewById(R.id.tvSync);
+        TextView tvSyncTimeTitle = rootView.findViewById(R.id.tvSyncTimeTitle);
+        TextView tvSyncTime = rootView.findViewById(R.id.tvSyncTime);
         ivSync = rootView.findViewById(R.id.ivSyncIcon);
         syncProgressBar = rootView.findViewById(R.id.pbSync);
+
+        if (rlSync != null) {
+            rlSync.setEnabled(true);
+            rlSync.setClickable(true);
+            rlSync.setAlpha(1f);
+        }
+        if (tvSync != null) {
+            tvSync.setEnabled(true);
+            tvSync.setClickable(true);
+            tvSync.setAlpha(1f);
+        }
+        if (tvSyncTimeTitle != null) {
+            tvSyncTimeTitle.setAlpha(1f);
+        }
+        if (tvSyncTime != null) {
+            tvSyncTime.setAlpha(1f);
+        }
+        if (ivSync != null) {
+            ivSync.setEnabled(true);
+            ivSync.setClickable(true);
+            ivSync.setAlpha(1f);
+            ivSync.setImageAlpha(255);
+            ivSync.setColorFilter(parentActivity.getResources().getColor(R.color.white), PorterDuff.Mode.SRC_IN);
+        }
 
         View.OnClickListener syncClicker = v -> {
             Toast.makeText(parentActivity, parentActivity.getResources().getText(R.string.action_start_sync), Toast.LENGTH_SHORT).show();
@@ -392,6 +420,8 @@ public class NavigationMenu implements NavigationContract.View, SyncStatusBroadc
         if (syncProgressBar == null || ivSync == null)
             return;
 
+        ivSync.setAlpha(1f);
+        ivSync.setImageAlpha(255);
         if (SyncStatusBroadcastReceiver.getInstance().isSyncing()) {
             syncProgressBar.setVisibility(View.VISIBLE);
             ivSync.setVisibility(View.INVISIBLE);

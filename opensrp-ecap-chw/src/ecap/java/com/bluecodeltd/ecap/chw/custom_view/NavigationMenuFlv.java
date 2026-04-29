@@ -26,6 +26,7 @@ public class NavigationMenuFlv implements NavigationMenu.Flavour {
     public HashMap<String, String> getTableMapValues() {
         HashMap<String, String> tableMap = new HashMap<>();
         tableMap.put(CoreConstants.DrawerMenu.REFERRALS, Constants.Tables.REFERRAL);
+        tableMap.put(CoreConstants.DrawerMenu.CHIMWEMWE, "ec_chimwemwe_group");
         return tableMap;
     }
 

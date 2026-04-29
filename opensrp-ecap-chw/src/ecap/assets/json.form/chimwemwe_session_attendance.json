@@ -52,6 +52,20 @@
     "display_back_button": "true",
     "fields": [
       {
+        "key": "group_id",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "group_id",
+        "type": "hidden",
+        "read_only": "true",
+        "hint": "Group ID",
+        "edit_type": "name",
+        "v_required": {
+          "value": true,
+          "err": ""
+        }
+      },
+      {
         "key": "session_number",
         "openmrs_entity_parent": "",
         "openmrs_entity": "person_attribute",
@@ -123,6 +137,14 @@
         "toaster_type": "info"
       },
       {
+        "key": "p1_participant_id",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p1_participant_id",
+        "type": "hidden",
+        "value": ""
+      },
+      {
         "key": "p1_cg_attendance",
         "openmrs_entity_parent": "",
         "openmrs_entity": "person_attribute",
@@ -150,6 +172,14 @@
         "type": "toaster_notes",
         "text": "SN 2",
         "toaster_type": "info"
+      },
+      {
+        "key": "p2_participant_id",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p2_participant_id",
+        "type": "hidden",
+        "value": ""
       },
       {
         "key": "p2_cg_attendance",
@@ -181,6 +211,14 @@
         "toaster_type": "info"
       },
       {
+        "key": "p3_participant_id",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p3_participant_id",
+        "type": "hidden",
+        "value": ""
+      },
+      {
         "key": "p3_cg_attendance",
         "openmrs_entity_parent": "",
         "openmrs_entity": "person_attribute",
@@ -208,6 +246,14 @@
         "type": "toaster_notes",
         "text": "SN 4",
         "toaster_type": "info"
+      },
+      {
+        "key": "p4_participant_id",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p4_participant_id",
+        "type": "hidden",
+        "value": ""
       },
       {
         "key": "p4_cg_attendance",
@@ -239,6 +285,14 @@
         "toaster_type": "info"
       },
       {
+        "key": "p5_participant_id",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p5_participant_id",
+        "type": "hidden",
+        "value": ""
+      },
+      {
         "key": "p5_cg_attendance",
         "openmrs_entity_parent": "",
         "openmrs_entity": "person_attribute",
@@ -266,6 +320,14 @@
         "type": "toaster_notes",
         "text": "SN 6",
         "toaster_type": "info"
+      },
+      {
+        "key": "p6_participant_id",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p6_participant_id",
+        "type": "hidden",
+        "value": ""
       },
       {
         "key": "p6_cg_attendance",
@@ -297,6 +359,14 @@
         "toaster_type": "info"
       },
       {
+        "key": "p7_participant_id",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p7_participant_id",
+        "type": "hidden",
+        "value": ""
+      },
+      {
         "key": "p7_cg_attendance",
         "openmrs_entity_parent": "",
         "openmrs_entity": "person_attribute",
@@ -324,6 +394,14 @@
         "type": "toaster_notes",
         "text": "SN 8",
         "toaster_type": "info"
+      },
+      {
+        "key": "p8_participant_id",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p8_participant_id",
+        "type": "hidden",
+        "value": ""
       },
       {
         "key": "p8_cg_attendance",
@@ -355,6 +433,14 @@
         "toaster_type": "info"
       },
       {
+        "key": "p9_participant_id",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p9_participant_id",
+        "type": "hidden",
+        "value": ""
+      },
+      {
         "key": "p9_cg_attendance",
         "openmrs_entity_parent": "",
         "openmrs_entity": "person_attribute",
@@ -382,6 +468,14 @@
         "type": "toaster_notes",
         "text": "SN 10",
         "toaster_type": "info"
+      },
+      {
+        "key": "p10_participant_id",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p10_participant_id",
+        "type": "hidden",
+        "value": ""
       },
       {
         "key": "p10_cg_attendance",
@@ -420,6 +514,14 @@
         "toaster_type": "info"
       },
       {
+        "key": "p11_participant_id",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p11_participant_id",
+        "type": "hidden",
+        "value": ""
+      },
+      {
         "key": "p11_cg_attendance",
         "openmrs_entity_parent": "",
         "openmrs_entity": "person_attribute",
@@ -447,6 +549,14 @@
         "type": "toaster_notes",
         "text": "SN 12",
         "toaster_type": "info"
+      },
+      {
+        "key": "p12_participant_id",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p12_participant_id",
+        "type": "hidden",
+        "value": ""
       },
       {
         "key": "p12_cg_attendance",
@@ -478,6 +588,14 @@
         "toaster_type": "info"
       },
       {
+        "key": "p13_participant_id",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p13_participant_id",
+        "type": "hidden",
+        "value": ""
+      },
+      {
         "key": "p13_cg_attendance",
         "openmrs_entity_parent": "",
         "openmrs_entity": "person_attribute",
@@ -505,6 +623,14 @@
         "type": "toaster_notes",
         "text": "SN 14",
         "toaster_type": "info"
+      },
+      {
+        "key": "p14_participant_id",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p14_participant_id",
+        "type": "hidden",
+        "value": ""
       },
       {
         "key": "p14_cg_attendance",
@@ -536,6 +662,14 @@
         "toaster_type": "info"
       },
       {
+        "key": "p15_participant_id",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p15_participant_id",
+        "type": "hidden",
+        "value": ""
+      },
+      {
         "key": "p15_cg_attendance",
         "openmrs_entity_parent": "",
         "openmrs_entity": "person_attribute",
@@ -563,6 +697,14 @@
         "type": "toaster_notes",
         "text": "SN 16",
         "toaster_type": "info"
+      },
+      {
+        "key": "p16_participant_id",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p16_participant_id",
+        "type": "hidden",
+        "value": ""
       },
       {
         "key": "p16_cg_attendance",
@@ -594,6 +736,14 @@
         "toaster_type": "info"
       },
       {
+        "key": "p17_participant_id",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p17_participant_id",
+        "type": "hidden",
+        "value": ""
+      },
+      {
         "key": "p17_cg_attendance",
         "openmrs_entity_parent": "",
         "openmrs_entity": "person_attribute",
@@ -621,6 +771,14 @@
         "type": "toaster_notes",
         "text": "SN 18",
         "toaster_type": "info"
+      },
+      {
+        "key": "p18_participant_id",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p18_participant_id",
+        "type": "hidden",
+        "value": ""
       },
       {
         "key": "p18_cg_attendance",
@@ -652,6 +810,14 @@
         "toaster_type": "info"
       },
       {
+        "key": "p19_participant_id",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p19_participant_id",
+        "type": "hidden",
+        "value": ""
+      },
+      {
         "key": "p19_cg_attendance",
         "openmrs_entity_parent": "",
         "openmrs_entity": "person_attribute",
@@ -679,6 +845,14 @@
         "type": "toaster_notes",
         "text": "SN 20",
         "toaster_type": "info"
+      },
+      {
+        "key": "p20_participant_id",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "p20_participant_id",
+        "type": "hidden",
+        "value": ""
       },
       {
         "key": "p20_cg_attendance",

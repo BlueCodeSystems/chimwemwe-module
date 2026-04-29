@@ -60,12 +60,14 @@ public class NavigationAdapter extends RecyclerView.Adapter<NavigationAdapter.My
         holder.tvName.setText(context.getResources().getText(model.getTitleID()));
         holder.tvName.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX,
                 context.getResources().getDimension(R.dimen.nav_item_text_size));
-        if(context.getResources().getText(model.getTitleID()).equals("Home"))
-        {
-            holder.tvCount.setText("");
-        }
-        else {
+        boolean showCount = CoreConstants.DrawerMenu.CHIMWEMWE.equals(model.getMenuTitle())
+                && model.getRegisterCount() >= 0;
+        if (showCount) {
             holder.tvCount.setText(String.format(Locale.getDefault(), "%d", model.getRegisterCount()));
+            holder.tvCount.setVisibility(View.VISIBLE);
+        } else {
+            holder.tvCount.setText("");
+            holder.tvCount.setVisibility(View.GONE);
         }
 
         holder.tvCount.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX,

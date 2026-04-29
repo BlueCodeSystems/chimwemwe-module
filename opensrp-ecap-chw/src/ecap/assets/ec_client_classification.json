@@ -796,9 +796,9 @@
           },
           {
             "field": "eventType",
-            "field_value": "Chimwemwe Enrollment",
+            "field_value": "Chimwemwe Referral",
             "creates_case": [
-              "ec_chimwemwe_enrollment"
+              "ec_chimwemwe_referral"
             ]
           }
         ]

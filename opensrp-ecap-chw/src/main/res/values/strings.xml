@@ -468,5 +468,8 @@
 
     <!-- Common menu/action strings expected by library menus -->
     <string name="logout_text">Logout</string>
+    <string name="group_icon">Group icon</string>
+    <string name="open_group_details">Open group details</string>
+    <string name="support_logo" />
 
 </resources>

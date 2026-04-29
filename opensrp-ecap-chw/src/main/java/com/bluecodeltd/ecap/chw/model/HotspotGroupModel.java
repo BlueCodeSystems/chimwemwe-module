@@ -3,7 +3,7 @@ package com.bluecodeltd.ecap.chw.model;
 public class HotspotGroupModel {
 
     private long   id;
-    private String groupCode;   // system-generated UUID
+    private String groupId;     // form/business identifier
     private String hotspotName;
     private String groupName;
     private String createdDate;
@@ -16,10 +16,8 @@ public class HotspotGroupModel {
     private String nearestHealthFacility;
 
     // Enrollment form — Step 2 (facilitators)
-    private String facilitator1FirstName;
-    private String facilitator1Surname;
-    private String facilitator2FirstName;
-    private String facilitator2Surname;
+    private String facilitatorName1;
+    private String facilitatorName2;
 
     // Enrollment form — Step 3 (planned session dates 1–14)
     private String session1Date;
@@ -46,8 +44,8 @@ public class HotspotGroupModel {
     public long getId()                  { return id; }
     public void setId(long id)           { this.id = id; }
 
-    public String getGroupCode()                   { return groupCode; }
-    public void   setGroupCode(String groupCode)   { this.groupCode = groupCode; }
+    public String getGroupId()                 { return groupId; }
+    public void   setGroupId(String groupId)   { this.groupId = groupId; }
 
     public String getHotspotName()                     { return hotspotName; }
     public void   setHotspotName(String hotspotName)   { this.hotspotName = hotspotName; }
@@ -77,17 +75,11 @@ public class HotspotGroupModel {
 
     // ── Step 2 ───────────────────────────────────────────────
 
-    public String getFacilitator1FirstName()                               { return facilitator1FirstName; }
-    public void   setFacilitator1FirstName(String facilitator1FirstName)   { this.facilitator1FirstName = facilitator1FirstName; }
+    public String getFacilitatorName1()                            { return facilitatorName1; }
+    public void   setFacilitatorName1(String facilitatorName1)    { this.facilitatorName1 = facilitatorName1; }
 
-    public String getFacilitator1Surname()                             { return facilitator1Surname; }
-    public void   setFacilitator1Surname(String facilitator1Surname)   { this.facilitator1Surname = facilitator1Surname; }
-
-    public String getFacilitator2FirstName()                               { return facilitator2FirstName; }
-    public void   setFacilitator2FirstName(String facilitator2FirstName)   { this.facilitator2FirstName = facilitator2FirstName; }
-
-    public String getFacilitator2Surname()                             { return facilitator2Surname; }
-    public void   setFacilitator2Surname(String facilitator2Surname)   { this.facilitator2Surname = facilitator2Surname; }
+    public String getFacilitatorName2()                            { return facilitatorName2; }
+    public void   setFacilitatorName2(String facilitatorName2)    { this.facilitatorName2 = facilitatorName2; }
 
     // ── Step 3 ───────────────────────────────────────────────
 
