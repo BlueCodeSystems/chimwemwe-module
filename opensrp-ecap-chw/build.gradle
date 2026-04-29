@@ -63,7 +63,7 @@ android {
 
     java {
         toolchain {
-            languageVersion = JavaLanguageVersion.of(17)
+            languageVersion = JavaLanguageVersion.of(21)
         }
     }
 
@@ -497,7 +497,7 @@ dependencies {
 def testToolchains = project.extensions.getByType(org.gradle.jvm.toolchain.JavaToolchainService)
 tasks.withType(Test).configureEach { t ->
     javaLauncher.set(testToolchains.launcherFor {
-        languageVersion = JavaLanguageVersion.of(17)
+        languageVersion = JavaLanguageVersion.of(21)
     })
     // Keep tests in a single forked worker to minimize cross-process serialization
     maxParallelForks = 1

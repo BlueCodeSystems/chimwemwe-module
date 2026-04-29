@@ -27,7 +27,7 @@
             android:fitsSystemWindows="false">
 
             <RelativeLayout
-                android:id="@+id/rlLogo"
+                android:id="@+id/drawer_header"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentStart="true"
@@ -64,7 +64,7 @@
                 android:id="@+id/vDiv1"
                 android:layout_width="match_parent"
                 android:layout_height="2dp"
-                android:layout_below="@+id/rlLogo"
+                android:layout_below="@+id/drawer_header"
                 android:background="#000000" />
 
             <ScrollView
