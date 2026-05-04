@@ -1,0 +1,61 @@
+package com.bluecodeltd.chimwemwe.chw.presenter;
+
+import android.app.Activity;
+
+import org.json.JSONObject;
+import com.bluecodeltd.chimwemwe.chw.BuildConfig;
+import com.bluecodeltd.chimwemwe.chw.activity.FamilyPlanningMemberProfileActivity;
+import com.bluecodeltd.chimwemwe.chw.activity.ReferralRegistrationActivity;
+import com.bluecodeltd.chimwemwe.chw.contract.AncMemberProfileContract;
+
+import org.smartregister.chw.core.presenter.CoreFamilyPlanningProfilePresenter;
+import org.smartregister.chw.core.utils.CoreConstants;
+import org.smartregister.chw.fp.domain.FpMemberObject;
+import com.bluecodeltd.chimwemwe.chw.model.ReferralTypeModel;
+import com.bluecodeltd.chimwemwe.chw.util.Constants;
+import com.bluecodeltd.chimwemwe.chw.util.Utils;
+
+import java.util.List;
+
+import timber.log.Timber;
+
+public class FamilyPlanningMemberProfilePresenter extends CoreFamilyPlanningProfilePresenter
+        implements AncMemberProfileContract.Presenter {
+
+    private FpMemberObject fpMemberObject;
+    private List<ReferralTypeModel> referralTypeModels;
+
+    public FamilyPlanningMemberProfilePresenter(org.smartregister.chw.fp.contract.BaseFpProfileContract.View view,
+                                                org.smartregister.chw.fp.contract.BaseFpProfileContract.Interactor interactor,
+                                                FpMemberObject fpMemberObject) {
+        super(view, interactor, fpMemberObject);
+        this.fpMemberObject = fpMemberObject;
+    }
+
+    @Override
+    public void referToFacility() {
+        referralTypeModels = ((FamilyPlanningMemberProfileActivity) getView()).getReferralTypeModels();
+        if (referralTypeModels.size() == 1) {
+            startFamilyPlanningReferral();
+        } else {
+            Utils.launchClientReferralActivity((Activity) getView(), referralTypeModels, fpMemberObject.getBaseEntityId());
+        }
+    }
+
+    @Override
+    public void startFamilyPlanningReferral() {
+        try {
+            if (BuildConfig.USE_UNIFIED_REFERRAL_APPROACH) {
+                JSONObject formJson = getFormUtils().getFormJson(Constants.JSON_FORM.getFamilyPlanningUnifiedReferralForm(fpMemberObject.getGender()));
+                formJson.put(Constants.REFERRAL_TASK_FOCUS, referralTypeModels.get(0).getReferralType());
+                ReferralRegistrationActivity.startGeneralReferralFormActivityForResults((Activity) getView(), fpMemberObject.getBaseEntityId(), formJson, false);
+            } else {
+                org.smartregister.chw.core.contract.CoreFamilyPlanningMemberProfileContract.View v =
+                        (org.smartregister.chw.core.contract.CoreFamilyPlanningMemberProfileContract.View) getView();
+                v.startFormActivity(getFormUtils().getFormJson(CoreConstants.JSON_FORM.getFamilyPlanningReferralForm(fpMemberObject.getGender())), fpMemberObject);
+            }
+        } catch (Exception e) {
+            Timber.e(e);
+        }
+    }
+}
