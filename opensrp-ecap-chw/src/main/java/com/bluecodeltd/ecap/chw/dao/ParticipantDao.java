@@ -212,10 +212,13 @@ public class ParticipantDao extends AbstractDao {
     }
 
     private static String sessionsDoneSelect() {
-        String pidExpr = "CAST(p.id AS TEXT)";
-        StringBuilder sb = new StringBuilder();
         // Count distinct sessions where the participant has any non-empty attendance recorded
-        // in the normalized participant-lines table (no slot limit).
+        // in the normalized participant-lines table (no slot limit). Match on p.participant_id
+        // (the stable "CHIM-..." business code), not the row PK — OpenSRP's CONFLICT_REPLACE
+        // overwrites the participant row's INTEGER id column with a non-numeric base_entity_id,
+        // so cursor.getLong(p.id) returns 0 for every participant and the PK is unusable.
+        String pidExpr = "p.participant_id";
+        StringBuilder sb = new StringBuilder();
         sb.append(" (SELECT COUNT(DISTINCT sap.session_number) FROM ec_chimwemwe_session_attendance_participant sap");
         sb.append("  WHERE sap.group_id=p.group_id AND sap.participant_id=").append(pidExpr);
         sb.append("  AND (sap.delete_status IS NULL OR sap.delete_status <> '1')");
@@ -289,11 +292,18 @@ public class ParticipantDao extends AbstractDao {
         } catch (Exception ignored) {}
 
         String groupId = p != null ? p.getGroupId() : null;
-        if (groupId != null && !groupId.trim().isEmpty()) {
-            SessionAttendanceDao.removeParticipantFromGroupSessions(groupId.trim(), id);
+        String participantCode = p != null ? p.getParticipantId() : null;
+        if (groupId != null && !groupId.trim().isEmpty()
+                && participantCode != null && !participantCode.trim().isEmpty()) {
+            SessionAttendanceDao.removeParticipantFromGroupSessions(groupId.trim(), participantCode);
         }
 
-        AbstractDao.updateDB("UPDATE ec_chimwemwe_session_attendance_participant SET delete_status='1' WHERE participant_id=" + q(String.valueOf(id)));
+        // Cascade soft-delete to attendance child tables. Match on participant_id (the business
+        // code) since the row PK `id` is corrupted to a non-numeric string by OpenSRP.
+        if (participantCode != null && !participantCode.trim().isEmpty()) {
+            AbstractDao.updateDB("UPDATE ec_chimwemwe_session_attendance_participant SET delete_status='1' WHERE participant_id=" + q(participantCode));
+            AbstractDao.updateDB("UPDATE ec_chimwemwe_attendance SET delete_status='1' WHERE participant_id=" + q(participantCode));
+        }
         AbstractDao.updateDB("UPDATE ec_chimwemwe_review     SET delete_status='1' WHERE participant_id=" + id);
         AbstractDao.updateDB("UPDATE ec_chimwemwe_referral   SET delete_status='1' WHERE participant_id=" + id);
         AbstractDao.updateDB("UPDATE " + TABLE + " SET delete_status='1' WHERE id=" + id);

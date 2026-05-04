@@ -89,20 +89,22 @@ public class SessionAttendanceParticipantDao extends AbstractDao {
     }
 
     /**
-     * Returns a map keyed by participant id for a given session (unlimited participants).
+     * Returns a map keyed by participant business code (ec_chimwemwe_participant.participant_id,
+     * e.g. "CHIM-1234567890") for a given session (unlimited participants). Keyed by code rather
+     * than the row PK because OpenSRP's CONFLICT_REPLACE corrupts the participant row's INTEGER
+     * id column with a non-numeric base_entity_id, so the row PK can't identify a participant.
      */
-    public static Map<Long, AttendanceModel> getSessionAttendanceMap(String groupId, int sessionNumber) {
-        Map<Long, AttendanceModel> out = new HashMap<>();
+    public static Map<String, AttendanceModel> getSessionAttendanceMap(String groupId, int sessionNumber) {
+        Map<String, AttendanceModel> out = new HashMap<>();
         try {
             String sql = "SELECT participant_id, session_date, caregiver_attendance, child_attendance FROM " + TABLE +
                     " WHERE group_id=" + q(groupId) + " AND session_number=" + sessionNumber +
                     " AND (delete_status IS NULL OR delete_status <> '1')";
-            List<Map<Long, AttendanceModel>> rows = AbstractDao.readData(sql, cursor -> {
-                Map<Long, AttendanceModel> map = new HashMap<>();
+            List<Map<String, AttendanceModel>> rows = AbstractDao.readData(sql, cursor -> {
+                Map<String, AttendanceModel> map = new HashMap<>();
                 String pidRaw = cursor.getString(0);
                 if (pidRaw == null || pidRaw.trim().isEmpty()) return map;
-                long pid;
-                try { pid = Long.parseLong(pidRaw.trim()); } catch (Exception ignored) { return map; }
+                String pid = pidRaw.trim();
 
                 AttendanceModel a = new AttendanceModel();
                 a.setGroupId(groupId);
@@ -116,7 +118,7 @@ public class SessionAttendanceParticipantDao extends AbstractDao {
             });
 
             if (rows != null) {
-                for (Map<Long, AttendanceModel> r : rows) if (r != null) out.putAll(r);
+                for (Map<String, AttendanceModel> r : rows) if (r != null) out.putAll(r);
             }
         } catch (Exception ignored) {}
         return out;
@@ -126,8 +128,10 @@ public class SessionAttendanceParticipantDao extends AbstractDao {
         AbstractDao.updateDB("UPDATE " + TABLE + " SET delete_status='1' WHERE group_id=" + q(groupId));
     }
 
-    public static void softDeleteForParticipant(long participantId) {
-        AbstractDao.updateDB("UPDATE " + TABLE + " SET delete_status='1' WHERE participant_id=" + q(String.valueOf(participantId)));
+    /** participantCode is the business identifier (ec_chimwemwe_participant.participant_id). */
+    public static void softDeleteForParticipant(String participantCode) {
+        if (participantCode == null || participantCode.trim().isEmpty()) return;
+        AbstractDao.updateDB("UPDATE " + TABLE + " SET delete_status='1' WHERE participant_id=" + q(participantCode.trim()));
     }
 
     private static String q(String s) {

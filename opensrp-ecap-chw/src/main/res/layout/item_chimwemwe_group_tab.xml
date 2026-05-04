@@ -21,7 +21,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="5dp"
-        android:background="@drawable/bg_pill_translucent"
+        android:background="@drawable/bg_chimwemwe_tab_count_pill"
         android:duplicateParentState="true"
         android:paddingStart="7dp"
         android:paddingEnd="7dp"

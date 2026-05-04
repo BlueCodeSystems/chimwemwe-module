@@ -31,3 +31,5 @@ opensrp-chw/lmh/
 hs_err_pid*
 opensrp-ecap-chw/ecap/*
 Task
+.claude/
+.gradle-user-home/
