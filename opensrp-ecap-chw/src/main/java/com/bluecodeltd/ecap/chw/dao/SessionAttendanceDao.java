@@ -23,6 +23,7 @@ public class SessionAttendanceDao extends AbstractDao {
                     "  last_interacted_with   INTEGER," +
                     "  delete_status          TEXT," +
                     "  group_id               TEXT NOT NULL," +
+                    "  participant_id         TEXT," +
                     "  session_number         INTEGER NOT NULL," +
                     "  session_date           TEXT," +
                     "  session_type           TEXT," +
@@ -99,6 +100,11 @@ public class SessionAttendanceDao extends AbstractDao {
         try { db.execSQL("ALTER TABLE " + TABLE + " ADD COLUMN session_gps TEXT"); } catch (Exception ignored) {}
     }
 
+    /** participant_id column added (DB v45). */
+    public static void migrateToV45(SQLiteDatabase db) {
+        try { db.execSQL("ALTER TABLE " + TABLE + " ADD COLUMN participant_id TEXT"); } catch (Exception ignored) {}
+    }
+
     public static boolean hasSession(String groupId, int sessionNumber) {
         List<Integer> res = AbstractDao.readData(
                 "SELECT COUNT(*) FROM " + TABLE +
@@ -106,6 +112,20 @@ public class SessionAttendanceDao extends AbstractDao {
                         " AND (delete_status IS NULL OR delete_status <> '1')",
                 cursor -> cursor.getInt(0));
         return res != null && !res.isEmpty() && res.get(0) > 0;
+    }
+
+    /**
+     * Returns the existing base_entity_id for a saved session row.
+     * Used to ensure edits do not generate/override base_entity_id (which creates duplicate Clients).
+     */
+    public static String getSessionBaseEntityId(String groupId, int sessionNumber) {
+        List<String> res = AbstractDao.readData(
+                "SELECT base_entity_id FROM " + TABLE +
+                        " WHERE group_id=" + q(groupId) + " AND session_number=" + sessionNumber +
+                        " AND (delete_status IS NULL OR delete_status <> '1')" +
+                        " ORDER BY last_interacted_with DESC LIMIT 1",
+                cursor -> cursor.getString(0));
+        return (res != null && !res.isEmpty()) ? res.get(0) : null;
     }
 
     public static String getSessionGps(String groupId, int sessionNumber) {

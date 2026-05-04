@@ -166,6 +166,18 @@ public class ChwRepositoryFlv {
                 case 44:
                     upgradeToVersion44(db);
                     break;
+                case 45:
+                    upgradeToVersion45(db);
+                    break;
+                case 46:
+                    upgradeToVersion46(db);
+                    break;
+                case 47:
+                    upgradeToVersion47(db);
+                    break;
+                case 48:
+                    upgradeToVersion48(db);
+                    break;
                 default:
                     break;
             }
@@ -1212,7 +1224,6 @@ public class ChwRepositoryFlv {
         try {
             com.bluecodeltd.ecap.chw.dao.HotspotGroupDao.createTable(db);
             com.bluecodeltd.ecap.chw.dao.ParticipantDao.createTable(db);
-            com.bluecodeltd.ecap.chw.dao.AttendanceDao.createTable(db);
         } catch (Exception e) {
             Timber.e(e, "upgradeToVersion28");
         }
@@ -1220,9 +1231,6 @@ public class ChwRepositoryFlv {
         // already existed (without group_id) are not recreated. Add it explicitly.
         try {
             db.execSQL("ALTER TABLE ec_chimwemwe_participant ADD COLUMN group_id INTEGER DEFAULT 0");
-        } catch (Exception ignored) {}
-        try {
-            db.execSQL("ALTER TABLE ec_chimwemwe_attendance ADD COLUMN group_id INTEGER DEFAULT 0");
         } catch (Exception ignored) {}
     }
 
@@ -1351,6 +1359,38 @@ public class ChwRepositoryFlv {
             com.bluecodeltd.ecap.chw.dao.SessionAttendanceDao.migrateToV44(db);
         } catch (Exception e) {
             Timber.e(e, "upgradeToVersion44 SessionAttendanceDao");
+        }
+    }
+
+    private static void upgradeToVersion45(SQLiteDatabase db) {
+        try {
+            com.bluecodeltd.ecap.chw.dao.SessionAttendanceDao.migrateToV45(db);
+        } catch (Exception e) {
+            Timber.e(e, "upgradeToVersion45 SessionAttendanceDao");
+        }
+    }
+
+    private static void upgradeToVersion46(SQLiteDatabase db) {
+        // Remove legacy per-participant attendance table; session snapshots are the source of truth.
+        try { db.execSQL("DROP TABLE IF EXISTS ec_chimwemwe_attendance"); } catch (Exception ignored) {}
+        try { db.execSQL("DROP INDEX IF EXISTS ec_chimwemwe_attendance_base_entity_id_idx"); } catch (Exception ignored) {}
+    }
+
+    private static void upgradeToVersion47(SQLiteDatabase db) {
+        // Unlimited participants per session: normalized session attendance lines table.
+        try {
+            com.bluecodeltd.ecap.chw.dao.SessionAttendanceParticipantDao.migrateToV47(db);
+        } catch (Exception e) {
+            Timber.e(e, "upgradeToVersion47 SessionAttendanceParticipantDao");
+        }
+    }
+
+    private static void upgradeToVersion48(SQLiteDatabase db) {
+        // Add OpenSRP standard is_closed field expected by the client processor for case models.
+        try {
+            com.bluecodeltd.ecap.chw.dao.SessionAttendanceParticipantDao.migrateToV48(db);
+        } catch (Exception e) {
+            Timber.e(e, "upgradeToVersion48 SessionAttendanceParticipantDao");
         }
     }
 
