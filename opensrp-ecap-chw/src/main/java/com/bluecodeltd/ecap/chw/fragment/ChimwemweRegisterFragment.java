@@ -20,6 +20,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.bluecodeltd.ecap.chw.R;
+import com.bluecodeltd.ecap.chw.activity.ChimwemweFacilitiesActivity;
 import com.bluecodeltd.ecap.chw.activity.HotspotGroupDetailActivity;
 import com.bluecodeltd.ecap.chw.contract.ChimwemweRegisterFragmentContract;
 import com.bluecodeltd.ecap.chw.presenter.ChimwemweRegisterPresenter;
@@ -101,6 +102,7 @@ public class ChimwemweRegisterFragment extends BaseSafeRegisterFragment
 
             View navbarContainer = view.findViewById(org.smartregister.R.id.register_nav_bar_container);
             if (navbarContainer != null) navbarContainer.bringToFront();
+            attachFacilitiesShortcut(view);
 
             if (getSearchView() != null) {
                 getSearchView().setCompoundDrawablesWithIntrinsicBounds(
@@ -117,6 +119,38 @@ public class ChimwemweRegisterFragment extends BaseSafeRegisterFragment
         } catch (Exception e) {
             Log.e(TAG, "setupViews error", e);
         }
+    }
+
+    private void attachFacilitiesShortcut(View root) {
+        try {
+            View container = root.findViewById(R.id.register_nav_bar_container);
+            if (!(container instanceof android.widget.LinearLayout)) return;
+            android.widget.LinearLayout ll = (android.widget.LinearLayout) container;
+
+            // Avoid duplicates across rebinds.
+            View existing = ll.findViewWithTag("chimwemwe_facilities_btn");
+            if (existing != null) return;
+
+            android.widget.TextView btn = new android.widget.TextView(root.getContext());
+            btn.setTag("chimwemwe_facilities_btn");
+            btn.setText("Facilities");
+            btn.setTextColor(android.graphics.Color.WHITE);
+            btn.setTextSize(13f);
+            btn.setPadding(18, 10, 18, 10);
+            btn.setBackgroundResource(R.drawable.bg_sessions_pill);
+            btn.setOnClickListener(v -> {
+                if (getActivity() == null) return;
+                startActivity(new Intent(getActivity(), ChimwemweFacilitiesActivity.class));
+            });
+
+            android.widget.LinearLayout.LayoutParams lp = new android.widget.LinearLayout.LayoutParams(
+                    android.widget.LinearLayout.LayoutParams.WRAP_CONTENT,
+                    android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+            );
+            lp.setMargins(10, 0, 10, 0);
+            btn.setLayoutParams(lp);
+            ll.addView(btn);
+        } catch (Exception ignored) {}
     }
 
     private void hideIfPresent(View root, int id) {

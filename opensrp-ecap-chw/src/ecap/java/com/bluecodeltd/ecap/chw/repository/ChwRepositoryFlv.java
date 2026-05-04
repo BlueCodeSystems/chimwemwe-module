@@ -178,6 +178,9 @@ public class ChwRepositoryFlv {
                 case 48:
                     upgradeToVersion48(db);
                     break;
+                case 49:
+                    upgradeToVersion49(db);
+                    break;
                 default:
                     break;
             }
@@ -1391,6 +1394,15 @@ public class ChwRepositoryFlv {
             com.bluecodeltd.ecap.chw.dao.SessionAttendanceParticipantDao.migrateToV48(db);
         } catch (Exception e) {
             Timber.e(e, "upgradeToVersion48 SessionAttendanceParticipantDao");
+        }
+    }
+
+    private static void upgradeToVersion49(SQLiteDatabase db) {
+        // Local facilities cache (synced from Firebase RTDB)
+        try {
+            com.bluecodeltd.ecap.chw.dao.ChimwemweFacilitiesDao.migrateToV49(db);
+        } catch (Exception e) {
+            Timber.e(e, "upgradeToVersion49 ChimwemweFacilitiesDao");
         }
     }
 

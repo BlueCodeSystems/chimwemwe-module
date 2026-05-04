@@ -55,6 +55,10 @@
             android:name=".activity.ShowReferralsActivity"
             android:theme="@style/ChwTheme.NoActionBar" />
         <activity
+            android:name=".activity.ChimwemweFacilitiesActivity"
+            android:exported="false"
+            android:theme="@style/ChwTheme.NoActionBar" />
+        <activity
             android:name=".activity.VcaServiceActivity"
             android:theme="@style/ChwTheme.NoActionBar" />
         <activity

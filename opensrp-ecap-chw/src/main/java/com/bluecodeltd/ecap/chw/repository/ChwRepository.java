@@ -5,6 +5,7 @@ import android.content.Context;
 import com.bluecodeltd.ecap.chw.BuildConfig;
 import com.bluecodeltd.ecap.chw.application.ChwApplication;
 import com.bluecodeltd.ecap.chw.dao.HotspotGroupDao;
+import com.bluecodeltd.ecap.chw.dao.ChimwemweFacilitiesDao;
 import com.bluecodeltd.ecap.chw.dao.MonthlyReviewDao;
 import com.bluecodeltd.ecap.chw.dao.ParticipantDao;
 import com.bluecodeltd.ecap.chw.dao.SessionAttendanceDao;
@@ -35,6 +36,7 @@ public class ChwRepository extends CoreChwRepository {
         SessionAttendanceParticipantDao.createTable(db);
         MonthlyReviewDao.createTable(db);
         com.bluecodeltd.ecap.chw.dao.ChimwemweReferralDao.createTable(db);
+        ChimwemweFacilitiesDao.createTable(db);
     }
 
     @Override
