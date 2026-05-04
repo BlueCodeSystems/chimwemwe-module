@@ -214,15 +214,12 @@ public class ParticipantDao extends AbstractDao {
     private static String sessionsDoneSelect() {
         String pidExpr = "CAST(p.id AS TEXT)";
         StringBuilder sb = new StringBuilder();
-        sb.append(" (SELECT COUNT(DISTINCT sa.session_number) FROM ec_chimwemwe_session_attendance sa");
-        sb.append("  WHERE sa.group_id=p.group_id AND (sa.delete_status IS NULL OR sa.delete_status <> '1') AND (");
-        for (int i = 1; i <= 20; i++) {
-            if (i > 1) sb.append(" OR ");
-            sb.append("(sa.p").append(i).append("_participant_id=").append(pidExpr);
-            sb.append(" AND (IFNULL(sa.p").append(i).append("_cg_attendance,'')!=''");
-            sb.append(" OR IFNULL(sa.p").append(i).append("_child_attendance,'')!=''))");
-        }
-        sb.append(")) AS sessions_done");
+        // Count distinct sessions where the participant has any non-empty attendance recorded
+        // in the normalized participant-lines table (no slot limit).
+        sb.append(" (SELECT COUNT(DISTINCT sap.session_number) FROM ec_chimwemwe_session_attendance_participant sap");
+        sb.append("  WHERE sap.group_id=p.group_id AND sap.participant_id=").append(pidExpr);
+        sb.append("  AND (sap.delete_status IS NULL OR sap.delete_status <> '1')");
+        sb.append("  AND (IFNULL(sap.caregiver_attendance,'')!='' OR IFNULL(sap.child_attendance,'')!='')) AS sessions_done");
         return sb.toString();
     }
 
@@ -296,7 +293,7 @@ public class ParticipantDao extends AbstractDao {
             SessionAttendanceDao.removeParticipantFromGroupSessions(groupId.trim(), id);
         }
 
-        AbstractDao.updateDB("UPDATE ec_chimwemwe_attendance SET delete_status='1' WHERE participant_id=" + q(String.valueOf(id)));
+        AbstractDao.updateDB("UPDATE ec_chimwemwe_session_attendance_participant SET delete_status='1' WHERE participant_id=" + q(String.valueOf(id)));
         AbstractDao.updateDB("UPDATE ec_chimwemwe_review     SET delete_status='1' WHERE participant_id=" + id);
         AbstractDao.updateDB("UPDATE ec_chimwemwe_referral   SET delete_status='1' WHERE participant_id=" + id);
         AbstractDao.updateDB("UPDATE " + TABLE + " SET delete_status='1' WHERE id=" + id);

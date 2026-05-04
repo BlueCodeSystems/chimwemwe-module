@@ -29,6 +29,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bluecodeltd.ecap.chw.R;
 import com.bluecodeltd.ecap.chw.dao.ParticipantDao;
 import com.bluecodeltd.ecap.chw.dao.SessionAttendanceDao;
+import com.bluecodeltd.ecap.chw.dao.SessionAttendanceParticipantDao;
 import com.bluecodeltd.ecap.chw.model.AttendanceModel;
 import com.bluecodeltd.ecap.chw.model.ParticipantModel;
 import com.bluecodeltd.ecap.chw.util.ChimwemweFormUtils;
@@ -109,7 +110,7 @@ public class RecordAttendanceActivity extends AppCompatActivity {
         Threading.io(() -> {
             List<ParticipantModel> participants = ParticipantDao.getParticipants(groupId);
             Map<Long, AttendanceModel> existingMap =
-                    SessionAttendanceDao.getSessionAttendanceMap(groupId, sessionNumber);
+                    SessionAttendanceParticipantDao.getSessionAttendanceMap(groupId, sessionNumber);
 
             // Build combined list
             List<AttendanceRowItem> rows = new ArrayList<>();
@@ -235,6 +236,16 @@ public class RecordAttendanceActivity extends AppCompatActivity {
             if (template == null) return;
 
             JSONObject sessionForm = new JSONObject(template.toString());
+
+            // Preserve base_entity_id on edits: if a session already exists, reuse its original base_entity_id
+            // instead of generating/overriding it (which would create a duplicate Client record).
+            if (isEditMode) {
+                String existingEntityId = SessionAttendanceDao.getSessionBaseEntityId(groupId, sessionNumber);
+                if (existingEntityId != null && !existingEntityId.trim().isEmpty()) {
+                    sessionForm.put("entity_id", existingEntityId.trim());
+                }
+            }
+
             ChimwemweFormUtils.ensureFieldValue(sessionForm, "group_id", groupId);
             ChimwemweFormUtils.ensureFieldValue(sessionForm, "session_number", String.valueOf(sessionNumber));
             ChimwemweFormUtils.ensureFieldValue(sessionForm, "session_date", date);
@@ -267,6 +278,31 @@ public class RecordAttendanceActivity extends AppCompatActivity {
                     ChimwemweFormUtils.attendanceEntityId(groupId, sessionNumber)
             );
             ChimwemweFormUtils.saveRegistration(processedSessionForm, isEditMode);
+
+            // Persist normalized per-participant lines (unlimited participants per session)
+            JSONObject lineTemplate = formUtils.getFormJson("chimwemwe_session_attendance_participant");
+            if (lineTemplate == null) return;
+            for (AttendanceRowItem row : rows) {
+                if (row == null || row.participant == null) continue;
+                String pid = String.valueOf(row.participant.getId());
+                String entityId = "chimwemwe-session-attendance-" + groupId + "-" + sessionNumber + "-" + pid;
+
+                JSONObject lineForm = new JSONObject(lineTemplate.toString());
+                lineForm.put("entity_id", entityId);
+                ChimwemweFormUtils.ensureFieldValue(lineForm, "group_id", groupId);
+                ChimwemweFormUtils.ensureFieldValue(lineForm, "session_number", String.valueOf(sessionNumber));
+                ChimwemweFormUtils.ensureFieldValue(lineForm, "session_date", date);
+                ChimwemweFormUtils.ensureFieldValue(lineForm, "participant_id", pid);
+                ChimwemweFormUtils.ensureFieldValue(lineForm, "caregiver_attendance", row.caregiverAttendance);
+                ChimwemweFormUtils.ensureFieldValue(lineForm, "child_attendance", row.childAttendance);
+
+                ChimwemweFormUtils.ProcessedForm processedLine = ChimwemweFormUtils.processRegistration(
+                        lineForm,
+                        "ec_chimwemwe_session_attendance_participant",
+                        entityId
+                );
+                ChimwemweFormUtils.saveRegistration(processedLine, true);
+            }
         } catch (Exception e) {
             timber.log.Timber.e(e, "saveFormEvent failed for session attendance");
         }

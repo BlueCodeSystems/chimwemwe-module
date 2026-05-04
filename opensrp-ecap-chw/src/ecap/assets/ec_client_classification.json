@@ -796,6 +796,13 @@
           },
           {
             "field": "eventType",
+            "field_value": "Chimwemwe Session Attendance Participant",
+            "creates_case": [
+              "ec_chimwemwe_session_attendance_participant"
+            ]
+          },
+          {
+            "field": "eventType",
             "field_value": "Chimwemwe Referral",
             "creates_case": [
               "ec_chimwemwe_referral"

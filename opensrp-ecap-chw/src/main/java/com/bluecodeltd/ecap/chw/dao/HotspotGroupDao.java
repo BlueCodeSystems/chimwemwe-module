@@ -304,8 +304,8 @@ public class HotspotGroupDao extends AbstractDao {
     public static void deleteGroupByBusinessId(String groupId) {
         if (groupId == null || groupId.trim().isEmpty()) return;
         String gid = groupId.trim();
-        AbstractDao.updateDB("UPDATE ec_chimwemwe_attendance         SET delete_status='1' WHERE group_id=" + q(gid));
         AbstractDao.updateDB("UPDATE ec_chimwemwe_session_attendance SET delete_status='1' WHERE group_id=" + q(gid));
+        AbstractDao.updateDB("UPDATE ec_chimwemwe_session_attendance_participant SET delete_status='1' WHERE group_id=" + q(gid));
         AbstractDao.updateDB("UPDATE ec_chimwemwe_review             SET delete_status='1' WHERE group_id=" + q(gid));
         AbstractDao.updateDB("UPDATE ec_chimwemwe_referral           SET delete_status='1' WHERE group_id=" + q(gid));
         AbstractDao.updateDB("UPDATE ec_chimwemwe_participant        SET delete_status='1' WHERE group_id=" + q(gid));
