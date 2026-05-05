@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.interactor;
+package com.bluecodeltd.chimwemwe.chw.interactor;
 
 import android.content.Context;
 import android.content.res.AssetManager;

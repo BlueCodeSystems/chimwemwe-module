@@ -1,11 +1,11 @@
-package com.bluecodeltd.ecap.chw.activity;
+package com.bluecodeltd.chimwemwe.chw.activity;
 
 import android.app.Activity;
 
-import com.bluecodeltd.ecap.chw.R;
+import com.bluecodeltd.chimwemwe.chw.R;
 import org.smartregister.chw.core.fragment.FamilyCallDialogFragment;
 import org.smartregister.chw.core.listener.OnClickFloatingMenu;
-import com.bluecodeltd.ecap.chw.presenter.ChildProfilePresenter;
+import com.bluecodeltd.chimwemwe.chw.presenter.ChildProfilePresenter;
 
 public class ChildProfileActivityFlv extends DefaultChildProfileActivityFlv {
 

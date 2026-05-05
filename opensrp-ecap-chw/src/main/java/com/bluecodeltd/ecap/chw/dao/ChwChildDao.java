@@ -1,10 +1,10 @@
-package com.bluecodeltd.ecap.chw.dao;
+package com.bluecodeltd.chimwemwe.chw.dao;
 
 import android.database.Cursor;
 
 import org.joda.time.DateTime;
 import org.joda.time.Days;
-import com.bluecodeltd.ecap.chw.application.ChwApplication;
+import com.bluecodeltd.chimwemwe.chw.application.ChwApplication;
 import org.smartregister.chw.core.dao.ChildDao;
 import org.smartregister.chw.core.domain.Child;
 import org.smartregister.dao.AbstractDao;

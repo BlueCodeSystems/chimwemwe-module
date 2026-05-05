@@ -1,6 +1,6 @@
-package com.bluecodeltd.ecap.chw.interactor;
+package com.bluecodeltd.chimwemwe.chw.interactor;
 
-import com.bluecodeltd.ecap.chw.application.ChwApplication;
+import com.bluecodeltd.chimwemwe.chw.application.ChwApplication;
 import org.smartregister.chw.core.interactor.CoreFamilyChangeContractInteractor;
 
 public class FamilyChangeContractInteractor extends CoreFamilyChangeContractInteractor {

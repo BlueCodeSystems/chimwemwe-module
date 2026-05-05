@@ -1,0 +1,25 @@
+package com.bluecodeltd.chimwemwe.chw.dao;
+
+import android.content.Context;
+
+import com.bluecodeltd.chimwemwe.chw.R;
+import org.smartregister.chw.core.dao.FHIRBundleDao;
+import com.bluecodeltd.chimwemwe.chw.util.Constants;
+import com.bluecodeltd.chimwemwe.chw.BuildConfig;
+import org.bluecodesystems.pulsebridge.model.FHIRBundleModel;
+
+public class ChildFHIRBundleDao extends FHIRBundleDao {
+
+    @Override
+    public FHIRBundleModel fetchFHIRDateModel(Context context, String childBaseEntityId) {
+        FHIRBundleModel bundle = super.fetchFHIRDateModel(context, childBaseEntityId);
+        bundle.setRootPackageName(context.getApplicationContext().getPackageName());
+        bundle.setAppVersion(String.valueOf(BuildConfig.VERSION_CODE));
+        bundle.setDisplayLanguage(context.getResources().getConfiguration().locale.getDisplayLanguage());
+        bundle.setAppName(context.getResources().getString(R.string.app_name));
+        bundle.setAppLanguage(context.getResources().getConfiguration().locale.getLanguage());
+        bundle.setEndPointPackageName(Constants.ThinkMdConstants.CHILD_PROFILE_ACTIVITY);
+        return bundle;
+    }
+
+}

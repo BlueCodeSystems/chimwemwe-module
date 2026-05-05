@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.fragment;
+package com.bluecodeltd.chimwemwe.chw.fragment;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -12,14 +12,14 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bluecodeltd.ecap.chw.activity.IndexDetailsActivity;
-import com.bluecodeltd.ecap.chw.adapter.NutritionAssessmentInterventionAdapter;
-import com.bluecodeltd.ecap.chw.dao.NutritionAssessmentInterventionDao;
-import com.bluecodeltd.ecap.chw.dao.VCAScreeningDao;
-import com.bluecodeltd.ecap.chw.databinding.FragmentVcaNutritionAssessmentBinding;
-import com.bluecodeltd.ecap.chw.model.NutritionAssessmentInterventionModel;
-import com.bluecodeltd.ecap.chw.model.VcaScreeningModel;
-import com.bluecodeltd.ecap.chw.util.Threading;
+import com.bluecodeltd.chimwemwe.chw.activity.IndexDetailsActivity;
+import com.bluecodeltd.chimwemwe.chw.adapter.NutritionAssessmentInterventionAdapter;
+import com.bluecodeltd.chimwemwe.chw.dao.NutritionAssessmentInterventionDao;
+import com.bluecodeltd.chimwemwe.chw.dao.VCAScreeningDao;
+import com.bluecodeltd.chimwemwe.chw.databinding.FragmentVcaNutritionAssessmentBinding;
+import com.bluecodeltd.chimwemwe.chw.model.NutritionAssessmentInterventionModel;
+import com.bluecodeltd.chimwemwe.chw.model.VcaScreeningModel;
+import com.bluecodeltd.chimwemwe.chw.util.Threading;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

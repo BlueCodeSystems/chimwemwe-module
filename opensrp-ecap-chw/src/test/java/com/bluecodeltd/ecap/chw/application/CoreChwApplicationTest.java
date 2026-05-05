@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.application;
+package com.bluecodeltd.chimwemwe.chw.application;
 
 import org.junit.Assert;
 import org.junit.Test;

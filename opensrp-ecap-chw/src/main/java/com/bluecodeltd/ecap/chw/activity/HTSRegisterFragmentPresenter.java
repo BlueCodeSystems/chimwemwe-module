@@ -1,7 +1,7 @@
-package com.bluecodeltd.ecap.chw.activity;
+package com.bluecodeltd.chimwemwe.chw.activity;
 
-import com.bluecodeltd.ecap.chw.contract.IndexRegisterFragmentContract;
-import com.bluecodeltd.ecap.chw.util.Constants;
+import com.bluecodeltd.chimwemwe.chw.contract.IndexRegisterFragmentContract;
+import com.bluecodeltd.chimwemwe.chw.util.Constants;
 
 public class HTSRegisterFragmentPresenter implements IndexRegisterFragmentContract.Presenter {
 

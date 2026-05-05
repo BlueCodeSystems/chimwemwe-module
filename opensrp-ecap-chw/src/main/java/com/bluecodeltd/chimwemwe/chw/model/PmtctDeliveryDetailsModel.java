@@ -1,0 +1,84 @@
+package com.bluecodeltd.chimwemwe.chw.model;
+
+public class PmtctDeliveryDetailsModel {
+    private String base_entity_id;
+    private String pmtct_id;
+    private String caregiver_name;
+    private String household_id;
+    private String date_of_delivery;
+    private String place_of_delivery;
+    private String on_art_at_time_of_delivery;
+
+    public String getBase_entity_id() {
+        return base_entity_id;
+    }
+
+    public void setBase_entity_id(String base_entity_id) {
+        this.base_entity_id = base_entity_id;
+    }
+
+    public String getPmtct_id() {
+        return pmtct_id;
+    }
+
+    public void setPmtct_id(String pmtct_id) {
+        this.pmtct_id = pmtct_id;
+    }
+
+    public String getCaregiver_name() {
+        return caregiver_name;
+    }
+
+    public void setCaregiver_name(String caregiver_name) {
+        this.caregiver_name = caregiver_name;
+    }
+
+    public String getHousehold_id() {
+        return household_id;
+    }
+
+    public void setHousehold_id(String household_id) {
+        this.household_id = household_id;
+    }
+
+    public String getDate_of_delivery() {
+        return date_of_delivery;
+    }
+
+    public void setDate_of_delivery(String date_of_delivery) {
+        this.date_of_delivery = date_of_delivery;
+    }
+
+    public String getPlace_of_delivery() {
+        return place_of_delivery;
+    }
+
+    public void setPlace_of_delivery(String place_of_delivery) {
+        this.place_of_delivery = place_of_delivery;
+    }
+
+    public String getOn_art_at_time_of_delivery() {
+        return on_art_at_time_of_delivery;
+    }
+
+    public void setOn_art_at_time_of_delivery(String on_art_at_time_of_delivery) {
+        this.on_art_at_time_of_delivery = on_art_at_time_of_delivery;
+    }
+
+    private final java.util.Map<String, String> additionalFields = new java.util.HashMap<>();
+
+    public java.util.Map<String, String> getAdditionalFields() {
+        return additionalFields;
+    }
+
+    public String getAdditionalField(String key) {
+        if (key == null) return null;
+        return additionalFields.get(key);
+    }
+
+    public void setAdditionalField(String key, String value) {
+        if (key == null) return;
+        additionalFields.put(key, value);
+    }
+}
+

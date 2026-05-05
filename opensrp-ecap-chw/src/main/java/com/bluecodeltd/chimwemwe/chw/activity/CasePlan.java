@@ -1,0 +1,415 @@
+package com.bluecodeltd.chimwemwe.chw.activity;
+
+import static com.vijay.jsonwizard.utils.FormUtils.fields;
+import static com.vijay.jsonwizard.utils.FormUtils.getFieldJSONObject;
+import static com.bluecodeltd.chimwemwe.chw.util.JsonFormUtils.tagSyncMetadata;
+import static org.smartregister.util.JsonFormUtils.STEP1;
+
+import android.annotation.SuppressLint;
+import android.app.Dialog;
+import android.content.Intent;
+import android.os.Build;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.view.Window;
+import android.view.WindowInsetsController;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.widget.Toolbar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.bluecodeltd.chimwemwe.chw.BuildConfig;
+import com.bluecodeltd.chimwemwe.chw.R;
+import com.bluecodeltd.chimwemwe.chw.adapter.DomainPlanAdapter;
+import com.bluecodeltd.chimwemwe.chw.application.ChwApplication;
+import com.bluecodeltd.chimwemwe.chw.dao.IndexPersonDao;
+import com.bluecodeltd.chimwemwe.chw.domain.ChildIndexEventClient;
+import com.bluecodeltd.chimwemwe.chw.model.CasePlanModel;
+import com.bluecodeltd.chimwemwe.chw.model.CaseStatusModel;
+import com.bluecodeltd.chimwemwe.chw.util.Constants;
+import com.bluecodeltd.chimwemwe.chw.util.Threading;
+import com.rey.material.widget.Button;
+import com.vijay.jsonwizard.constants.JsonFormConstants;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.smartregister.client.utils.domain.Form;
+import org.smartregister.clientandeventmodel.Client;
+import org.smartregister.clientandeventmodel.Event;
+import org.smartregister.domain.db.EventClient;
+import org.smartregister.domain.tag.FormTag;
+import org.smartregister.family.util.AppExecutors;
+import org.smartregister.family.util.JsonFormUtils;
+import org.smartregister.repository.AllSharedPreferences;
+import org.smartregister.sync.ClientProcessorForJava;
+import org.smartregister.sync.helper.ECSyncHelper;
+import org.smartregister.util.FormUtils;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+
+import es.dmoral.toasty.Toasty;
+import timber.log.Timber;
+
+public class CasePlan extends AppCompatActivity {
+
+    private com.bluecodeltd.chimwemwe.chw.databinding.ActivityCasePlanBinding binding;
+
+
+    private RecyclerView recyclerView;
+    DomainPlanAdapter recyclerViewadapter;
+    private ArrayList<CasePlanModel> domainList = new ArrayList<>();
+    private Button domainBtn, domainBtn2;
+    String childId, caseDate, hivStatus,case_plan_id;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        binding = com.bluecodeltd.chimwemwe.chw.databinding.ActivityCasePlanBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+
+        setUpActionBar();
+        applyLightStatusBar();
+
+        recyclerView = binding.domainrecyclerView;
+        domainBtn = binding.domainBtn;
+        domainBtn2 = binding.domainBtn2;
+
+        childId = getIntent().getExtras().getString("childId");
+        caseDate = getIntent().getExtras().getString("dateId");
+        hivStatus = getIntent().getExtras().getString("hivStatus");
+        case_plan_id = getIntent().getExtras().getString("case_plan_id");
+
+        fetchData();
+
+    }
+
+    private void setUpActionBar() {
+        Toolbar toolbar = binding.collapsingToolbar;
+        TextView tvTitle = binding.tvTitle;
+        // Avoid IllegalStateException when theme already supplies an ActionBar
+        if (getSupportActionBar() == null) {
+            try { setSupportActionBar(toolbar); } catch (IllegalStateException ignored) {}
+        }
+
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            final Drawable upArrow = getResources().getDrawable(R.drawable.ic_arrow_back_white_24dp);
+            upArrow.setColorFilter(getResources().getColor(org.smartregister.R.color.text_blue), PorterDuff.Mode.SRC_ATOP);
+            actionBar.setHomeAsUpIndicator(upArrow);
+        }
+        toolbar.setNavigationOnClickListener(v -> onBackPressed());
+        tvTitle.setText("VCA Case Plan");
+    }
+
+    private void applyLightStatusBar() {
+        Window window = getWindow();
+        View decorView = window.getDecorView();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            WindowInsetsController controller = decorView.getWindowInsetsController();
+            if (controller != null) {
+                controller.setSystemBarsAppearance(
+                        WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS,
+                        WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS);
+            }
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            int flags = decorView.getSystemUiVisibility() | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+            decorView.setSystemUiVisibility(flags);
+        }
+    }
+
+    public void fetchData() {
+        final String fChildId = childId;
+        final String fCaseDate = caseDate;
+        Threading.io(() -> {
+            List<CasePlanModel> domains = new ArrayList<>();
+            try { domains = IndexPersonDao.getDomainsById(fChildId, fCaseDate); } catch (Exception ignored) {}
+            List<CasePlanModel> finalDomains = domains == null ? new ArrayList<>() : domains;
+            Threading.main(() -> {
+                domainList.clear();
+                domainList.addAll(finalDomains);
+
+                if (recyclerViewadapter == null) {
+                    RecyclerView.LayoutManager eLayoutManager = new LinearLayoutManager(getApplicationContext());
+                    recyclerView.setHasFixedSize(true);
+                    recyclerView.setLayoutManager(eLayoutManager);
+                    recyclerView.setItemAnimator(new DefaultItemAnimator());
+                    recyclerViewadapter = new DomainPlanAdapter(domainList, CasePlan.this, "domain");
+                    recyclerView.setAdapter(recyclerViewadapter);
+
+                    recyclerViewadapter.setOnDataUpdateListener(() -> runOnUiThread(() -> {
+                        recreate();
+                    }));
+                } else {
+                    try { if (recyclerViewadapter != null) recyclerViewadapter.notifyDataSetChanged(); } catch (Exception ignored) {}
+                }
+
+                if (recyclerViewadapter != null && recyclerViewadapter.getItemCount() > 0) {
+                    domainBtn.setVisibility(View.GONE);
+                    domainBtn2.setVisibility(View.VISIBLE);
+                } else {
+                    domainBtn.setVisibility(View.VISIBLE);
+                    domainBtn2.setVisibility(View.GONE);
+                }
+            });
+        });
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    public void onClick(View v) {
+        int id = v.getId();
+
+
+        switch (id) {
+            case R.id.domainBtn:
+            case R.id.domainBtn2:
+                Threading.io(() -> {
+                    CaseStatusModel caseStatusModel = null;
+                    try { caseStatusModel = IndexPersonDao.getCaseStatus(childId); } catch (Exception ignored) {}
+                    CaseStatusModel finalCaseStatusModel = caseStatusModel;
+                    Threading.main(() -> {
+                        if(finalCaseStatusModel != null && finalCaseStatusModel.getCase_status() != null) {
+                            if(finalCaseStatusModel.getCase_status().equals("0") || finalCaseStatusModel.getCase_status().equals("2")) {
+                                Dialog dialog = new Dialog(this);
+                                dialog.setContentView(R.layout.dialog_layout);
+                                dialog.show();
+
+                                TextView dialogMessage = dialog.findViewById(R.id.dialog_message);
+                                dialogMessage.setText(finalCaseStatusModel.getFirst_name() + " " + finalCaseStatusModel.getLast_name() + " was either de-registered or inactive in the program");
+
+                                android.widget.Button dialogButton = dialog.findViewById(R.id.dialog_button);
+                                dialogButton.setOnClickListener(va -> dialog.dismiss());
+                            } else {
+                                try {
+                                    FormUtils formUtils = new FormUtils(CasePlan.this);
+                                    JSONObject indexRegisterForm = formUtils.getFormJson("domain");
+
+                                    JSONObject cId = getFieldJSONObject(fields(indexRegisterForm, STEP1), "unique_id");
+                                    cId.put("value",childId);
+
+                                    JSONObject cDate = getFieldJSONObject(fields(indexRegisterForm, STEP1), "case_plan_date");
+                                    cDate.put("value", caseDate);
+
+                                    JSONObject casePlanId = getFieldJSONObject(fields(indexRegisterForm, STEP1), "case_plan_id");
+                                    casePlanId.put("value", case_plan_id);
+
+                                    if(hivStatus == null || !hivStatus.equals("yes")){
+                                        JSONArray domainType = getFieldJSONObject(fields(indexRegisterForm, STEP1), "type").getJSONArray("options");
+                                        domainType.remove(0);
+                                    }
+
+                                    startFormActivity(indexRegisterForm);
+
+                                } catch (Exception e) {
+                                    Timber.e(e);
+                                }
+                            }
+                        } else {
+                            Log.e("CasePlan", "caseStatusModel or caseStatusModel.getCase_status() is null");
+                        }
+                    });
+                });
+
+                break;
+        }
+    }
+
+    public void startFormActivity(JSONObject jsonObject) {
+
+        Form form = new Form();
+        form.setWizard(true);
+        form.setName("Vulnerability Identified");
+        form.setHideSaveLabel(true);
+        form.setNextLabel(getString(R.string.next));
+        form.setPreviousLabel(getString(R.string.previous));
+        form.setSaveLabel(getString(R.string.submit));
+        form.setNavigationBackground(R.color.primary);
+        Intent intent = new Intent(this, org.smartregister.family.util.Utils.metadata().familyFormActivity);
+        intent.putExtra(JsonFormConstants.JSON_FORM_KEY.FORM, form);
+        intent.putExtra(JsonFormConstants.JSON_FORM_KEY.JSON, jsonObject.toString());
+        startActivityForResult(intent, JsonFormUtils.REQUEST_CODE_GET_JSON);
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == JsonFormUtils.REQUEST_CODE_GET_JSON && resultCode == RESULT_OK) {
+
+            boolean is_edit_mode = false;
+
+            String jsonString = data.getStringExtra(JsonFormConstants.JSON_FORM_KEY.JSON);
+
+            JSONObject jsonFormObject = null;
+            try {
+                jsonFormObject = new JSONObject(jsonString);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            if (!jsonFormObject.optString("entity_id").isEmpty()) {
+                is_edit_mode = true;
+            }
+            String EncounterType = jsonFormObject.optString(JsonFormConstants.ENCOUNTER_TYPE, "");
+
+            try {
+
+                ChildIndexEventClient childIndexEventClient = processRegistration(jsonString);
+
+                if (childIndexEventClient == null) {
+                    return;
+                }
+
+                saveRegistration(childIndexEventClient, is_edit_mode, EncounterType);
+
+                switch (EncounterType) {
+
+                    case "Domain":
+                        Toasty.success(CasePlan.this, "Vulnerability Saved", Toast.LENGTH_LONG, true).show();
+                        recreate();
+                        refresh();
+                        break;
+
+                }
+
+            } catch (Exception e) {
+                Timber.e(e);
+            }
+        }
+    }
+
+    public ChildIndexEventClient processRegistration(String jsonString){
+
+        try {
+            JSONObject formJsonObject = new JSONObject(jsonString);
+
+            String encounterType = formJsonObject.getString(JsonFormConstants.ENCOUNTER_TYPE);
+
+            String entityId = formJsonObject.optString("entity_id");
+
+            if(entityId.isEmpty()){
+                entityId  = org.smartregister.util.JsonFormUtils.generateRandomUUIDString();
+            }
+
+
+            JSONObject metadata = formJsonObject.getJSONObject(Constants.METADATA);
+
+
+            JSONArray fields = org.smartregister.util.JsonFormUtils.fields(formJsonObject);
+
+            switch (encounterType) {
+                case "Domain":
+
+                    if (fields != null) {
+                        FormTag formTag = getFormTag();
+                        Event event = org.smartregister.util.JsonFormUtils.createEvent(fields, metadata, formTag, entityId,
+                                encounterType, Constants.EcapClientTable.EC_VCA_CASE_PLAN_DOMAIN);
+                        tagSyncMetadata(event);
+                        Client client = org.smartregister.util.JsonFormUtils.createBaseClient(fields, formTag, entityId );
+                        return new ChildIndexEventClient(event, client);
+                    }
+                    break;
+
+            }
+        } catch (JSONException e) {
+            Timber.e(e);
+        }
+
+        return null;
+    }
+
+    public boolean saveRegistration(ChildIndexEventClient childIndexEventClient, boolean isEditMode,String encounterType) {
+
+        Runnable runnable = () -> {
+
+            Event event = childIndexEventClient.getEvent();
+            Client client = childIndexEventClient.getClient();
+
+            if (event != null && client != null) {
+                try {
+                    ECSyncHelper ecSyncHelper = getECSyncHelper();
+
+                    JSONObject newClientJsonObject = new JSONObject(org.smartregister.util.JsonFormUtils.gson.toJson(client));
+
+                    JSONObject existingClientJsonObject = ecSyncHelper.getClient(client.getBaseEntityId());
+
+                    if (isEditMode) {
+                        JSONObject mergedClientJsonObject =
+                                org.smartregister.util.JsonFormUtils.merge(existingClientJsonObject, newClientJsonObject);
+                        ecSyncHelper.addClient(client.getBaseEntityId(), mergedClientJsonObject);
+                    } else {
+                        ecSyncHelper.addClient(client.getBaseEntityId(), newClientJsonObject);
+                    }
+
+                    JSONObject eventJsonObject = new JSONObject(org.smartregister.util.JsonFormUtils.gson.toJson(event));
+                    ecSyncHelper.addEvent(event.getBaseEntityId(), eventJsonObject);
+
+                    Long lastUpdatedAtDate = getAllSharedPreferences().fetchLastUpdatedAtDate(0);
+                    Date currentSyncDate = new Date(lastUpdatedAtDate);
+
+                    //Get saved event for processing
+                    List<EventClient> savedEvents = ecSyncHelper.getEvents(Collections.singletonList(event.getFormSubmissionId()));
+                    getClientProcessorForJava().processClient(savedEvents);
+                    getAllSharedPreferences().saveLastUpdatedAtDate(currentSyncDate.getTime());
+
+
+                } catch (Exception e) {
+                    Timber.e(e);
+                }
+            }
+
+        };
+
+
+        try {
+            AppExecutors appExecutors = new AppExecutors();
+            appExecutors.diskIO().execute(runnable);
+            return true;
+        } catch (Exception exception) {
+            Timber.e(exception);
+            return false;
+        }
+    }
+
+    private ECSyncHelper getECSyncHelper() {
+        return ChwApplication.getInstance().getEcSyncHelper();
+    }
+
+    public FormTag getFormTag() {
+        FormTag formTag = new FormTag();
+        AllSharedPreferences allSharedPreferences = getAllSharedPreferences();
+        formTag.providerId = allSharedPreferences.fetchRegisteredANM();
+        formTag.appVersion = BuildConfig.VERSION_CODE;
+        formTag.databaseVersion = BuildConfig.DATABASE_VERSION;
+        return formTag;
+    }
+
+    public AllSharedPreferences getAllSharedPreferences () {
+        return ChwApplication.getInstance().getContext().allSharedPreferences();
+    }
+
+    private ClientProcessorForJava getClientProcessorForJava() {
+        return ChwApplication.getInstance().getClientProcessorForJava();
+    }
+    public void refresh(){
+        recreate();
+    }
+
+
+
+}

@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw
+package com.bluecodeltd.chimwemwe.chw
 
 import android.content.Context
 import android.content.Intent
@@ -12,9 +12,9 @@ import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.*
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.*
-import com.bluecodeltd.ecap.chw.activity.AllClientsRegisterActivity
-import com.bluecodeltd.ecap.chw.activity.LoginActivity
-import com.bluecodeltd.ecap.chw.R
+import com.bluecodeltd.chimwemwe.chw.activity.AllClientsRegisterActivity
+import com.bluecodeltd.chimwemwe.chw.activity.LoginActivity
+import com.bluecodeltd.chimwemwe.chw.R
 import org.hamcrest.CoreMatchers.allOf
 import org.junit.Assume.assumeTrue
 import org.junit.Rule

@@ -1,7 +1,7 @@
-package com.bluecodeltd.ecap.chw.model;
+package com.bluecodeltd.chimwemwe.chw.model;
 
 
-import com.bluecodeltd.ecap.chw.contract.CoreBeneficiariesRegisterFragmentContract;
+import com.bluecodeltd.chimwemwe.chw.contract.CoreBeneficiariesRegisterFragmentContract;
 
 public class CoreBeneficiariesRegisterFragmentModel implements CoreBeneficiariesRegisterFragmentContract {
 

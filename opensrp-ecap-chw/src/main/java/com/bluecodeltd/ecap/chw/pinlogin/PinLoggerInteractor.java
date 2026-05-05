@@ -1,13 +1,13 @@
-package com.bluecodeltd.ecap.chw.pinlogin;
+package com.bluecodeltd.chimwemwe.chw.pinlogin;
 
 import androidx.annotation.NonNull;
 
 import org.joda.time.DateTime;
 import org.smartregister.AllConstants;
 import org.smartregister.CoreLibrary;
-import com.bluecodeltd.ecap.chw.contract.LoginJobScheduler;
-import com.bluecodeltd.ecap.chw.contract.PinLoginContract;
-import com.bluecodeltd.ecap.chw.interactor.LoginJobSchedulerProvider;
+import com.bluecodeltd.chimwemwe.chw.contract.LoginJobScheduler;
+import com.bluecodeltd.chimwemwe.chw.contract.PinLoginContract;
+import com.bluecodeltd.chimwemwe.chw.interactor.LoginJobSchedulerProvider;
 import org.smartregister.domain.TimeStatus;
 import org.smartregister.service.UserService;
 

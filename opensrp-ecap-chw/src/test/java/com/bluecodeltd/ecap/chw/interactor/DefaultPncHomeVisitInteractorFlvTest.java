@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.interactor;
+package com.bluecodeltd.chimwemwe.chw.interactor;
 
 import org.joda.time.DateTime;
 import org.json.JSONObject;
@@ -12,8 +12,8 @@ import org.smartregister.chw.anc.model.BaseAncHomeVisitAction;
 import org.smartregister.chw.core.domain.Person;
 import org.smartregister.chw.core.rule.PNCHealthFacilityVisitRule;
 import org.smartregister.chw.core.utils.CoreConstants;
-import com.bluecodeltd.ecap.chw.domain.PNCHealthFacilityVisitSummary;
-import com.bluecodeltd.ecap.chw.domain.PncBaby;
+import com.bluecodeltd.chimwemwe.chw.domain.PNCHealthFacilityVisitSummary;
+import com.bluecodeltd.chimwemwe.chw.domain.PncBaby;
 import org.smartregister.dao.AbstractDao;
 import org.smartregister.domain.Alert;
 import org.smartregister.immunization.domain.ServiceWrapper;

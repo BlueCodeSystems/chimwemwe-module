@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.model;
+package com.bluecodeltd.chimwemwe.chw.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;

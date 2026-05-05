@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.fragment;
+package com.bluecodeltd.chimwemwe.chw.fragment;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -12,12 +12,12 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bluecodeltd.ecap.chw.R;
-import com.bluecodeltd.ecap.chw.activity.MotherPmtctProfileActivity;
-import com.bluecodeltd.ecap.chw.adapter.PmctMotherHeiAdapter;
-import com.bluecodeltd.ecap.chw.dao.PmtctChildDao;
-import com.bluecodeltd.ecap.chw.model.PmtctChildModel;
-import com.bluecodeltd.ecap.chw.model.PtctMotherModel;
+import com.bluecodeltd.chimwemwe.chw.R;
+import com.bluecodeltd.chimwemwe.chw.activity.MotherPmtctProfileActivity;
+import com.bluecodeltd.chimwemwe.chw.adapter.PmctMotherHeiAdapter;
+import com.bluecodeltd.chimwemwe.chw.dao.PmtctChildDao;
+import com.bluecodeltd.chimwemwe.chw.model.PmtctChildModel;
+import com.bluecodeltd.chimwemwe.chw.model.PtctMotherModel;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.fragment;
+package com.bluecodeltd.chimwemwe.chw.fragment;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -11,12 +11,12 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bluecodeltd.ecap.chw.activity.ChildNonPmtctDetail;
-import com.bluecodeltd.ecap.chw.adapter.ChildFinalOutcomeAdapter;
-import com.bluecodeltd.ecap.chw.dao.ChildFinalOutcomeDao;
-import com.bluecodeltd.ecap.chw.databinding.FragmentChildFinalOutcomeBinding;
-import com.bluecodeltd.ecap.chw.model.ChildFinalOutcomeModel;
-import com.bluecodeltd.ecap.chw.util.Threading;
+import com.bluecodeltd.chimwemwe.chw.activity.ChildNonPmtctDetail;
+import com.bluecodeltd.chimwemwe.chw.adapter.ChildFinalOutcomeAdapter;
+import com.bluecodeltd.chimwemwe.chw.dao.ChildFinalOutcomeDao;
+import com.bluecodeltd.chimwemwe.chw.databinding.FragmentChildFinalOutcomeBinding;
+import com.bluecodeltd.chimwemwe.chw.model.ChildFinalOutcomeModel;
+import com.bluecodeltd.chimwemwe.chw.util.Threading;
 
 import org.jetbrains.annotations.NotNull;
 

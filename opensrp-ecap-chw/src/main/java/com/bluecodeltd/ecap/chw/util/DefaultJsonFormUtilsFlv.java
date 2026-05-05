@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.util;
+package com.bluecodeltd.chimwemwe.chw.util;
 
 import android.content.Context;
 
@@ -8,7 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.bluecodeltd.ecap.chw.application.ChwApplication;
+import com.bluecodeltd.chimwemwe.chw.application.ChwApplication;
 import org.smartregister.chw.core.form_data.NativeFormsDataBinder;
 import org.smartregister.chw.core.utils.ChwDBConstants;
 import org.smartregister.chw.core.utils.CoreConstants;

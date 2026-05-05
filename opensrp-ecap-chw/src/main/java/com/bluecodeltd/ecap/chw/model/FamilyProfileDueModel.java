@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.model;
+package com.bluecodeltd.chimwemwe.chw.model;
 
 import org.smartregister.chw.core.utils.ChildDBConstants;
 import org.smartregister.chw.core.utils.CoreConstants;

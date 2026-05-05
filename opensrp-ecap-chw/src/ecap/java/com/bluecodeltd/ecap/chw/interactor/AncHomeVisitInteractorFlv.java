@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.interactor;
+package com.bluecodeltd.chimwemwe.chw.interactor;
 
 import android.content.Context;
 
@@ -9,8 +9,8 @@ import org.joda.time.format.DateTimeFormat;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.bluecodeltd.ecap.chw.R;
-import com.bluecodeltd.ecap.chw.actionhelper.HealthFacilityVisitAction;
+import com.bluecodeltd.chimwemwe.chw.R;
+import com.bluecodeltd.chimwemwe.chw.actionhelper.HealthFacilityVisitAction;
 import org.smartregister.chw.anc.AncLibrary;
 import org.smartregister.chw.anc.contract.BaseAncHomeVisitContract;
 import org.smartregister.chw.anc.domain.MemberObject;
@@ -21,9 +21,9 @@ import org.smartregister.chw.anc.util.VisitUtils;
 import org.smartregister.chw.core.dao.AncDao;
 import org.smartregister.chw.core.utils.CoreConstants;
 import org.smartregister.chw.referral.util.JsonFormConstants;
-import com.bluecodeltd.ecap.chw.util.Constants;
-import com.bluecodeltd.ecap.chw.util.ContactUtil;
-import com.bluecodeltd.ecap.chw.util.JsonFormUtils;
+import com.bluecodeltd.chimwemwe.chw.util.Constants;
+import com.bluecodeltd.chimwemwe.chw.util.ContactUtil;
+import com.bluecodeltd.chimwemwe.chw.util.JsonFormUtils;
 
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;

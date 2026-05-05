@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.interactor;
+package com.bluecodeltd.chimwemwe.chw.interactor;
 
 import android.content.Context;
 
@@ -10,7 +10,7 @@ import org.smartregister.chw.anc.domain.Visit;
 import org.smartregister.chw.anc.model.BaseUpcomingService;
 import org.smartregister.chw.anc.util.Constants;
 import org.smartregister.chw.core.interactor.CoreAncMemberProfileInteractor;
-import com.bluecodeltd.ecap.chw.dao.FamilyDao;
+import com.bluecodeltd.chimwemwe.chw.dao.FamilyDao;
 import org.smartregister.dao.AbstractDao;
 import org.smartregister.domain.Alert;
 import org.smartregister.domain.AlertStatus;

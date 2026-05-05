@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.activity;
+package com.bluecodeltd.chimwemwe.chw.activity;
 
 import android.content.Intent;
 
@@ -7,8 +7,8 @@ import org.smartregister.chw.anc.util.Constants;
 import org.smartregister.chw.core.activity.CoreChildRegisterActivity;
 import org.smartregister.chw.core.contract.CoreChildRegisterContract;
 import org.smartregister.chw.core.utils.CoreConstants;
-import com.bluecodeltd.ecap.chw.fragment.ChildRegisterFragment;
-import com.bluecodeltd.ecap.chw.schedulers.ChwScheduleTaskExecutor;
+import com.bluecodeltd.chimwemwe.chw.fragment.ChildRegisterFragment;
+import com.bluecodeltd.chimwemwe.chw.schedulers.ChwScheduleTaskExecutor;
 import org.smartregister.family.util.JsonFormUtils;
 import org.smartregister.helper.BottomNavigationHelper;
 import org.smartregister.view.fragment.BaseRegisterFragment;

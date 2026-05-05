@@ -1,18 +1,18 @@
-package com.bluecodeltd.ecap.chw.interactor;
+package com.bluecodeltd.chimwemwe.chw.interactor;
 
 import android.content.Context;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.joda.time.DateTime;
-import com.bluecodeltd.ecap.chw.R;
+import com.bluecodeltd.chimwemwe.chw.R;
 import org.smartregister.chw.anc.domain.MemberObject;
 import org.smartregister.chw.anc.domain.VisitDetail;
 import org.smartregister.chw.anc.model.BaseUpcomingService;
 import org.smartregister.chw.core.utils.CoreConstants;
 import org.smartregister.chw.core.utils.VaccineScheduleUtil;
-import com.bluecodeltd.ecap.chw.dao.ChwPNCDao;
-import com.bluecodeltd.ecap.chw.domain.PNCHealthFacilityVisitSummary;
+import com.bluecodeltd.chimwemwe.chw.dao.ChwPNCDao;
+import com.bluecodeltd.chimwemwe.chw.domain.PNCHealthFacilityVisitSummary;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;

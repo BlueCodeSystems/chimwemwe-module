@@ -1,11 +1,11 @@
-package com.bluecodeltd.ecap.chw.viewmodel
+package com.bluecodeltd.chimwemwe.chw.viewmodel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.bluecodeltd.ecap.chw.dao.GraduationDao
-import com.bluecodeltd.ecap.chw.model.GraduationModel
+import com.bluecodeltd.chimwemwe.chw.dao.GraduationDao
+import com.bluecodeltd.chimwemwe.chw.model.GraduationModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 

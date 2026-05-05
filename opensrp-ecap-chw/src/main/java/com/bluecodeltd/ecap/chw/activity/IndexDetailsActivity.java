@@ -1,9 +1,9 @@
-package com.bluecodeltd.ecap.chw.activity;
+package com.bluecodeltd.chimwemwe.chw.activity;
 
 import static com.vijay.jsonwizard.utils.FormUtils.fields;
 import static com.vijay.jsonwizard.utils.FormUtils.getFieldJSONObject;
 import static org.smartregister.chw.core.utils.CoreJsonFormUtils.getSyncHelper;
-import static com.bluecodeltd.ecap.chw.util.JsonFormUtils.tagSyncMetadata;
+import static com.bluecodeltd.chimwemwe.chw.util.JsonFormUtils.tagSyncMetadata;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
@@ -40,50 +40,50 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.preference.PreferenceManager;
 import androidx.viewpager2.widget.ViewPager2;
 
-import com.bluecodeltd.ecap.chw.fragment.VcaNutritionAssessmentFragment;
+import com.bluecodeltd.chimwemwe.chw.fragment.VcaNutritionAssessmentFragment;
 import com.google.android.material.tabs.TabLayoutMediator;
 
-import com.bluecodeltd.ecap.chw.BuildConfig;
-import com.bluecodeltd.ecap.chw.R;
-import com.bluecodeltd.ecap.chw.adapter.ProfileViewPagerAdapter;
-import com.bluecodeltd.ecap.chw.application.ChwApplication;
-import com.bluecodeltd.ecap.chw.dao.CasePlanDao;
-import com.bluecodeltd.ecap.chw.dao.GraduationDao;
-import com.bluecodeltd.ecap.chw.dao.HivAssessmentAbove15Dao;
-import com.bluecodeltd.ecap.chw.dao.HivAssessmentUnder15Dao;
-import com.bluecodeltd.ecap.chw.dao.HouseholdDao;
-import com.bluecodeltd.ecap.chw.dao.IndexPersonDao;
-import com.bluecodeltd.ecap.chw.dao.ReferralDao;
-import com.bluecodeltd.ecap.chw.dao.NutritionAssessmentInterventionDao;
-import com.bluecodeltd.ecap.chw.dao.VCAScreeningDao;
-import com.bluecodeltd.ecap.chw.dao.VcaAssessmentDao;
-import com.bluecodeltd.ecap.chw.dao.VcaCasePlanDao;
-import com.bluecodeltd.ecap.chw.dao.VcaVisitationDao;
-import com.bluecodeltd.ecap.chw.dao.WeServiceVcaDao;
-import com.bluecodeltd.ecap.chw.dao.TbScreeningDao;
-import com.bluecodeltd.ecap.chw.dao.newCaregiverDao;
-import com.bluecodeltd.ecap.chw.domain.ChildIndexEventClient;
-import com.bluecodeltd.ecap.chw.fragment.ChildCasePlanFragment;
-import com.bluecodeltd.ecap.chw.fragment.ChildVisitsFragment;
-import com.bluecodeltd.ecap.chw.fragment.ProfileOverviewFragment;
-import com.bluecodeltd.ecap.chw.fragment.VcaHivAssesmentFragment;
-import com.bluecodeltd.ecap.chw.fragment.VcaTbScreeningFragment;
-import com.bluecodeltd.ecap.chw.model.Child;
-import com.bluecodeltd.ecap.chw.model.ChildRegisterModel;
-import com.bluecodeltd.ecap.chw.model.GraduationModel;
-import com.bluecodeltd.ecap.chw.model.HivRiskAssessmentAbove15Model;
-import com.bluecodeltd.ecap.chw.model.HivRiskAssessmentUnder15Model;
-import com.bluecodeltd.ecap.chw.model.ReferralModel;
-import com.bluecodeltd.ecap.chw.model.VCAModel;
-import com.bluecodeltd.ecap.chw.model.VcaAssessmentModel;
-import com.bluecodeltd.ecap.chw.model.VcaCasePlanModel;
-import com.bluecodeltd.ecap.chw.model.VcaScreeningModel;
-import com.bluecodeltd.ecap.chw.model.VcaVisitationModel;
-import com.bluecodeltd.ecap.chw.model.WeServiceVcaModel;
-import com.bluecodeltd.ecap.chw.model.newCaregiverModel;
-import com.bluecodeltd.ecap.chw.model.TbScreeningModel;
-import com.bluecodeltd.ecap.chw.util.Constants;
-import com.bluecodeltd.ecap.chw.util.Threading;
+import com.bluecodeltd.chimwemwe.chw.BuildConfig;
+import com.bluecodeltd.chimwemwe.chw.R;
+import com.bluecodeltd.chimwemwe.chw.adapter.ProfileViewPagerAdapter;
+import com.bluecodeltd.chimwemwe.chw.application.ChwApplication;
+import com.bluecodeltd.chimwemwe.chw.dao.CasePlanDao;
+import com.bluecodeltd.chimwemwe.chw.dao.GraduationDao;
+import com.bluecodeltd.chimwemwe.chw.dao.HivAssessmentAbove15Dao;
+import com.bluecodeltd.chimwemwe.chw.dao.HivAssessmentUnder15Dao;
+import com.bluecodeltd.chimwemwe.chw.dao.HouseholdDao;
+import com.bluecodeltd.chimwemwe.chw.dao.IndexPersonDao;
+import com.bluecodeltd.chimwemwe.chw.dao.ReferralDao;
+import com.bluecodeltd.chimwemwe.chw.dao.NutritionAssessmentInterventionDao;
+import com.bluecodeltd.chimwemwe.chw.dao.VCAScreeningDao;
+import com.bluecodeltd.chimwemwe.chw.dao.VcaAssessmentDao;
+import com.bluecodeltd.chimwemwe.chw.dao.VcaCasePlanDao;
+import com.bluecodeltd.chimwemwe.chw.dao.VcaVisitationDao;
+import com.bluecodeltd.chimwemwe.chw.dao.WeServiceVcaDao;
+import com.bluecodeltd.chimwemwe.chw.dao.TbScreeningDao;
+import com.bluecodeltd.chimwemwe.chw.dao.newCaregiverDao;
+import com.bluecodeltd.chimwemwe.chw.domain.ChildIndexEventClient;
+import com.bluecodeltd.chimwemwe.chw.fragment.ChildCasePlanFragment;
+import com.bluecodeltd.chimwemwe.chw.fragment.ChildVisitsFragment;
+import com.bluecodeltd.chimwemwe.chw.fragment.ProfileOverviewFragment;
+import com.bluecodeltd.chimwemwe.chw.fragment.VcaHivAssesmentFragment;
+import com.bluecodeltd.chimwemwe.chw.fragment.VcaTbScreeningFragment;
+import com.bluecodeltd.chimwemwe.chw.model.Child;
+import com.bluecodeltd.chimwemwe.chw.model.ChildRegisterModel;
+import com.bluecodeltd.chimwemwe.chw.model.GraduationModel;
+import com.bluecodeltd.chimwemwe.chw.model.HivRiskAssessmentAbove15Model;
+import com.bluecodeltd.chimwemwe.chw.model.HivRiskAssessmentUnder15Model;
+import com.bluecodeltd.chimwemwe.chw.model.ReferralModel;
+import com.bluecodeltd.chimwemwe.chw.model.VCAModel;
+import com.bluecodeltd.chimwemwe.chw.model.VcaAssessmentModel;
+import com.bluecodeltd.chimwemwe.chw.model.VcaCasePlanModel;
+import com.bluecodeltd.chimwemwe.chw.model.VcaScreeningModel;
+import com.bluecodeltd.chimwemwe.chw.model.VcaVisitationModel;
+import com.bluecodeltd.chimwemwe.chw.model.WeServiceVcaModel;
+import com.bluecodeltd.chimwemwe.chw.model.newCaregiverModel;
+import com.bluecodeltd.chimwemwe.chw.model.TbScreeningModel;
+import com.bluecodeltd.chimwemwe.chw.util.Constants;
+import com.bluecodeltd.chimwemwe.chw.util.Threading;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -133,7 +133,7 @@ import es.dmoral.toasty.Toasty;
 import timber.log.Timber;
 
 public class IndexDetailsActivity extends AppCompatActivity {
-    private com.bluecodeltd.ecap.chw.databinding.VcaContentBinding binding;
+    private com.bluecodeltd.chimwemwe.chw.databinding.VcaContentBinding binding;
 //    @Override
 //    protected void onResume() {
 //        super.onResume();
@@ -183,7 +183,7 @@ public class IndexDetailsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding = com.bluecodeltd.ecap.chw.databinding.VcaContentBinding.inflate(getLayoutInflater());
+        binding = com.bluecodeltd.chimwemwe.chw.databinding.VcaContentBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         toolbar = binding.toolbarx;
@@ -512,12 +512,12 @@ public class IndexDetailsActivity extends AppCompatActivity {
                 int years = now.get(java.util.Calendar.YEAR) - c.get(java.util.Calendar.YEAR);
                 if (now.get(java.util.Calendar.DAY_OF_YEAR) < c.get(java.util.Calendar.DAY_OF_YEAR)) years--;
                 if (years <= 5) {
-                    fragments.add(new com.bluecodeltd.ecap.chw.fragment.VcaNutritionAssessmentFragment());
+                    fragments.add(new com.bluecodeltd.chimwemwe.chw.fragment.VcaNutritionAssessmentFragment());
                 }
             }
         } catch (Exception ignored) { }
 
-        com.bluecodeltd.ecap.chw.adapter.ViewPager2Adapter adapter = new com.bluecodeltd.ecap.chw.adapter.ViewPager2Adapter(this, fragments);
+        com.bluecodeltd.chimwemwe.chw.adapter.ViewPager2Adapter adapter = new com.bluecodeltd.chimwemwe.chw.adapter.ViewPager2Adapter(this, fragments);
         mViewPager.setAdapter(adapter);
         try { mViewPager.setNestedScrollingEnabled(true); } catch (Throwable ignored) {}
         try { mViewPager.setOffscreenPageLimit(Math.min(5, fragments.size())); } catch (Throwable ignored) {}
@@ -537,11 +537,11 @@ public class IndexDetailsActivity extends AppCompatActivity {
                     // For positions beyond the first three, determine label by fragment type
                     try {
                         androidx.fragment.app.Fragment f = fragments.get(position);
-                        if (f instanceof com.bluecodeltd.ecap.chw.fragment.VcaNutritionAssessmentFragment) {
+                        if (f instanceof com.bluecodeltd.chimwemwe.chw.fragment.VcaNutritionAssessmentFragment) {
                             tab.setText("NUTRITION");
-                        } else if (f instanceof com.bluecodeltd.ecap.chw.fragment.VcaTbScreeningFragment) {
+                        } else if (f instanceof com.bluecodeltd.chimwemwe.chw.fragment.VcaTbScreeningFragment) {
                             tab.setText("TB SCREENING");
-                        } else if (f instanceof com.bluecodeltd.ecap.chw.fragment.VcaHivAssesmentFragment) {
+                        } else if (f instanceof com.bluecodeltd.chimwemwe.chw.fragment.VcaHivAssesmentFragment) {
                             tab.setText("HIV ASSESSMENT");
                         }
                     } catch (Exception ignored) { }
@@ -554,7 +554,7 @@ public class IndexDetailsActivity extends AppCompatActivity {
             // HIV Assessment tab (if present at any index)
             for (int i = 0; i < fragments.size(); i++) {
                 androidx.fragment.app.Fragment f = fragments.get(i);
-                if (f instanceof com.bluecodeltd.ecap.chw.fragment.VcaHivAssesmentFragment) {
+                if (f instanceof com.bluecodeltd.chimwemwe.chw.fragment.VcaHivAssesmentFragment) {
                     updateHivAssessmentTabTitleAtIndex(i);
                     break;
                 }
@@ -562,7 +562,7 @@ public class IndexDetailsActivity extends AppCompatActivity {
             // Nutrition tab (if present at any index)
             for (int i = 0; i < fragments.size(); i++) {
                 androidx.fragment.app.Fragment f = fragments.get(i);
-                if (f instanceof com.bluecodeltd.ecap.chw.fragment.VcaNutritionAssessmentFragment) {
+                if (f instanceof com.bluecodeltd.chimwemwe.chw.fragment.VcaNutritionAssessmentFragment) {
                     updateNutritionTabTitleAtIndex(i);
                     break;
                 }
@@ -570,7 +570,7 @@ public class IndexDetailsActivity extends AppCompatActivity {
             // TB Screening tab (if present at any index)
             for (int i = 0; i < fragments.size(); i++) {
                 androidx.fragment.app.Fragment f = fragments.get(i);
-                if (f instanceof com.bluecodeltd.ecap.chw.fragment.VcaTbScreeningFragment) {
+                if (f instanceof com.bluecodeltd.chimwemwe.chw.fragment.VcaTbScreeningFragment) {
                     updateTbTabTitleAtIndex(i);
                     break;
                 }
@@ -599,7 +599,7 @@ public class IndexDetailsActivity extends AppCompatActivity {
 
         int count = 0;
         try {
-            count = com.bluecodeltd.ecap.chw.dao.TbScreeningDao.countByVcaId(uniqueId);
+            count = com.bluecodeltd.chimwemwe.chw.dao.TbScreeningDao.countByVcaId(uniqueId);
         } catch (Exception ignored) { }
         visitTabCount.setText(String.valueOf(count));
         visitTabCount.setVisibility(View.VISIBLE);

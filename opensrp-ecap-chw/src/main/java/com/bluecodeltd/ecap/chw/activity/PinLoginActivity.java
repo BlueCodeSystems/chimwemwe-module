@@ -1,19 +1,19 @@
-package com.bluecodeltd.ecap.chw.activity;
+package com.bluecodeltd.chimwemwe.chw.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
-import com.bluecodeltd.ecap.chw.application.ChwApplication;
-import com.bluecodeltd.ecap.chw.contract.PinViewContract;
-import com.bluecodeltd.ecap.chw.fragment.ChooseLoginMethodFragment;
-import com.bluecodeltd.ecap.chw.fragment.PinLoginFragment;
-import com.bluecodeltd.ecap.chw.fragment.SetPinFragment;
-import com.bluecodeltd.ecap.chw.pinlogin.PinLogger;
-import com.bluecodeltd.ecap.chw.pinlogin.PinLoginUtil;
+import com.bluecodeltd.chimwemwe.chw.application.ChwApplication;
+import com.bluecodeltd.chimwemwe.chw.contract.PinViewContract;
+import com.bluecodeltd.chimwemwe.chw.fragment.ChooseLoginMethodFragment;
+import com.bluecodeltd.chimwemwe.chw.fragment.PinLoginFragment;
+import com.bluecodeltd.chimwemwe.chw.fragment.SetPinFragment;
+import com.bluecodeltd.chimwemwe.chw.pinlogin.PinLogger;
+import com.bluecodeltd.chimwemwe.chw.pinlogin.PinLoginUtil;
 
-import com.bluecodeltd.ecap.chw.R;
+import com.bluecodeltd.chimwemwe.chw.R;
 
 public class PinLoginActivity extends AppCompatActivity implements PinViewContract.Controller {
     public static final String DESTINATION_FRAGMENT = "DESTINATION_FRAGMENT";

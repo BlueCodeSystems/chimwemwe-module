@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.model;
+package com.bluecodeltd.chimwemwe.chw.model;
 
 public class GraduationModel {
     private String base_entity_id;

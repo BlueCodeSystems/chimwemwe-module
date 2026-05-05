@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.contract;
+package com.bluecodeltd.chimwemwe.chw.contract;
 
 import org.smartregister.view.contract.BaseRegisterFragmentContract;
 

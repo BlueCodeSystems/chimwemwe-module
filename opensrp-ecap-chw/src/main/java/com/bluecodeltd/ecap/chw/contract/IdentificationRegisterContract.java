@@ -1,7 +1,7 @@
-package com.bluecodeltd.ecap.chw.contract;
+package com.bluecodeltd.chimwemwe.chw.contract;
 
-import com.bluecodeltd.ecap.chw.domain.ChildIndexEventClient;
-import com.bluecodeltd.ecap.chw.model.IdentificationEventClient;
+import com.bluecodeltd.chimwemwe.chw.domain.ChildIndexEventClient;
+import com.bluecodeltd.chimwemwe.chw.model.IdentificationEventClient;
 
 import org.smartregister.view.contract.BaseRegisterContract;
 

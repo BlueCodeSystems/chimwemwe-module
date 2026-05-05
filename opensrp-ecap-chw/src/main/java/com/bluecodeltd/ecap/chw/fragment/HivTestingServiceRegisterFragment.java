@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.fragment;
+package com.bluecodeltd.chimwemwe.chw.fragment;
 
 import android.app.AlertDialog;
 import android.content.Intent;
@@ -12,14 +12,14 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.ActionBar;
 
-import com.bluecodeltd.ecap.chw.R;
-import com.bluecodeltd.ecap.chw.activity.HTSDetailsActivity;
-import com.bluecodeltd.ecap.chw.activity.HTSRegisterFragmentPresenter;
-import com.bluecodeltd.ecap.chw.contract.IndexRegisterFragmentContract;
-import com.bluecodeltd.ecap.chw.provider.HivTestingServicesRegisterProvider;
-import com.bluecodeltd.ecap.chw.util.Constants;
+import com.bluecodeltd.chimwemwe.chw.R;
+import com.bluecodeltd.chimwemwe.chw.activity.HTSDetailsActivity;
+import com.bluecodeltd.chimwemwe.chw.activity.HTSRegisterFragmentPresenter;
+import com.bluecodeltd.chimwemwe.chw.contract.IndexRegisterFragmentContract;
+import com.bluecodeltd.chimwemwe.chw.provider.HivTestingServicesRegisterProvider;
+import com.bluecodeltd.chimwemwe.chw.util.Constants;
 import com.github.javiersantos.appupdater.AppUpdater;
-import com.bluecodeltd.ecap.chw.util.UpdateManager;
+import com.bluecodeltd.chimwemwe.chw.util.UpdateManager;
 
 import org.smartregister.chw.core.custom_views.NavigationMenu;
 import org.smartregister.commonregistry.CommonPersonObjectClient;
@@ -35,7 +35,7 @@ import java.util.HashMap;
 
 public class HivTestingServiceRegisterFragment extends BaseSafeRegisterFragment implements IndexRegisterFragmentContract.View {
 
-    private com.bluecodeltd.ecap.chw.databinding.FragmentBaseRegisterBinding binding;
+    private com.bluecodeltd.chimwemwe.chw.databinding.FragmentBaseRegisterBinding binding;
 
     AlertDialog.Builder builder;
 
@@ -146,7 +146,7 @@ public class HivTestingServiceRegisterFragment extends BaseSafeRegisterFragment 
 
     @Override
     public void setupViews(View view) {
-        try { binding = com.bluecodeltd.ecap.chw.databinding.FragmentBaseRegisterBinding.bind(view); } catch (Throwable ignored) {}
+        try { binding = com.bluecodeltd.chimwemwe.chw.databinding.FragmentBaseRegisterBinding.bind(view); } catch (Throwable ignored) {}
         // Ensure required views exist before BaseRegisterFragment.setupViews(view)
         try {
             // Ensure Toolbar exists for BaseRegisterFragment/NavigationMenu

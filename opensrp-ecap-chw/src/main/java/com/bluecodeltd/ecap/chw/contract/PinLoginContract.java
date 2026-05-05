@@ -1,8 +1,8 @@
-package com.bluecodeltd.ecap.chw.contract;
+package com.bluecodeltd.chimwemwe.chw.contract;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import com.bluecodeltd.ecap.chw.pinlogin.PinLogger;
+import com.bluecodeltd.chimwemwe.chw.pinlogin.PinLogger;
 
 public interface PinLoginContract {
 

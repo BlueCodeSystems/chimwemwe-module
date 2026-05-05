@@ -1,8 +1,8 @@
-package com.bluecodeltd.ecap.chw.custom_view;
+package com.bluecodeltd.chimwemwe.chw.custom_view;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import com.bluecodeltd.ecap.chw.R;
+import com.bluecodeltd.chimwemwe.chw.R;
 
 import static org.smartregister.chw.core.utils.Utils.redrawWithOption;
 

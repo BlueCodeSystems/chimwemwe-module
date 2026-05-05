@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.actionhelper;
+package com.bluecodeltd.chimwemwe.chw.actionhelper;
 
 import android.content.Context;
 
@@ -8,7 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.bluecodeltd.ecap.chw.R;
+import com.bluecodeltd.chimwemwe.chw.R;
 import org.smartregister.chw.anc.actionhelper.HomeVisitActionHelper;
 import org.smartregister.chw.anc.domain.VisitDetail;
 import org.smartregister.chw.anc.model.BaseAncHomeVisitAction;
@@ -74,7 +74,7 @@ public class IPTPAction extends HomeVisitActionHelper {
     public void onPayloadReceived(String jsonPayload) {
         try {
             JSONObject jsonObject = new JSONObject(jsonPayload);
-            str_date = com.bluecodeltd.ecap.chw.util.JsonFormUtils.getValue(jsonObject, MessageFormat.format("iptp{0}_date", serviceIteration));
+            str_date = com.bluecodeltd.chimwemwe.chw.util.JsonFormUtils.getValue(jsonObject, MessageFormat.format("iptp{0}_date", serviceIteration));
 
             try {
                 parsedDate = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).parse(str_date);

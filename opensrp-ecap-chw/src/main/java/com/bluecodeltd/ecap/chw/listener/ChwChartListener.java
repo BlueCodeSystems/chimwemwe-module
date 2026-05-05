@@ -1,14 +1,14 @@
-package com.bluecodeltd.ecap.chw.listener;
+package com.bluecodeltd.chimwemwe.chw.listener;
 
 import android.app.Activity;
 import android.os.Bundle;
 import android.widget.Toast;
 
-import com.bluecodeltd.ecap.chw.R;
-import com.bluecodeltd.ecap.chw.activity.FragmentBaseActivity;
-import com.bluecodeltd.ecap.chw.application.ChwApplication;
-import com.bluecodeltd.ecap.chw.fragment.MyCommunityActivityDetailsFragment;
-import com.bluecodeltd.ecap.chw.util.Constants;
+import com.bluecodeltd.chimwemwe.chw.R;
+import com.bluecodeltd.chimwemwe.chw.activity.FragmentBaseActivity;
+import com.bluecodeltd.chimwemwe.chw.application.ChwApplication;
+import com.bluecodeltd.chimwemwe.chw.fragment.MyCommunityActivityDetailsFragment;
+import com.bluecodeltd.chimwemwe.chw.util.Constants;
 import org.smartregister.reporting.domain.PieChartSlice;
 import org.smartregister.reporting.listener.PieChartSelectListener;
 

@@ -1,11 +1,11 @@
-package com.bluecodeltd.ecap.chw.viewmodel
+package com.bluecodeltd.chimwemwe.chw.viewmodel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.bluecodeltd.ecap.chw.dao.IndexPersonDao
-import com.bluecodeltd.ecap.chw.model.Child
+import com.bluecodeltd.chimwemwe.chw.dao.IndexPersonDao
+import com.bluecodeltd.chimwemwe.chw.model.Child
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 

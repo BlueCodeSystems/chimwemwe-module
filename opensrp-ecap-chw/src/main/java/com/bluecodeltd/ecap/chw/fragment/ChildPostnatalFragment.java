@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.fragment;
+package com.bluecodeltd.chimwemwe.chw.fragment;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -11,12 +11,12 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bluecodeltd.ecap.chw.activity.ChildNonPmtctDetail;
-import com.bluecodeltd.ecap.chw.adapter.ChildPostnatalAdapter;
-import com.bluecodeltd.ecap.chw.dao.ChildPostnatalCareDao;
-import com.bluecodeltd.ecap.chw.databinding.FragmentChildPostnatalBinding;
-import com.bluecodeltd.ecap.chw.model.ChildPostnatalCareModel;
-import com.bluecodeltd.ecap.chw.util.Threading;
+import com.bluecodeltd.chimwemwe.chw.activity.ChildNonPmtctDetail;
+import com.bluecodeltd.chimwemwe.chw.adapter.ChildPostnatalAdapter;
+import com.bluecodeltd.chimwemwe.chw.dao.ChildPostnatalCareDao;
+import com.bluecodeltd.chimwemwe.chw.databinding.FragmentChildPostnatalBinding;
+import com.bluecodeltd.chimwemwe.chw.model.ChildPostnatalCareModel;
+import com.bluecodeltd.chimwemwe.chw.util.Threading;
 
 import org.jetbrains.annotations.NotNull;
 

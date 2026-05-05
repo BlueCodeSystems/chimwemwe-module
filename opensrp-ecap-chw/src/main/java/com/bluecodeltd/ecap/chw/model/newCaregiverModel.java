@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.model;
+package com.bluecodeltd.chimwemwe.chw.model;
 
 public class newCaregiverModel {
     private String new_caregiver_name;

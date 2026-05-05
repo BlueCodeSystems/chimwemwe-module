@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.interactor;
+package com.bluecodeltd.chimwemwe.chw.interactor;
 
 import org.smartregister.chw.core.interactor.CoreFamilyChangeContractInteractor;
 import org.smartregister.family.util.DBConstants;

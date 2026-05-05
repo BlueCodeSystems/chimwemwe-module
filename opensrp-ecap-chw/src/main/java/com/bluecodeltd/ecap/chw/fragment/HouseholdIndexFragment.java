@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.fragment;
+package com.bluecodeltd.chimwemwe.chw.fragment;
 
 import android.content.Intent;
 import android.database.Cursor;
@@ -7,7 +7,7 @@ import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import com.bluecodeltd.ecap.chw.util.Threading;
+import com.bluecodeltd.chimwemwe.chw.util.Threading;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -19,13 +19,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.ActionBar;
 import androidx.loader.content.Loader;
 
-import com.bluecodeltd.ecap.chw.R;
-import com.bluecodeltd.ecap.chw.activity.HouseholdDetails;
-import com.bluecodeltd.ecap.chw.contract.HouseholdIndexFragmentContract;
-import com.bluecodeltd.ecap.chw.dao.HouseholdDao;
-import com.bluecodeltd.ecap.chw.presenter.HouseholdIndexFragmentPresenter;
-import com.bluecodeltd.ecap.chw.provider.HouseholdRegisterProvider;
-import com.bluecodeltd.ecap.chw.util.Constants;
+import com.bluecodeltd.chimwemwe.chw.R;
+import com.bluecodeltd.chimwemwe.chw.activity.HouseholdDetails;
+import com.bluecodeltd.chimwemwe.chw.contract.HouseholdIndexFragmentContract;
+import com.bluecodeltd.chimwemwe.chw.dao.HouseholdDao;
+import com.bluecodeltd.chimwemwe.chw.presenter.HouseholdIndexFragmentPresenter;
+import com.bluecodeltd.chimwemwe.chw.provider.HouseholdRegisterProvider;
+import com.bluecodeltd.chimwemwe.chw.util.Constants;
 
 import org.smartregister.AllConstants;
 import org.smartregister.CoreLibrary;
@@ -44,7 +44,7 @@ import es.dmoral.toasty.Toasty;
 public class HouseholdIndexFragment extends BaseSafeRegisterFragment implements HouseholdIndexFragmentContract.View{
     private static final long SEARCH_DEBOUNCE_MS = 350L;
 
-    private com.bluecodeltd.ecap.chw.databinding.FragmentBaseRegisterBinding binding;
+    private com.bluecodeltd.chimwemwe.chw.databinding.FragmentBaseRegisterBinding binding;
     private final Handler searchHandler = new Handler(Looper.getMainLooper());
     private String pendingSearchText = "";
     private final Runnable searchRunnable = () -> filter(pendingSearchText, "", getMainCondition(), false);
@@ -153,7 +153,7 @@ public class HouseholdIndexFragment extends BaseSafeRegisterFragment implements 
 
     @Override
     public void setupViews(View view) {
-        try { binding = com.bluecodeltd.ecap.chw.databinding.FragmentBaseRegisterBinding.bind(view); } catch (Throwable ignored) {}
+        try { binding = com.bluecodeltd.chimwemwe.chw.databinding.FragmentBaseRegisterBinding.bind(view); } catch (Throwable ignored) {}
 
         try {
             // Ensure required views exist before BaseRegisterFragment.setupViews(view)

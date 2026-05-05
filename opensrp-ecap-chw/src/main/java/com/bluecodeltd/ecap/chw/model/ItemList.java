@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.model;
+package com.bluecodeltd.chimwemwe.chw.model;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;

@@ -1,7 +1,7 @@
-package com.bluecodeltd.ecap.chw.dao;
+package com.bluecodeltd.chimwemwe.chw.dao;
 
-import com.bluecodeltd.ecap.chw.model.VcaCSVModel;
-import com.bluecodeltd.ecap.chw.model.VcaScreeningModel;
+import com.bluecodeltd.chimwemwe.chw.model.VcaCSVModel;
+import com.bluecodeltd.chimwemwe.chw.model.VcaScreeningModel;
 
 import org.smartregister.dao.AbstractDao;
 

@@ -1,11 +1,11 @@
-package com.bluecodeltd.ecap.chw.viewmodel
+package com.bluecodeltd.chimwemwe.chw.viewmodel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.bluecodeltd.ecap.chw.dao.HotspotGroupDao
-import com.bluecodeltd.ecap.chw.dao.ParticipantDao
+import com.bluecodeltd.chimwemwe.chw.dao.HotspotGroupDao
+import com.bluecodeltd.chimwemwe.chw.dao.ParticipantDao
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime

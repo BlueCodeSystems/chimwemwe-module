@@ -40,7 +40,7 @@ if (project.rootProject.file("local.properties").exists()) {
 
 
 android {
-    namespace  = "com.bluecodeltd.ecap.chw"
+    namespace  = "com.bluecodeltd.chimwemwe.chw"
     useLibrary 'org.apache.http.legacy'
     compileSdkVersion 35
     buildToolsVersion '35.0.0'
@@ -322,7 +322,7 @@ android {
             buildConfigField "String", 'DEFAULT_LOCATION', '"Health Facility"'
             buildConfigField "String", 'DEFAULT_LOCATION_DEBUG', '"Health Facility"'
             // Must not go below what is already on devices; SQLCipher blocks downgrades.
-            buildConfigField "int", "DATABASE_VERSION", '48'
+            buildConfigField "int", "DATABASE_VERSION", '49'
         }
     }
 }

@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.actionhelper;
+package com.bluecodeltd.chimwemwe.chw.actionhelper;
 
 import android.content.Context;
 
@@ -6,11 +6,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.bluecodeltd.ecap.chw.R;
+import com.bluecodeltd.chimwemwe.chw.R;
 import org.smartregister.chw.anc.actionhelper.HomeVisitActionHelper;
 import org.smartregister.chw.anc.domain.VisitDetail;
 import org.smartregister.chw.anc.model.BaseAncHomeVisitAction;
-import com.bluecodeltd.ecap.chw.util.JsonFormUtils;
+import com.bluecodeltd.chimwemwe.chw.util.JsonFormUtils;
 import org.smartregister.domain.Alert;
 
 import java.util.List;

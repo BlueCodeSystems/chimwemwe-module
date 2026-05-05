@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.dao;
+package com.bluecodeltd.chimwemwe.chw.dao;
 
 import net.sqlcipher.MatrixCursor;
 import net.sqlcipher.database.SQLiteDatabase;
@@ -9,7 +9,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import com.bluecodeltd.ecap.chw.model.FamilyDetailsModel;
+import com.bluecodeltd.chimwemwe.chw.model.FamilyDetailsModel;
 import org.smartregister.domain.AlertStatus;
 import org.smartregister.repository.Repository;
 

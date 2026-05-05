@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.adapter;
+package com.bluecodeltd.chimwemwe.chw.adapter;
 
 import android.content.Context;
 import android.content.Intent;
@@ -13,10 +13,10 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bluecodeltd.ecap.chw.R;
-import com.bluecodeltd.ecap.chw.activity.HeiDetailsActivity;
-import com.bluecodeltd.ecap.chw.model.PmtctChildModel;
-import com.bluecodeltd.ecap.chw.util.Threading;
+import com.bluecodeltd.chimwemwe.chw.R;
+import com.bluecodeltd.chimwemwe.chw.activity.HeiDetailsActivity;
+import com.bluecodeltd.chimwemwe.chw.model.PmtctChildModel;
+import com.bluecodeltd.chimwemwe.chw.util.Threading;
 
 import java.time.LocalDate;
 import java.time.Period;
@@ -109,12 +109,12 @@ Context context;
             try {
                 String hid = safe(householdId);
                 String pmtctId = safe(monitoringModel.getHousehold_id());
-                com.bluecodeltd.ecap.chw.model.PtctMotherModel mother = null;
+                com.bluecodeltd.chimwemwe.chw.model.PtctMotherModel mother = null;
                 if (!hid.isEmpty()) {
-                    mother = com.bluecodeltd.ecap.chw.dao.PMTCTMotherDao.getPMCTMother(hid);
+                    mother = com.bluecodeltd.chimwemwe.chw.dao.PMTCTMotherDao.getPMCTMother(hid);
                 }
                 if (mother == null && !pmtctId.isEmpty()) {
-                    mother = com.bluecodeltd.ecap.chw.dao.PMTCTMotherDao.getPMCTMother(pmtctId);
+                    mother = com.bluecodeltd.chimwemwe.chw.dao.PMTCTMotherDao.getPMCTMother(pmtctId);
                 }
                 if (mother != null) {
                     String agywUnsupp = safe(mother.getAgyw_unsuppressed_vl_1st());

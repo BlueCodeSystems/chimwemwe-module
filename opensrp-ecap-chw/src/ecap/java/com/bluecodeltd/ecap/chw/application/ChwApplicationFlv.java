@@ -1,6 +1,6 @@
-package com.bluecodeltd.ecap.chw.application;
+package com.bluecodeltd.chimwemwe.chw.application;
 
-import com.bluecodeltd.ecap.chw.util.Constants;
+import com.bluecodeltd.chimwemwe.chw.util.Constants;
 
 import org.smartregister.chw.core.utils.CoreConstants;
 import org.smartregister.family.util.DBConstants;

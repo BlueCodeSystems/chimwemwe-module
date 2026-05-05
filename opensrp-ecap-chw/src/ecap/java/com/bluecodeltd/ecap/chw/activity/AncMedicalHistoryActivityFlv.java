@@ -1,10 +1,10 @@
-package com.bluecodeltd.ecap.chw.activity;
+package com.bluecodeltd.chimwemwe.chw.activity;
 
 import android.content.Context;
 import android.view.View;
 import android.widget.TextView;
 
-import com.bluecodeltd.ecap.chw.R;
+import com.bluecodeltd.chimwemwe.chw.R;
 
 import java.text.MessageFormat;
 import java.util.List;
