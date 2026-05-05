@@ -148,11 +148,12 @@ public class SessionAttendanceDao extends AbstractDao {
     }
 
     /**
-     * Returns a map keyed by participant id for the session snapshot.
-     * Values contain caregiver/child attendance for that participant.
+     * Returns a map keyed by participant code (ec_chimwemwe_participant.participant_id, e.g.
+     * "CHIM-1234567890") for the session snapshot. Values contain caregiver/child attendance
+     * for that participant.
      */
-    public static Map<Long, AttendanceModel> getSessionAttendanceMap(String groupId, int sessionNumber) {
-        Map<Long, AttendanceModel> out = new HashMap<>();
+    public static Map<String, AttendanceModel> getSessionAttendanceMap(String groupId, int sessionNumber) {
+        Map<String, AttendanceModel> out = new HashMap<>();
         try {
             StringBuilder select = new StringBuilder();
             select.append("SELECT session_date");
@@ -167,8 +168,8 @@ public class SessionAttendanceDao extends AbstractDao {
                     .append(" AND (delete_status IS NULL OR delete_status <> '1')")
                     .append(" ORDER BY last_interacted_with DESC LIMIT 1");
 
-            List<Map<Long, AttendanceModel>> rows = AbstractDao.readData(select.toString(), cursor -> {
-                Map<Long, AttendanceModel> map = new HashMap<>();
+            List<Map<String, AttendanceModel>> rows = AbstractDao.readData(select.toString(), cursor -> {
+                Map<String, AttendanceModel> map = new HashMap<>();
                 String sessionDate = cursor.getString(0);
                 int idx = 1;
                 for (int i = 1; i <= 20; i++) {
@@ -176,12 +177,7 @@ public class SessionAttendanceDao extends AbstractDao {
                     String cg = cursor.getString(idx++);
                     String ch = cursor.getString(idx++);
                     if (pidRaw == null || pidRaw.trim().isEmpty()) continue;
-                    long pid;
-                    try {
-                        pid = Long.parseLong(pidRaw.trim());
-                    } catch (Exception ignored) {
-                        continue;
-                    }
+                    String pid = pidRaw.trim();
                     AttendanceModel a = new AttendanceModel();
                     a.setGroupId(groupId);
                     a.setParticipantId(pid);
@@ -204,13 +200,77 @@ public class SessionAttendanceDao extends AbstractDao {
     }
 
     /**
+     * Direct write of the per-slot participant id and attendance columns for
+     * (group_id, session_number). Bypasses the OpenSRP form processor so the slot
+     * columns are guaranteed populated even when the form pipeline doesn't translate
+     * spinner values into client attributes correctly. The OpenSRP Event/Client
+     * records (used for sync) are still created by the caller via saveRegistration —
+     * this only patches the DB columns.
+     *
+     * Slot match key is the participant business code (ec_chimwemwe_participant.participant_id),
+     * NOT the row PK — OpenSRP overwrites the participant row's `id` column with the
+     * non-numeric base_entity_id when processing the Client, which makes the row PK
+     * unusable as a stable identifier from Java.
+     *
+     * Inserts a stub row keyed by the deterministic base_entity_id if one doesn't exist,
+     * so the UPDATE always has a target — independent of whether the OpenSRP processor
+     * has finished writing the row.
+     */
+    public static void upsertSlots(String groupId, int sessionNumber,
+                                   List<AttendanceModel> attendances) {
+        if (groupId == null || groupId.trim().isEmpty() || attendances == null) return;
+        String gid = groupId.trim();
+
+        String baseEntityId = "chimwemwe-attendance-" + gid + "-" + sessionNumber;
+        String sessionDate = "";
+        if (!attendances.isEmpty() && attendances.get(0).getSessionDate() != null) {
+            sessionDate = attendances.get(0).getSessionDate();
+        }
+
+        // INSERT OR IGNORE relies on the unique base_entity_id index — no-op if a row
+        // already exists for this (gid, sessionNumber) under that base_entity_id.
+        String insertSql = "INSERT OR IGNORE INTO " + TABLE +
+                " (base_entity_id, group_id, session_number, session_date, last_interacted_with) " +
+                "VALUES (" + q(baseEntityId) + "," + q(gid) + "," + sessionNumber + "," +
+                q(sessionDate) + "," + System.currentTimeMillis() + ")";
+        AbstractDao.updateDB(insertSql);
+
+        int n = Math.min(attendances.size(), 20);
+
+        // Single combined UPDATE: filled slots get the snapshot data, unused slots are cleared.
+        // Filtering by base_entity_id (unique) avoids any group_id/session_number whitespace
+        // mismatch with whatever the OpenSRP processor wrote.
+        StringBuilder set = new StringBuilder("UPDATE ").append(TABLE).append(" SET ");
+        set.append("session_date=").append(q(sessionDate));
+        for (int i = 0; i < 20; i++) {
+            int slot = i + 1;
+            if (i < n) {
+                AttendanceModel a = attendances.get(i);
+                String pid = a.getParticipantId() != null ? a.getParticipantId() : "";
+                String cg  = a.getCaregiverAttendance() != null ? a.getCaregiverAttendance() : "";
+                String ch  = a.getChildAttendance()    != null ? a.getChildAttendance()    : "";
+                set.append(",p").append(slot).append("_participant_id=").append(q(pid))
+                   .append(",p").append(slot).append("_cg_attendance=").append(q(cg))
+                   .append(",p").append(slot).append("_child_attendance=").append(q(ch));
+            } else {
+                set.append(",p").append(slot).append("_participant_id=NULL")
+                   .append(",p").append(slot).append("_cg_attendance=''")
+                   .append(",p").append(slot).append("_child_attendance=''");
+            }
+        }
+        set.append(" WHERE base_entity_id=").append(q(baseEntityId));
+        AbstractDao.updateDB(set.toString());
+    }
+
+    /**
      * Clears a participant slot in all session snapshots for a group.
      * This avoids deleting entire session rows that also contain other participants' data.
+     * participantCode is the business identifier (ec_chimwemwe_participant.participant_id).
      */
-    public static void removeParticipantFromGroupSessions(String groupId, long participantRowId) {
-        if (groupId == null || groupId.trim().isEmpty() || participantRowId <= 0) return;
+    public static void removeParticipantFromGroupSessions(String groupId, String participantCode) {
+        if (groupId == null || groupId.trim().isEmpty() || participantCode == null || participantCode.trim().isEmpty()) return;
         String gid = groupId.trim();
-        String pid = String.valueOf(participantRowId);
+        String pid = participantCode.trim();
         for (int i = 1; i <= 20; i++) {
             String sql = "UPDATE " + TABLE + " SET " +
                     "p" + i + "_participant_id=NULL," +

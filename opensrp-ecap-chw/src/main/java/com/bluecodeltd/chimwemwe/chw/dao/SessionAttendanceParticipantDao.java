@@ -89,20 +89,22 @@ public class SessionAttendanceParticipantDao extends AbstractDao {
     }
 
     /**
-     * Returns a map keyed by participant id for a given session (unlimited participants).
+     * Returns a map keyed by participant business code (ec_chimwemwe_participant.participant_id,
+     * e.g. "CHIM-1234567890") for a given session (unlimited participants). Keyed by code rather
+     * than the row PK because OpenSRP's CONFLICT_REPLACE corrupts the participant row's INTEGER
+     * id column with a non-numeric base_entity_id, so the row PK can't identify a participant.
      */
-    public static Map<Long, AttendanceModel> getSessionAttendanceMap(String groupId, int sessionNumber) {
-        Map<Long, AttendanceModel> out = new HashMap<>();
+    public static Map<String, AttendanceModel> getSessionAttendanceMap(String groupId, int sessionNumber) {
+        Map<String, AttendanceModel> out = new HashMap<>();
         try {
             String sql = "SELECT participant_id, session_date, caregiver_attendance, child_attendance FROM " + TABLE +
                     " WHERE group_id=" + q(groupId) + " AND session_number=" + sessionNumber +
                     " AND (delete_status IS NULL OR delete_status <> '1')";
-            List<Map<Long, AttendanceModel>> rows = AbstractDao.readData(sql, cursor -> {
-                Map<Long, AttendanceModel> map = new HashMap<>();
+            List<Map<String, AttendanceModel>> rows = AbstractDao.readData(sql, cursor -> {
+                Map<String, AttendanceModel> map = new HashMap<>();
                 String pidRaw = cursor.getString(0);
                 if (pidRaw == null || pidRaw.trim().isEmpty()) return map;
-                long pid;
-                try { pid = Long.parseLong(pidRaw.trim()); } catch (Exception ignored) { return map; }
+                String pid = pidRaw.trim();
 
                 AttendanceModel a = new AttendanceModel();
                 a.setGroupId(groupId);
@@ -116,7 +118,7 @@ public class SessionAttendanceParticipantDao extends AbstractDao {
             });
 
             if (rows != null) {
-                for (Map<Long, AttendanceModel> r : rows) if (r != null) out.putAll(r);
+                for (Map<String, AttendanceModel> r : rows) if (r != null) out.putAll(r);
             }
         } catch (Exception ignored) {}
         return out;
@@ -126,8 +128,52 @@ public class SessionAttendanceParticipantDao extends AbstractDao {
         AbstractDao.updateDB("UPDATE " + TABLE + " SET delete_status='1' WHERE group_id=" + q(groupId));
     }
 
-    public static void softDeleteForParticipant(long participantId) {
-        AbstractDao.updateDB("UPDATE " + TABLE + " SET delete_status='1' WHERE participant_id=" + q(String.valueOf(participantId)));
+    /** participantCode is the business identifier (ec_chimwemwe_participant.participant_id). */
+    public static void softDeleteForParticipant(String participantCode) {
+        if (participantCode == null || participantCode.trim().isEmpty()) return;
+        AbstractDao.updateDB("UPDATE " + TABLE + " SET delete_status='1' WHERE participant_id=" + q(participantCode.trim()));
+    }
+
+    /**
+     * Direct write of one (group, session, participant) row. Bypasses the OpenSRP form processor
+     * because its edit-mode JsonFormUtils.merge() preserves existing non-empty attribute values
+     * when the new value is empty — so flipping a participant's attendance from "Group" or
+     * "Home Visit" to "Absent" (which encodes as "") through saveRegistration alone does NOT
+     * land. The OpenSRP Client/Event records used for sync are still created by the caller via
+     * saveRegistration; this only patches the bind_type table columns to whatever the caller
+     * actually intended (including empty strings).
+     *
+     * Idempotent: insert-or-ignore by deterministic base_entity_id, then update the snapshot
+     * columns explicitly.
+     */
+    public static void upsertLine(String groupId, int sessionNumber, String sessionDate,
+                                  String participantCode, String caregiverAttendance,
+                                  String childAttendance) {
+        if (groupId == null || groupId.trim().isEmpty()) return;
+        if (participantCode == null || participantCode.trim().isEmpty()) return;
+        String gid = groupId.trim();
+        String pid = participantCode.trim();
+        String date = sessionDate != null ? sessionDate : "";
+        String cg = caregiverAttendance != null ? caregiverAttendance : "";
+        String ch = childAttendance != null ? childAttendance : "";
+        String baseEntityId = "chimwemwe-session-attendance-" + gid + "-" + sessionNumber + "-" + pid;
+        long now = System.currentTimeMillis();
+
+        String insert = "INSERT OR IGNORE INTO " + TABLE +
+                " (base_entity_id, last_interacted_with, delete_status, is_closed, group_id, session_number," +
+                "  participant_id, session_date, caregiver_attendance, child_attendance) " +
+                "VALUES (" + q(baseEntityId) + "," + now + ",NULL,0," + q(gid) + "," + sessionNumber + "," +
+                q(pid) + "," + q(date) + "," + q(cg) + "," + q(ch) + ")";
+        AbstractDao.updateDB(insert);
+
+        String update = "UPDATE " + TABLE + " SET " +
+                "last_interacted_with=" + now + "," +
+                "delete_status=NULL," +
+                "session_date=" + q(date) + "," +
+                "caregiver_attendance=" + q(cg) + "," +
+                "child_attendance=" + q(ch) +
+                " WHERE base_entity_id=" + q(baseEntityId);
+        AbstractDao.updateDB(update);
     }
 
     private static String q(String s) {

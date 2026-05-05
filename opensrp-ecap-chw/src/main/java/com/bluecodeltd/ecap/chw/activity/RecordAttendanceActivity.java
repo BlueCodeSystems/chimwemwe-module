@@ -109,13 +109,16 @@ public class RecordAttendanceActivity extends AppCompatActivity {
     private void loadData() {
         Threading.io(() -> {
             List<ParticipantModel> participants = ParticipantDao.getParticipants(groupId);
-            Map<Long, AttendanceModel> existingMap =
+            // Read from the normalized per-participant lines table. Map is keyed by the
+            // participant business code (participant_id) — the row PK is unusable because
+            // OpenSRP overwrites it with a non-numeric base_entity_id.
+            Map<String, AttendanceModel> existingMap =
                     SessionAttendanceParticipantDao.getSessionAttendanceMap(groupId, sessionNumber);
 
-            // Build combined list
+            // Build combined list — keyed by the participant business code (participant_id).
             List<AttendanceRowItem> rows = new ArrayList<>();
             for (ParticipantModel p : participants) {
-                AttendanceModel att = existingMap.get(p.getId());
+                AttendanceModel att = existingMap.get(p.getParticipantId());
                 String cgAtt = att != null ? att.getCaregiverAttendance() : "";
                 String chAtt = att != null ? att.getChildAttendance()     : "";
                 rows.add(new AttendanceRowItem(p, cgAtt, chAtt));
@@ -266,8 +269,10 @@ public class RecordAttendanceActivity extends AppCompatActivity {
                 int slot = i + 1;
                 String fullName = row.participant.getCaregiverFullName()
                         + " / " + row.participant.getChildFullName();
+                String participantCode = row.participant.getParticipantId() != null
+                        ? row.participant.getParticipantId() : "";
                 ChimwemweFormUtils.ensureFieldValue(sessionForm, "p" + slot + "_label", fullName);
-                ChimwemweFormUtils.ensureFieldValue(sessionForm, "p" + slot + "_participant_id", String.valueOf(row.participant.getId()));
+                ChimwemweFormUtils.ensureFieldValue(sessionForm, "p" + slot + "_participant_id", participantCode);
                 ChimwemweFormUtils.ensureFieldValue(sessionForm, "p" + slot + "_cg_attendance", row.caregiverAttendance);
                 ChimwemweFormUtils.ensureFieldValue(sessionForm, "p" + slot + "_child_attendance", row.childAttendance);
             }
@@ -279,12 +284,17 @@ public class RecordAttendanceActivity extends AppCompatActivity {
             );
             ChimwemweFormUtils.saveRegistration(processedSessionForm, isEditMode);
 
-            // Persist normalized per-participant lines (unlimited participants per session)
+            // Persist normalized per-participant lines (unlimited participants per session).
+            // entity_id and participant_id use the stable "CHIM-..." business code, NOT the row PK
+            // (OpenSRP's CONFLICT_REPLACE corrupts the participant row's INTEGER id with a string,
+            // so String.valueOf(participant.getId()) returns "0" for every participant — which
+            // would make all line entity_ids collide and overwrite each other).
             JSONObject lineTemplate = formUtils.getFormJson("chimwemwe_session_attendance_participant");
             if (lineTemplate == null) return;
             for (AttendanceRowItem row : rows) {
                 if (row == null || row.participant == null) continue;
-                String pid = String.valueOf(row.participant.getId());
+                String pid = row.participant.getParticipantId();
+                if (pid == null || pid.trim().isEmpty()) continue;
                 String entityId = "chimwemwe-session-attendance-" + groupId + "-" + sessionNumber + "-" + pid;
 
                 JSONObject lineForm = new JSONObject(lineTemplate.toString());
@@ -302,6 +312,15 @@ public class RecordAttendanceActivity extends AppCompatActivity {
                         entityId
                 );
                 ChimwemweFormUtils.saveRegistration(processedLine, true);
+
+                // Force the bind_type table columns to the values the user actually picked.
+                // The OpenSRP saveRegistration above runs Client merge in edit mode, which
+                // preserves existing non-empty attribute values when the new value is empty —
+                // so toggling a participant from Group/Home Visit to Absent ('') would silently
+                // be discarded. upsertLine writes the columns directly to bypass that.
+                SessionAttendanceParticipantDao.upsertLine(
+                        groupId, sessionNumber, date, pid,
+                        row.caregiverAttendance, row.childAttendance);
             }
         } catch (Exception e) {
             timber.log.Timber.e(e, "saveFormEvent failed for session attendance");

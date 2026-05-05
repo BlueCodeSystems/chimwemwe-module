@@ -84,14 +84,14 @@ public class AttendanceDao extends AbstractDao {
         // Delete existing then insert (simpler than REPLACE which requires UNIQUE constraint)
         AbstractDao.updateDB("DELETE FROM " + TABLE +
                 " WHERE group_id=" + q(m.getGroupId()) +
-                " AND participant_id=" + q(String.valueOf(m.getParticipantId())) +
+                " AND participant_id=" + q(m.getParticipantId()) +
                 " AND session_number=" + m.getSessionNumber());
         String sql = "INSERT INTO " + TABLE +
                 " (base_entity_id, group_id, participant_id, session_number, session_date," +
                 "  caregiver_attendance, child_attendance) VALUES (" +
                 q("chimwemwe-attendance-" + m.getGroupId() + "-" + m.getSessionNumber() + "-" + m.getParticipantId()) + "," +
                 q(m.getGroupId()) + "," +
-                q(String.valueOf(m.getParticipantId())) + "," +
+                q(m.getParticipantId()) + "," +
                 m.getSessionNumber() + "," +
                 q(m.getSessionDate()) + "," +
                 q(m.getCaregiverAttendance()) + "," +
@@ -109,12 +109,8 @@ public class AttendanceDao extends AbstractDao {
             AttendanceModel a = new AttendanceModel();
             a.setId(cursor.getLong(0));
             a.setGroupId(cursor.getString(1));
-            try {
-                String pid = cursor.getString(2);
-                a.setParticipantId(pid != null && !pid.trim().isEmpty() ? Long.parseLong(pid.trim()) : 0L);
-            } catch (Exception ignored) {
-                a.setParticipantId(0L);
-            }
+            String pid = cursor.getString(2);
+            a.setParticipantId(pid != null ? pid.trim() : "");
             a.setSessionNumber(cursor.getInt(3));
             a.setSessionDate(cursor.getString(4));
             a.setCaregiverAttendance(cursor.getString(5));
