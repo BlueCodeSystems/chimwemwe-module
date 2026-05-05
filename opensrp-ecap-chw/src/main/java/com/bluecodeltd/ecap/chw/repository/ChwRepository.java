@@ -4,10 +4,11 @@ import android.content.Context;
 
 import com.bluecodeltd.ecap.chw.BuildConfig;
 import com.bluecodeltd.ecap.chw.application.ChwApplication;
-import com.bluecodeltd.ecap.chw.dao.AttendanceDao;
 import com.bluecodeltd.ecap.chw.dao.HotspotGroupDao;
 import com.bluecodeltd.ecap.chw.dao.MonthlyReviewDao;
 import com.bluecodeltd.ecap.chw.dao.ParticipantDao;
+import com.bluecodeltd.ecap.chw.dao.SessionAttendanceDao;
+import com.bluecodeltd.ecap.chw.dao.SessionAttendanceParticipantDao;
 
 import net.sqlcipher.database.SQLiteDatabase;
 
@@ -26,17 +27,21 @@ public class ChwRepository extends CoreChwRepository {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
+        ChwApplication.registerChimwemweGroupRepository();
         super.onCreate(db);
         HotspotGroupDao.createTable(db);
         ParticipantDao.createTable(db);
-        AttendanceDao.createTable(db);
+        SessionAttendanceDao.createTable(db);
+        SessionAttendanceParticipantDao.createTable(db);
         MonthlyReviewDao.createTable(db);
+        com.bluecodeltd.ecap.chw.dao.ChimwemweReferralDao.createTable(db);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         Timber.w(CoreChwRepository.class.getName(), "Upgrading database from version "
                 + oldVersion + " to " + newVersion + ", which will destroy all old data");
+        ChwApplication.registerChimwemweGroupRepository();
         ChwRepositoryFlv.onUpgrade(context, db, oldVersion, newVersion);
     }
 }

@@ -59,6 +59,9 @@ public class LoginActivity extends BaseLoginActivity implements BaseLoginContrac
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().hide();
+        }
         //Sentry.captureMessage("testing SDK setup");
         txtUsername = findViewById(R.id.login_user_name_edit_text);
         txtPassword = findViewById(R.id.login_password_edit_text);

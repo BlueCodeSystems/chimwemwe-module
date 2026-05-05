@@ -13,7 +13,7 @@
     <include
         layout="@layout/base_register_search_bar"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize" />
+        android:layout_height="wrap_content" />
 
     <!-- Sort/filter bar (provides register_sort_filter_bar_layout) -->
     <include

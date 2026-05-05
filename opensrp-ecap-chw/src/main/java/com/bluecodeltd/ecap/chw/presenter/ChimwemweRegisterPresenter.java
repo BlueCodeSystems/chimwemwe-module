@@ -26,11 +26,24 @@ public class ChimwemweRegisterPresenter implements ChimwemweRegisterFragmentCont
         String mainSelect =
                 "SELECT ec_chimwemwe_group.id AS _id, " +
                 "ec_chimwemwe_group.id AS id, " +
-                "hotspot_name, group_name, created_date, " +
-                "(SELECT COUNT(*) FROM ec_chimwemwe_participant WHERE group_id=ec_chimwemwe_group.id) AS p_count, " +
-                "(SELECT COUNT(DISTINCT session_number) FROM ec_chimwemwe_attendance WHERE group_id=ec_chimwemwe_group.id AND (caregiver_attendance!='' OR child_attendance!='')) AS s_count, " +
+                "ec_chimwemwe_group.group_id AS group_id, " +
+                "ec_chimwemwe_group.hotspot_name AS hotspot_name, " +
+                "ec_chimwemwe_group.group_name AS group_name, " +
+                "ec_chimwemwe_group.created_date AS created_date, " +
+                "COALESCE(participant_counts.p_count, 0) AS p_count, " +
+                "COALESCE(attendance_counts.s_count, 0) AS s_count, " +
                 "'' AS relationalid, '' AS sync_status " +
-                "FROM ec_chimwemwe_group";
+                "FROM ec_chimwemwe_group " +
+                "LEFT JOIN (" +
+                "SELECT group_id, COUNT(*) AS p_count " +
+                "FROM ec_chimwemwe_participant GROUP BY group_id" +
+                ") AS participant_counts " +
+                "ON participant_counts.group_id = ec_chimwemwe_group.group_id " +
+                "LEFT JOIN (" +
+                "SELECT group_id, COUNT(DISTINCT session_number) AS s_count " +
+                "FROM ec_chimwemwe_session_attendance GROUP BY group_id" +
+                ") AS attendance_counts " +
+                "ON attendance_counts.group_id = ec_chimwemwe_group.group_id";
         getView().initializeQueryParams(table, countSelect, mainSelect);
         getView().initializeAdapter();
         getView().countExecute();

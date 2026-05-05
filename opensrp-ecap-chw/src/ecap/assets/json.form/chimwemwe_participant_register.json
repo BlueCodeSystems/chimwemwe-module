@@ -52,6 +52,28 @@
     "display_back_button": "true",
     "fields": [
       {
+        "key": "participant_id",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "participant_id",
+        "type": "hidden",
+        "value": ""
+      },
+      {
+        "key": "group_id",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "group_id",
+        "type": "hidden",
+        "read_only": "true",
+        "hint": "Group ID",
+        "edit_type": "name",
+        "v_required": {
+          "value": true,
+          "err": ""
+        }
+      },
+      {
         "key": "caregiver_info_note",
         "openmrs_entity_parent": "",
         "openmrs_entity": "person_attribute",
@@ -168,7 +190,7 @@
         "values": ["-- Select --", "Yes", "No"],
         "read_only": "true",
         "v_required": {
-          "value": "false",
+          "value": "No",
           "err": ""
         }
       },

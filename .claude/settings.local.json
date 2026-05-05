@@ -14,7 +14,9 @@
       "Bash(find:*)",
       "Bash(xargs grep:*)",
       "Bash(grep -v \":0$\")",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(powershell.exe *)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); [print\\(f'step{i}: '+str\\([f[\\\\\"key\\\\\"] for f in d.get\\(\\\\\"step\\\\\"+str\\(i\\),{}\\).get\\(\\\\\"fields\\\\\",[]\\)]\\)\\) for i in range\\(1,5\\) if 'step'+str\\(i\\) in d]\")"
     ]
   }
 }

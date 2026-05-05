@@ -1,6 +1,7 @@
 package com.bluecodeltd.ecap.chw.model;
 
 import com.bluecodeltd.ecap.chw.R;
+import com.bluecodeltd.ecap.chw.dao.HotspotGroupDao;
 import com.bluecodeltd.ecap.chw.util.Constants;
 
 import org.smartregister.chw.core.model.NavigationModel;
@@ -23,7 +24,7 @@ public class NavigationModelFlv implements NavigationModel.Flavor {
                     R.mipmap.sidemenu_landd_active,
                     R.string.nav_home,
                     CoreConstants.DrawerMenu.REPORTS,
-                    0);
+                    -1);
             navigationOptions.add(homeOption);
 
             NavigationOption chimwemweOption = new NavigationOption(
@@ -31,7 +32,7 @@ public class NavigationModelFlv implements NavigationModel.Flavor {
                     R.mipmap.sidemenu_families_active,
                     R.string.chimwemwe_groups,
                     Constants.DrawerMenu.CHIMWEMWE,
-                    0);
+                    HotspotGroupDao.countGroups());
             navigationOptions.add(chimwemweOption);
         }
 

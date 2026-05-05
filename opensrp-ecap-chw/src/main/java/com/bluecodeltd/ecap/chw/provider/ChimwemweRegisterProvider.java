@@ -1,7 +1,8 @@
 package com.bluecodeltd.ecap.chw.provider;
 
-import android.content.Context;
+import android.content.res.ColorStateList;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,11 +27,29 @@ import java.text.MessageFormat;
 
 public class ChimwemweRegisterProvider implements RecyclerViewProvider<ChimwemweGroupViewHolder> {
 
-    private final Context context;
+    // NEW — no sessions yet (grey)
+    private static final int COLOR_NEW_BAR   = Color.parseColor("#94A3B8");
+    private static final int COLOR_NEW_ICON  = Color.parseColor("#F1F5F9");
+    private static final int COLOR_NEW_TEXT  = Color.parseColor("#64748B");
+    private static final int COLOR_NEW_BADGE = Color.parseColor("#F1F5F9");
+
+    // ACTIVE — sessions underway (sky blue, matches chimwemwe_primary)
+    private static final int COLOR_ACT_BAR   = Color.parseColor("#0284C7");
+    private static final int COLOR_ACT_ICON  = Color.parseColor("#E0F2FE");
+    private static final int COLOR_ACT_TEXT  = Color.parseColor("#0284C7");
+    private static final int COLOR_ACT_BADGE = Color.parseColor("#E0F2FE");
+
+    // COMPLETE — all 14 sessions recorded (green)
+    private static final int COLOR_DONE_BAR   = Color.parseColor("#166534");
+    private static final int COLOR_DONE_ICON  = Color.parseColor("#DCFCE7");
+    private static final int COLOR_DONE_TEXT  = Color.parseColor("#166534");
+    private static final int COLOR_DONE_BADGE = Color.parseColor("#DCFCE7");
+
+    private final android.content.Context context;
     private final View.OnClickListener onClickListener;
     private final View.OnClickListener paginationViewHandler;
 
-    public ChimwemweRegisterProvider(Context context,
+    public ChimwemweRegisterProvider(android.content.Context context,
                                      View.OnClickListener onClickListener,
                                      View.OnClickListener paginationViewHandler) {
         this.context = context;
@@ -39,37 +58,100 @@ public class ChimwemweRegisterProvider implements RecyclerViewProvider<Chimwemwe
     }
 
     @Override
-    public void getView(Cursor cursor, SmartRegisterClient client, ChimwemweGroupViewHolder holder) {
-        CommonPersonObjectClient personClient = (CommonPersonObjectClient) client;
-        String groupName = Utils.getValue(personClient.getColumnmaps(), "group_name",   false);
-        String hotspot   = Utils.getValue(personClient.getColumnmaps(), "hotspot_name", false);
+    public void getView(Cursor cursor, SmartRegisterClient client, ChimwemweGroupViewHolder h) {
+        CommonPersonObjectClient pc = (CommonPersonObjectClient) client;
 
-        // Read computed counts directly from the cursor — CommonRepository may not include
-        // aliased subquery columns in the column map, so we bypass it here.
-        String pCount = cursorString(cursor, "p_count", "0");
-        String sCount = cursorString(cursor, "s_count", "0");
+        String groupName = Utils.getValue(pc.getColumnmaps(), "group_name", false);
+        String groupId = Utils.getValue(pc.getColumnmaps(), "group_id", false);
+        String hotspot = Utils.getValue(pc.getColumnmaps(), "hotspot_name", false);
 
-        holder.tvGroupName.setText(!groupName.isEmpty() ? groupName : "—");
-        holder.tvHotspotName.setText(hotspot);
-        holder.tvParticipantCount.setText(pCount + " participants");
-        holder.tvSessionsRecorded.setText(sCount + "/14 sessions");
+        String pCountStr = cursorStr(cursor, "p_count", "0");
+        String sCountStr = cursorStr(cursor, "s_count", "0");
+        int sCount = parseInt(sCountStr);
 
-        holder.itemView.setTag(personClient);
-        holder.itemView.setOnClickListener(onClickListener);
+        h.tvGroupName.setText(!groupName.isEmpty() ? groupName : "-");
+        h.tvGroupId.setText(!groupId.isEmpty() ? groupId : "-");
+        h.tvHotspotName.setText(!hotspot.isEmpty() ? hotspot : "");
+        h.tvParticipantCount.setText(pCountStr);
+        h.tvSessionsRecorded.setText(sCount + " / 14 sessions");
+        if (h.tvGroupInitials != null) {
+            h.tvGroupInitials.setText(initials(groupName));
+        }
+
+        if (h.pbSessions != null) {
+            h.pbSessions.setProgress(Math.min(sCount, 14));
+        }
+
+        int barColor;
+        int iconColor;
+        int textColor;
+        int badgeColor;
+        String badgeLabel;
+
+        if (sCount >= 14) {
+            barColor = COLOR_DONE_BAR;
+            iconColor = COLOR_DONE_ICON;
+            textColor = COLOR_DONE_TEXT;
+            badgeColor = COLOR_DONE_BADGE;
+            badgeLabel = "COMPLETE";
+        } else if (sCount > 0) {
+            barColor = COLOR_ACT_BAR;
+            iconColor = COLOR_ACT_ICON;
+            textColor = COLOR_ACT_TEXT;
+            badgeColor = COLOR_ACT_BADGE;
+            badgeLabel = "ACTIVE";
+        } else {
+            barColor = COLOR_NEW_BAR;
+            iconColor = COLOR_NEW_ICON;
+            textColor = COLOR_NEW_TEXT;
+            badgeColor = COLOR_NEW_BADGE;
+            badgeLabel = "NEW";
+        }
+
+        if (h.viewStatusBar != null) {
+            h.viewStatusBar.setBackgroundColor(barColor);
+        }
+        if (h.flGroupIcon != null) {
+            h.flGroupIcon.getBackground().setTint(barColor);
+        }
+        if (h.tvGroupStatus != null) {
+            h.tvGroupStatus.setText(badgeLabel);
+            h.tvGroupStatus.setTextColor(textColor);
+            h.tvGroupStatus.setBackgroundTintList(ColorStateList.valueOf(badgeColor));
+        }
+
+        h.itemView.setTag(pc);
+        h.itemView.setOnClickListener(onClickListener);
     }
 
-    /** Read a string value from the cursor by column name, returning {@code fallback} if absent. */
-    private static String cursorString(Cursor cursor, String column, String fallback) {
-        int idx = cursor.getColumnIndex(column);
-        if (idx < 0) return fallback;
-        String val = cursor.getString(idx);
-        return (val == null || val.isEmpty()) ? fallback : val;
+    private static String cursorStr(Cursor c, String col, String fallback) {
+        int idx = c.getColumnIndex(col);
+        if (idx < 0) {
+            return fallback;
+        }
+        String v = c.getString(idx);
+        return (v == null || v.isEmpty()) ? fallback : v;
+    }
+
+    private static int parseInt(String s) {
+        try {
+            return Integer.parseInt(s.trim());
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    private static String initials(String name) {
+        if (name == null || name.trim().isEmpty()) return "G";
+        String[] parts = name.trim().split("\\s+");
+        if (parts.length == 1) return String.valueOf(parts[0].charAt(0)).toUpperCase();
+        return (String.valueOf(parts[0].charAt(0)) + String.valueOf(parts[parts.length - 1].charAt(0))).toUpperCase();
     }
 
     @Override
-    public void getFooterView(RecyclerView.ViewHolder viewHolder, int currentPage, int totalPages,
+    public void getFooterView(RecyclerView.ViewHolder vh, int currentPage, int totalPages,
                               boolean hasNext, boolean hasPrev) {
-        FooterViewHolder footer = (FooterViewHolder) viewHolder;
+        FooterViewHolder footer = (FooterViewHolder) vh;
         footer.pageInfoView.setText(
                 MessageFormat.format(context.getString(org.smartregister.R.string.str_page_info),
                         currentPage, totalPages));
@@ -80,16 +162,16 @@ public class ChimwemweRegisterProvider implements RecyclerViewProvider<Chimwemwe
     }
 
     @Override
-    public SmartRegisterClients updateClients(FilterOption fo, ServiceModeOption smo,
-                                              FilterOption fo2, SortOption so) {
+    public SmartRegisterClients updateClients(FilterOption a, ServiceModeOption b, FilterOption c, SortOption d) {
         return null;
     }
 
     @Override
-    public void onServiceModeSelected(ServiceModeOption smo) {}
+    public void onServiceModeSelected(ServiceModeOption s) {
+    }
 
     @Override
-    public OnClickFormLauncher newFormLauncher(String s, String s1, String s2) {
+    public OnClickFormLauncher newFormLauncher(String a, String b, String c) {
         return null;
     }
 
@@ -100,14 +182,14 @@ public class ChimwemweRegisterProvider implements RecyclerViewProvider<Chimwemwe
 
     @Override
     public ChimwemweGroupViewHolder createViewHolder(ViewGroup parent) {
-        View v = inflater().inflate(R.layout.item_hotspot_group, parent, false);
-        return new ChimwemweGroupViewHolder(v);
+        return new ChimwemweGroupViewHolder(
+                inflater().inflate(R.layout.item_hotspot_group, parent, false));
     }
 
     @Override
     public RecyclerView.ViewHolder createFooterHolder(ViewGroup parent) {
-        View v = inflater().inflate(org.smartregister.R.layout.smart_register_pagination, parent, false);
-        return new FooterViewHolder(v);
+        return new FooterViewHolder(
+                inflater().inflate(org.smartregister.R.layout.smart_register_pagination, parent, false));
     }
 
     @Override

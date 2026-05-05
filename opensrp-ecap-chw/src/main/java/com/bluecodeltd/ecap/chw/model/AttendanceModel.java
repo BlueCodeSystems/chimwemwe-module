@@ -10,8 +10,13 @@ public class AttendanceModel {
     public static final String ABSENT     = "";
 
     private long id;
-    private long groupId;
-    private long participantId;
+    // Business identifier from ec_chimwemwe_group.group_id
+    private String groupId;
+    // Business identifier from ec_chimwemwe_participant.participant_id (e.g. "CHIM-1234567890").
+    // Stored as a String because the OpenSRP form processor writes participants with a non-numeric
+    // base_entity_id, which clobbers the row's `id` INTEGER PK with a string value — so the row
+    // PK can't be used to identify a participant from Java.
+    private String participantId;
     private int  sessionNumber;   // 1–14
     private String sessionDate;   // DD/MM/YY
     private String caregiverAttendance;
@@ -20,11 +25,11 @@ public class AttendanceModel {
     public long getId() { return id; }
     public void setId(long id) { this.id = id; }
 
-    public long getGroupId() { return groupId; }
-    public void setGroupId(long groupId) { this.groupId = groupId; }
+    public String getGroupId() { return groupId; }
+    public void setGroupId(String groupId) { this.groupId = groupId; }
 
-    public long getParticipantId() { return participantId; }
-    public void setParticipantId(long participantId) { this.participantId = participantId; }
+    public String getParticipantId() { return participantId; }
+    public void setParticipantId(String participantId) { this.participantId = participantId; }
 
     public int getSessionNumber() { return sessionNumber; }
     public void setSessionNumber(int sessionNumber) { this.sessionNumber = sessionNumber; }

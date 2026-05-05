@@ -63,7 +63,7 @@ android {
 
     java {
         toolchain {
-            languageVersion = JavaLanguageVersion.of(17)
+            languageVersion = JavaLanguageVersion.of(21)
         }
     }
 
@@ -321,7 +321,8 @@ android {
             buildConfigField "String[]", "ALLOWED_LOCATION_LEVELS_DEBUG", '{"Country","Province","District","Ward","Health Facility"}'
             buildConfigField "String", 'DEFAULT_LOCATION', '"Health Facility"'
             buildConfigField "String", 'DEFAULT_LOCATION_DEBUG', '"Health Facility"'
-            buildConfigField "int", "DATABASE_VERSION", '32'
+            // Must not go below what is already on devices; SQLCipher blocks downgrades.
+            buildConfigField "int", "DATABASE_VERSION", '48'
         }
     }
 }
@@ -496,7 +497,7 @@ dependencies {
 def testToolchains = project.extensions.getByType(org.gradle.jvm.toolchain.JavaToolchainService)
 tasks.withType(Test).configureEach { t ->
     javaLauncher.set(testToolchains.launcherFor {
-        languageVersion = JavaLanguageVersion.of(17)
+        languageVersion = JavaLanguageVersion.of(21)
     })
     // Keep tests in a single forked worker to minimize cross-process serialization
     maxParallelForks = 1

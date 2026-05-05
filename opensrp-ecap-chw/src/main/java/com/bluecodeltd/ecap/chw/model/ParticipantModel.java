@@ -2,8 +2,9 @@ package com.bluecodeltd.ecap.chw.model;
 
 public class ParticipantModel {
     private long id;
-    private String participantCode;  // system-generated UUID
-    private long groupId;
+    private String participantId;
+    // Business identifier from ec_chimwemwe_group.group_id
+    private String groupId;
     private int sn;
     private String caregiverFirstName;
     private String caregiverSurname;
@@ -30,11 +31,11 @@ public class ParticipantModel {
     public long getId() { return id; }
     public void setId(long id) { this.id = id; }
 
-    public String getParticipantCode()                      { return participantCode; }
-    public void   setParticipantCode(String participantCode) { this.participantCode = participantCode; }
+    public String getParticipantId()               { return participantId; }
+    public void   setParticipantId(String v)        { this.participantId = v; }
 
-    public long getGroupId() { return groupId; }
-    public void setGroupId(long groupId) { this.groupId = groupId; }
+    public String getGroupId() { return groupId; }
+    public void setGroupId(String groupId) { this.groupId = groupId; }
 
     public int getSn() { return sn; }
     public void setSn(int sn) { this.sn = sn; }

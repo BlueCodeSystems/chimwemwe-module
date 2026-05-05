@@ -1,10 +1,19 @@
 package com.bluecodeltd.ecap.chw.fragment;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.LinearLayout;
+import android.view.ViewGroup;
 import android.widget.TextView;
+
+import com.bluecodeltd.ecap.chw.util.Threading;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -24,11 +33,30 @@ import org.smartregister.util.Utils;
 
 import java.util.HashMap;
 
+import timber.log.Timber;
+
 public class ChimwemweRegisterFragment extends BaseSafeRegisterFragment
         implements ChimwemweRegisterFragmentContract.View {
 
-    private static final String TAG = "ChimwemweRegFrag";
+    private static final String TAG   = "ChimwemweRegFrag";
     private static final String TABLE = "ec_chimwemwe_group";
+    private static final long   SEARCH_DEBOUNCE_MS = 350L;
+
+    private final Handler  searchHandler = new Handler(Looper.getMainLooper());
+    private       String   pendingSearchText = "";
+
+    private final Runnable searchRunnable = () -> applySearch(pendingSearchText);
+
+    private final TextWatcher debouncedSearchWatcher = new TextWatcher() {
+        @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+        @Override public void afterTextChanged(Editable s) {}
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            pendingSearchText = s == null ? "" : s.toString();
+            searchHandler.removeCallbacks(searchRunnable);
+            searchHandler.postDelayed(searchRunnable, SEARCH_DEBOUNCE_MS);
+        }
+    };
 
     @Override
     protected void initializePresenter() {
@@ -38,12 +66,19 @@ public class ChimwemweRegisterFragment extends BaseSafeRegisterFragment
     }
 
     @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        // Inflate the dedicated Chimwemwe layout instead of the shared base register layout
+        // so other registers (Family, ANC, HTS, etc.) are not affected.
+        View view = inflater.inflate(R.layout.fragment_chimwemwe_register, container, false);
+        setupViews(view);
+        return view;
+    }
+
+    @Override
     public void setupViews(View view) {
         try {
-            // Ensure RecyclerView + ProgressBar exist before base setup (handled by BaseSafeRegisterFragment)
             super.setupViews(view);
 
-            // Toolbar
             Toolbar toolbar = view.findViewById(org.smartregister.R.id.register_toolbar);
             if (toolbar != null) {
                 if (getActivity() instanceof AppCompatActivity) {
@@ -55,54 +90,24 @@ public class ChimwemweRegisterFragment extends BaseSafeRegisterFragment
                 }
                 toolbar.setTitle("");
                 TextView titleLabel = toolbar.findViewById(org.smartregister.R.id.txt_title_label);
-                if (titleLabel != null) titleLabel.setVisibility(View.GONE);
+                if (titleLabel != null) titleLabel.setVisibility(View.VISIBLE);
 
                 NavigationMenu menu = NavigationMenu.getInstance(getActivity(), null, toolbar);
                 if (menu != null && menu.getNavigationAdapter() != null) {
                     menu.getNavigationAdapter().setSelectedView(Constants.DrawerMenu.CHIMWEMWE);
                 }
-                try {
-                    if (menu != null && getActivity() != null) {
-                        androidx.drawerlayout.widget.DrawerLayout drawer = menu.getDrawer();
-                        androidx.appcompat.graphics.drawable.DrawerArrowDrawable arrow =
-                                new androidx.appcompat.graphics.drawable.DrawerArrowDrawable(getActivity());
-                        arrow.setColor(android.graphics.Color.WHITE);
-                        toolbar.setNavigationIcon(arrow);
-                        toolbar.setNavigationOnClickListener(v -> {
-                            if (drawer != null) drawer.openDrawer(androidx.core.view.GravityCompat.START);
-                        });
-                    }
-                } catch (Throwable ignored) {}
+                applyDrawerNavigation(toolbar, menu);
             }
 
-            // Navbar
             View navbarContainer = view.findViewById(org.smartregister.R.id.register_nav_bar_container);
             if (navbarContainer != null) navbarContainer.bringToFront();
 
-            // Search bar styling
-            View searchBarLayout = view.findViewById(R.id.search_bar_layout);
-            if (searchBarLayout != null) {
-                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                searchBarLayout.setLayoutParams(params);
-                searchBarLayout.setBackgroundResource(R.color.primary);
-                searchBarLayout.setPadding(
-                        searchBarLayout.getPaddingLeft(),
-                        searchBarLayout.getPaddingTop(),
-                        searchBarLayout.getPaddingRight(),
-                        (int) org.smartregister.chw.core.utils.Utils.convertDpToPixel(10, getActivity()));
-            }
-
-            // Search view appearance
             if (getSearchView() != null) {
-                getSearchView().setHint(getString(R.string.search_hint));
-                getSearchView().setBackgroundResource(org.smartregister.R.color.white);
                 getSearchView().setCompoundDrawablesWithIntrinsicBounds(
                         org.smartregister.R.drawable.ic_action_search, 0, 0, 0);
-                getSearchView().setTextColor(getResources().getColor(org.smartregister.R.color.text_black));
+                getSearchView().setTextColor(getResources().getColor(R.color.chimwemwe_text_primary));
             }
 
-            // Hide unused header sections
             hideIfPresent(view, org.smartregister.R.id.top_right_layout);
             hideIfPresent(view, org.smartregister.R.id.top_left_layout);
             hideIfPresent(view, org.smartregister.R.id.register_sort_filter_bar_layout);
@@ -121,6 +126,76 @@ public class ChimwemweRegisterFragment extends BaseSafeRegisterFragment
         } catch (Exception ignored) {}
     }
 
+    // ── Search ───────────────────────────────────────────────
+
+    @Override
+    protected void updateSearchView() {
+        if (getSearchView() != null) {
+            getSearchView().removeTextChangedListener(textWatcher);
+            getSearchView().removeTextChangedListener(debouncedSearchWatcher);
+            getSearchView().addTextChangedListener(debouncedSearchWatcher);
+            getSearchView().setOnKeyListener(hideKeyboard);
+        }
+    }
+
+    @Override
+    public void filter(String filterString, String joinTableString,
+                       String mainConditionString, boolean qrCode) {
+        if (getSearchCancelView() != null) {
+            getSearchCancelView().setVisibility(
+                    filterString == null || filterString.isEmpty() ? View.INVISIBLE : View.VISIBLE);
+        }
+        if (filterString == null || filterString.isEmpty()) {
+            Utils.hideKeyboard(getActivity());
+        }
+
+        this.filters = buildSqlFilter(filterString);
+        this.joinTable = joinTableString;
+        this.mainCondition = mainConditionString;
+
+        if (clientAdapter != null) {
+            if (clientAdapter.getCurrentlimit() == 0) clientAdapter.setCurrentlimit(20);
+            clientAdapter.setCurrentoffset(0);
+        }
+
+        showProgressView();
+        filterandSortExecute(countBundle());
+    }
+
+    private String buildSqlFilter(String filterString) {
+        String base = "WHERE (ec_chimwemwe_group.delete_status IS NULL OR ec_chimwemwe_group.delete_status <> '1')";
+        if (filterString == null || filterString.trim().isEmpty()) {
+            return base;
+        }
+
+        String escaped = filterString.trim()
+                .replace("'", "''")
+                .replace("%", "\\%")
+                .replace("_", "\\_");
+        // Qualify group_id with the table name to avoid ambiguity with the JOIN
+        // subquery aliases that also expose a group_id column.
+        return base + " AND ("
+                + "ec_chimwemwe_group.group_name LIKE '%" + escaped + "%' ESCAPE '\\' "
+                + "OR ec_chimwemwe_group.hotspot_name LIKE '%" + escaped + "%' ESCAPE '\\' "
+                + "OR ec_chimwemwe_group.group_id LIKE '%" + escaped + "%' ESCAPE '\\' "
+                + ")";
+    }
+
+    private void applySearch(String text) {
+        filter(text, "", getMainCondition(), false);
+    }
+
+    @Override
+    public void onDestroyView() {
+        searchHandler.removeCallbacks(searchRunnable);
+        if (getSearchView() != null) {
+            getSearchView().removeTextChangedListener(debouncedSearchWatcher);
+        }
+        super.onDestroyView();
+    }
+
+    // ── Lifecycle ────────────────────────────────────────────
+
     @Override
     public void onResume() {
         super.onResume();
@@ -131,11 +206,13 @@ public class ChimwemweRegisterFragment extends BaseSafeRegisterFragment
         View root = getView();
         if (root == null) return;
         Toolbar toolbar = root.findViewById(org.smartregister.R.id.register_toolbar);
-        if (toolbar != null) toolbar.setTitle("");
+        if (toolbar != null) {
+            toolbar.setTitle("");
+            applyDrawerNavigation(toolbar, NavigationMenu.getInstance(getActivity(), null, toolbar));
+        }
         TextView titleLabel = root.findViewById(org.smartregister.R.id.txt_title_label);
         if (titleLabel != null) {
             titleLabel.setVisibility(View.VISIBLE);
-            titleLabel.setText(getString(R.string.chimwemwe_groups));
         }
         if (getActivity() instanceof AppCompatActivity) {
             AppCompatActivity act = (AppCompatActivity) getActivity();
@@ -143,6 +220,44 @@ public class ChimwemweRegisterFragment extends BaseSafeRegisterFragment
                 act.getSupportActionBar().setDisplayShowTitleEnabled(false);
             }
         }
+    }
+
+    // ── Adapter ──────────────────────────────────────────────
+
+    /**
+     * Run the COUNT query off the main thread to avoid blocking on a SQLite write lock held
+     * by OpenSRP's background sync, which would otherwise cause an ANR.
+     */
+    @Override
+    public void countExecute() {
+        Threading.io(() -> {
+            int count = 0;
+            try {
+                String joinClause =
+                        " LEFT JOIN (SELECT group_id, COUNT(*) AS p_count FROM ec_chimwemwe_participant GROUP BY group_id) AS participant_counts" +
+                        " ON participant_counts.group_id = ec_chimwemwe_group.group_id" +
+                        " LEFT JOIN (SELECT group_id, COUNT(DISTINCT session_number) AS s_count FROM ec_chimwemwe_session_attendance GROUP BY group_id) AS attendance_counts" +
+                        " ON attendance_counts.group_id = ec_chimwemwe_group.group_id";
+                String filterClause = (filters == null || filters.isEmpty()) ? "" : " " + filters;
+                String query = "SELECT COUNT(*) FROM " + TABLE + joinClause + filterClause;
+                Cursor cursor = context().commonrepository(TABLE)
+                        .rawCustomQueryForAdapter(query);
+                if (cursor != null) {
+                    cursor.moveToFirst();
+                    count = cursor.getInt(0);
+                    cursor.close();
+                }
+            } catch (Exception e) {
+                Timber.e(e, "countExecute");
+            }
+            final int finalCount = count;
+            Threading.main(() -> {
+                if (clientAdapter != null) {
+                    clientAdapter.setTotalcount(finalCount);
+                    clientAdapter.setCurrentlimit(20);
+                }
+            });
+        });
     }
 
     @Override
@@ -185,22 +300,27 @@ public class ChimwemweRegisterFragment extends BaseSafeRegisterFragment
         }
     }
 
+    // ── Navigation ───────────────────────────────────────────
+
     @Override
     protected void onViewClicked(View view) {
         Object tag = view.getTag();
         if (!(tag instanceof CommonPersonObjectClient)) return;
         CommonPersonObjectClient client = (CommonPersonObjectClient) tag;
-        String idStr = Utils.getValue(client.getColumnmaps(), "id", false);
-        long groupId = -1L;
-        try { groupId = Long.parseLong(idStr); } catch (Exception ignored) {}
         Intent intent = new Intent(requireContext(), HotspotGroupDetailActivity.class);
-        intent.putExtra("group_id", groupId);
+        String groupId = Utils.getValue(client.getColumnmaps(), "group_id", false);
+        if (groupId == null || groupId.trim().isEmpty()) {
+            groupId = Utils.getValue(client.getColumnmaps(), "id", false);
+        }
+        intent.putExtra(HotspotGroupDetailActivity.EXTRA_GROUP_ID, groupId);
         startActivity(intent);
     }
 
+    // ── Query params ─────────────────────────────────────────
+
     @Override
     protected String getMainCondition() {
-        return "1=1";
+        return "(ec_chimwemwe_group.delete_status IS NULL OR ec_chimwemwe_group.delete_status <> '1')";
     }
 
     @Override
@@ -209,16 +329,34 @@ public class ChimwemweRegisterFragment extends BaseSafeRegisterFragment
     }
 
     @Override
+    protected boolean isValidFilterForFts(org.smartregister.commonregistry.CommonRepository commonRepository) {
+        return false;
+    }
+
+    private void applyDrawerNavigation(Toolbar toolbar, NavigationMenu menu) {
+        try {
+            if (toolbar == null || menu == null || getActivity() == null) return;
+            androidx.drawerlayout.widget.DrawerLayout drawer = menu.getDrawer();
+            androidx.appcompat.graphics.drawable.DrawerArrowDrawable arrow =
+                    new androidx.appcompat.graphics.drawable.DrawerArrowDrawable(getActivity());
+            arrow.setColor(android.graphics.Color.WHITE);
+            arrow.setProgress(0f);
+            toolbar.setNavigationIcon(arrow);
+            toolbar.setNavigationContentDescription("Open drawer");
+            toolbar.setNavigationOnClickListener(v -> {
+                if (drawer != null) drawer.openDrawer(androidx.core.view.GravityCompat.START);
+            });
+        } catch (Throwable ignored) {}
+    }
+
+    @Override
     protected void startRegistration() {}
 
-    @Override
-    public void setUniqueID(String s) {}
+    // ── Contract stubs ───────────────────────────────────────
 
-    @Override
-    public void setAdvancedSearchFormData(HashMap<String, String> map) {}
-
-    @Override
-    public void showNotFoundPopup(String s) {}
+    @Override public void setUniqueID(String s) {}
+    @Override public void setAdvancedSearchFormData(HashMap<String, String> map) {}
+    @Override public void showNotFoundPopup(String s) {}
 
     @Override
     public void showProgressView() {

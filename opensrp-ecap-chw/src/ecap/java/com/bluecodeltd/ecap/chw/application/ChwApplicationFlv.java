@@ -109,7 +109,14 @@ public class ChwApplicationFlv extends DefaultChwApplicationFlv {
 
     @Override
     public String[] getFTSTables() {
-        return new String[]{CoreConstants.TABLE_NAME.EC_CLIENT_INDEX, CoreConstants.TABLE_NAME.EC_MOTHER_INDEX, Constants.EcapClientTable.EC_HOUSEHOLD, CoreConstants.TABLE_NAME.EC_HIV_TESTING_SERVICE, CoreConstants.TABLE_NAME.EC_MOTHER_PMTCT};
+        return new String[]{
+                CoreConstants.TABLE_NAME.EC_CLIENT_INDEX,
+                CoreConstants.TABLE_NAME.EC_MOTHER_INDEX,
+                Constants.EcapClientTable.EC_HOUSEHOLD,
+                CoreConstants.TABLE_NAME.EC_HIV_TESTING_SERVICE,
+                CoreConstants.TABLE_NAME.EC_MOTHER_PMTCT,
+                "ec_chimwemwe_group"
+        };
     }
 
     @Override
@@ -159,7 +166,12 @@ public class ChwApplicationFlv extends DefaultChwApplicationFlv {
                 "caregiver_name",
                 "delete_status"
         });
-
+        map.put("ec_chimwemwe_group", new String[]{
+                "group_name",
+                "hotspot_name",
+                "group_id",
+                "created_date"
+        });
         return map;
     }
 
@@ -211,7 +223,12 @@ public class ChwApplicationFlv extends DefaultChwApplicationFlv {
                 "caregiver_name",
                 "delete_status"
         });
-
+        map.put("ec_chimwemwe_group", new String[]{
+                "group_name",
+                "hotspot_name",
+                "group_id",
+                "created_date"
+        });
         return map;
     }
 

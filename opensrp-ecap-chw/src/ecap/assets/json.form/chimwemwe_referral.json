@@ -1,6 +1,6 @@
 {
-  "count": "3",
-  "encounter_type": "Chimwemwe Participant Registration",
+  "count": "1",
+  "encounter_type": "Chimwemwe Referral",
   "entity_id": "",
   "metadata": {
     "start": {
@@ -51,6 +51,25 @@
     "title": "Referral Details",
     "display_back_button": "true",
     "fields": [
+      {
+        "key": "participant_id",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "participant_id",
+        "type": "hidden",
+        "value": ""
+      },
+      {
+        "key": "group_id",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "group_id",
+        "type": "hidden",
+        "read_only": "true",
+        "hint": "Group ID",
+        "edit_type": "name",
+        "v_required": { "value": true, "err": "" }
+      },
       {
         "key": "referral_note",
         "openmrs_entity_parent": "",
