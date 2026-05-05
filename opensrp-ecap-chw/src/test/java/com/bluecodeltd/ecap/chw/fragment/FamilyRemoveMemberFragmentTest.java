@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.fragment;
+package com.bluecodeltd.chimwemwe.chw.fragment;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -6,9 +6,9 @@ import org.mockito.Mockito;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.util.ReflectionHelpers;
-import com.bluecodeltd.ecap.chw.application.ChwApplication;
-import com.bluecodeltd.ecap.chw.presenter.FamilyRemoveMemberPresenter;
-import com.bluecodeltd.ecap.chw.shadows.FamilyRemoveMemberConfirmDialogShadow;
+import com.bluecodeltd.chimwemwe.chw.application.ChwApplication;
+import com.bluecodeltd.chimwemwe.chw.presenter.FamilyRemoveMemberPresenter;
+import com.bluecodeltd.chimwemwe.chw.shadows.FamilyRemoveMemberConfirmDialogShadow;
 import org.smartregister.commonregistry.CommonPersonObjectClient;
 
 @RunWith(RobolectricTestRunner.class)

@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.presenter;
+package com.bluecodeltd.chimwemwe.chw.presenter;
 
 import org.junit.Before;
 import org.junit.Test;

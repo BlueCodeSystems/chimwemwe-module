@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.fragment;
+package com.bluecodeltd.chimwemwe.chw.fragment;
 
 import android.content.Intent;
 import android.util.Log;
@@ -7,16 +7,16 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
-import com.bluecodeltd.ecap.chw.R;
-import com.bluecodeltd.ecap.chw.activity.IndexDetailsActivity;
-import com.bluecodeltd.ecap.chw.activity.MotherDetail;
-import com.bluecodeltd.ecap.chw.contract.IndexRegisterFragmentContract;
-import com.bluecodeltd.ecap.chw.contract.MotherIndexFragmentContract;
-import com.bluecodeltd.ecap.chw.presenter.IndexRegisterFragmentPresenter;
-import com.bluecodeltd.ecap.chw.presenter.MotherIndexFragmentPresenter;
-import com.bluecodeltd.ecap.chw.provider.IndexRegisterProvider;
-import com.bluecodeltd.ecap.chw.provider.MotherRegisterProvider;
-import com.bluecodeltd.ecap.chw.util.Constants;
+import com.bluecodeltd.chimwemwe.chw.R;
+import com.bluecodeltd.chimwemwe.chw.activity.IndexDetailsActivity;
+import com.bluecodeltd.chimwemwe.chw.activity.MotherDetail;
+import com.bluecodeltd.chimwemwe.chw.contract.IndexRegisterFragmentContract;
+import com.bluecodeltd.chimwemwe.chw.contract.MotherIndexFragmentContract;
+import com.bluecodeltd.chimwemwe.chw.presenter.IndexRegisterFragmentPresenter;
+import com.bluecodeltd.chimwemwe.chw.presenter.MotherIndexFragmentPresenter;
+import com.bluecodeltd.chimwemwe.chw.provider.IndexRegisterProvider;
+import com.bluecodeltd.chimwemwe.chw.provider.MotherRegisterProvider;
+import com.bluecodeltd.chimwemwe.chw.util.Constants;
 
 import org.smartregister.chw.core.custom_views.NavigationMenu;
 import org.smartregister.commonregistry.CommonPersonObjectClient;
@@ -33,7 +33,7 @@ import androidx.appcompat.app.ActionBar;
 
 public class MotherIndexFragment extends BaseSafeRegisterFragment implements MotherIndexFragmentContract.View {
 
-    private com.bluecodeltd.ecap.chw.databinding.FragmentBaseRegisterBinding binding;
+    private com.bluecodeltd.chimwemwe.chw.databinding.FragmentBaseRegisterBinding binding;
 
     @Override
     public void showProgressView() {
@@ -114,7 +114,7 @@ public class MotherIndexFragment extends BaseSafeRegisterFragment implements Mot
 
     @Override
     public void setupViews(View view) {
-        try { binding = com.bluecodeltd.ecap.chw.databinding.FragmentBaseRegisterBinding.bind(view); } catch (Throwable ignored) {}
+        try { binding = com.bluecodeltd.chimwemwe.chw.databinding.FragmentBaseRegisterBinding.bind(view); } catch (Throwable ignored) {}
         // Ensure required views exist before BaseRegisterFragment.setupViews(view)
         try {
             androidx.recyclerview.widget.RecyclerView rv = null;

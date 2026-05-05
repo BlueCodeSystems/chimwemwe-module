@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.activity;
+package com.bluecodeltd.chimwemwe.chw.activity;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -8,7 +8,7 @@ import org.smartregister.chw.anc.domain.GroupedVisit;
 import org.smartregister.chw.anc.domain.MemberObject;
 import org.smartregister.chw.anc.util.Constants;
 import org.smartregister.chw.core.activity.CorePncMedicalHistoryActivity;
-import com.bluecodeltd.ecap.chw.interactor.PncMedicalHistoryActivityInteractor;
+import com.bluecodeltd.chimwemwe.chw.interactor.PncMedicalHistoryActivityInteractor;
 import org.smartregister.chw.pnc.contract.BasePncMedicalHistoryContract;
 
 import java.util.List;

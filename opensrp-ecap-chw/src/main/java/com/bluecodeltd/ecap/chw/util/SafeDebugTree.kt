@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.util
+package com.bluecodeltd.chimwemwe.chw.util
 
 import android.util.Log
 import timber.log.Timber

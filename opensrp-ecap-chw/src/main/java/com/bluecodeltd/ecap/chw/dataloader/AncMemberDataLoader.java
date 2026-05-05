@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.dataloader;
+package com.bluecodeltd.chimwemwe.chw.dataloader;
 
 import android.content.Context;
 
@@ -10,7 +10,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.smartregister.chw.core.form_data.NativeFormsDataLoader;
 import org.smartregister.chw.core.utils.CoreConstants;
-import com.bluecodeltd.ecap.chw.dao.ChwANCDao;
+import com.bluecodeltd.chimwemwe.chw.dao.ChwANCDao;
 
 import java.util.ArrayList;
 import java.util.List;

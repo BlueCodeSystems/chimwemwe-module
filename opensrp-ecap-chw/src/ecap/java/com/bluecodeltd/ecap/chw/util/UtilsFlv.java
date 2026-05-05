@@ -1,10 +1,10 @@
-package com.bluecodeltd.ecap.chw.util;
+package com.bluecodeltd.chimwemwe.chw.util;
 
 import android.os.AsyncTask;
 import android.view.Menu;
 
 import org.apache.commons.lang3.StringUtils;
-import com.bluecodeltd.ecap.chw.R;
+import com.bluecodeltd.chimwemwe.chw.R;
 import org.smartregister.chw.core.rule.MalariaFollowUpRule;
 import org.smartregister.chw.core.utils.CoreConstants;
 import org.smartregister.chw.core.utils.MalariaVisitUtil;

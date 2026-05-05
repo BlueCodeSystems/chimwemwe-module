@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.activity;
+package com.bluecodeltd.chimwemwe.chw.activity;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -9,8 +9,8 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import com.bluecodeltd.ecap.chw.fragment.IndividualProfileRemoveFragment;
-import com.bluecodeltd.ecap.chw.util.Constants;
+import com.bluecodeltd.chimwemwe.chw.fragment.IndividualProfileRemoveFragment;
+import com.bluecodeltd.chimwemwe.chw.util.Constants;
 
 public class IndividualProfileRemoveActivityTest {
     @Mock

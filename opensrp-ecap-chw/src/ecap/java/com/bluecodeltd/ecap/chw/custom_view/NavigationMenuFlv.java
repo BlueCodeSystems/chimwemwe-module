@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.custom_view;
+package com.bluecodeltd.chimwemwe.chw.custom_view;
 
 import android.app.Activity;
 import android.content.Intent;

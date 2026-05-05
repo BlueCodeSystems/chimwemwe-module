@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.intent;
+package com.bluecodeltd.chimwemwe.chw.intent;
 
 public class ChwPncCloseDateIntentFlv extends DefaultChwPncCloseDateIntentFlv {
     @Override

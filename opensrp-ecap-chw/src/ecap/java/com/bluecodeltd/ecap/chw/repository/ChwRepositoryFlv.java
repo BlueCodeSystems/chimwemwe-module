@@ -1,14 +1,14 @@
-package com.bluecodeltd.ecap.chw.repository;
+package com.bluecodeltd.chimwemwe.chw.repository;
 
 import android.content.Context;
 
-import com.bluecodeltd.ecap.chw.BuildConfig;
-import com.bluecodeltd.ecap.chw.application.ChwApplication;
-import com.bluecodeltd.ecap.chw.dao.ChimwemweIndexDao;
-import com.bluecodeltd.ecap.chw.util.ChildDBConstants;
-import com.bluecodeltd.ecap.chw.util.ChwDBConstants;
-import com.bluecodeltd.ecap.chw.util.RepositoryUtils;
-import com.bluecodeltd.ecap.chw.util.RepositoryUtilsFlv;
+import com.bluecodeltd.chimwemwe.chw.BuildConfig;
+import com.bluecodeltd.chimwemwe.chw.application.ChwApplication;
+import com.bluecodeltd.chimwemwe.chw.dao.ChimwemweIndexDao;
+import com.bluecodeltd.chimwemwe.chw.util.ChildDBConstants;
+import com.bluecodeltd.chimwemwe.chw.util.ChwDBConstants;
+import com.bluecodeltd.chimwemwe.chw.util.RepositoryUtils;
+import com.bluecodeltd.chimwemwe.chw.util.RepositoryUtilsFlv;
 
 import net.sqlcipher.database.SQLiteDatabase;
 
@@ -877,7 +877,7 @@ public class ChwRepositoryFlv {
 
     private static void upgradeToVersion24(SQLiteDatabase db) {
         try {
-            com.bluecodeltd.ecap.chw.util.DatabaseMigrationUtils.fillFamilyMemberLocationTableWithProviderIds(db);
+            com.bluecodeltd.chimwemwe.chw.util.DatabaseMigrationUtils.fillFamilyMemberLocationTableWithProviderIds(db);
             db.execSQL(RepositoryUtils.EC_FAMILY_MEMBER_LOCATION_PROVIDER_ID_INDEX);
         } catch (Exception e) {
             Timber.e(e, "upgradeToVersion24");
@@ -1225,8 +1225,8 @@ public class ChwRepositoryFlv {
 
     private static void upgradeToVersion28(SQLiteDatabase db) {
         try {
-            com.bluecodeltd.ecap.chw.dao.HotspotGroupDao.createTable(db);
-            com.bluecodeltd.ecap.chw.dao.ParticipantDao.createTable(db);
+            com.bluecodeltd.chimwemwe.chw.dao.HotspotGroupDao.createTable(db);
+            com.bluecodeltd.chimwemwe.chw.dao.ParticipantDao.createTable(db);
         } catch (Exception e) {
             Timber.e(e, "upgradeToVersion28");
         }
@@ -1239,7 +1239,7 @@ public class ChwRepositoryFlv {
 
     private static void upgradeToVersion29(SQLiteDatabase db) {
         try {
-            com.bluecodeltd.ecap.chw.dao.MonthlyReviewDao.createTable(db);
+            com.bluecodeltd.chimwemwe.chw.dao.MonthlyReviewDao.createTable(db);
         } catch (Exception e) {
             Timber.e(e, "upgradeToVersion29");
         }
@@ -1249,7 +1249,7 @@ public class ChwRepositoryFlv {
         try {
             // Add the 21 new columns to ec_chimwemwe_group (location, GPS, health facility,
             // facilitators, and planned session dates 1–14)
-            com.bluecodeltd.ecap.chw.dao.HotspotGroupDao.migrateToV30(db);
+            com.bluecodeltd.chimwemwe.chw.dao.HotspotGroupDao.migrateToV30(db);
         } catch (Exception e) {
             Timber.e(e, "upgradeToVersion30");
         }
@@ -1258,11 +1258,11 @@ public class ChwRepositoryFlv {
     private static void upgradeToVersion31(SQLiteDatabase db) {
         try {
             // Add province + district to ec_chimwemwe_group
-            com.bluecodeltd.ecap.chw.dao.HotspotGroupDao.migrateToV31(db);
+            com.bluecodeltd.chimwemwe.chw.dao.HotspotGroupDao.migrateToV31(db);
             // Add referral columns to ec_chimwemwe_participant
-            com.bluecodeltd.ecap.chw.dao.ParticipantDao.migrateToV31(db);
+            com.bluecodeltd.chimwemwe.chw.dao.ParticipantDao.migrateToV31(db);
             // Add review_quarter to ec_chimwemwe_review
-            com.bluecodeltd.ecap.chw.dao.MonthlyReviewDao.migrateToV31(db);
+            com.bluecodeltd.chimwemwe.chw.dao.MonthlyReviewDao.migrateToV31(db);
         } catch (Exception e) {
             Timber.e(e, "upgradeToVersion31");
         }
@@ -1271,9 +1271,9 @@ public class ChwRepositoryFlv {
     private static void upgradeToVersion32(SQLiteDatabase db) {
         try {
             // Add system-generated UUID column to ec_chimwemwe_group
-            com.bluecodeltd.ecap.chw.dao.HotspotGroupDao.migrateToV32(db);
+            com.bluecodeltd.chimwemwe.chw.dao.HotspotGroupDao.migrateToV32(db);
             // Add system-generated UUID column to ec_chimwemwe_participant
-            com.bluecodeltd.ecap.chw.dao.ParticipantDao.migrateToV32(db);
+            com.bluecodeltd.chimwemwe.chw.dao.ParticipantDao.migrateToV32(db);
         } catch (Exception e) {
             Timber.e(e, "upgradeToVersion32");
         }
@@ -1282,9 +1282,9 @@ public class ChwRepositoryFlv {
     private static void upgradeToVersion33(SQLiteDatabase db) {
         try {
             // Add participant_id column to ec_chimwemwe_review
-            com.bluecodeltd.ecap.chw.dao.MonthlyReviewDao.migrateToV33(db);
+            com.bluecodeltd.chimwemwe.chw.dao.MonthlyReviewDao.migrateToV33(db);
             // Create ec_chimwemwe_referral table
-            com.bluecodeltd.ecap.chw.dao.ChimwemweReferralDao.createTable(db);
+            com.bluecodeltd.chimwemwe.chw.dao.ChimwemweReferralDao.createTable(db);
         } catch (Exception e) {
             Timber.e(e, "upgradeToVersion33");
         }
@@ -1292,8 +1292,8 @@ public class ChwRepositoryFlv {
 
     private static void upgradeToVersion35(SQLiteDatabase db) {
         try {
-            com.bluecodeltd.ecap.chw.dao.ParticipantDao.migrateToV35(db);
-            com.bluecodeltd.ecap.chw.dao.AttendanceDao.migrateToV35(db);
+            com.bluecodeltd.chimwemwe.chw.dao.ParticipantDao.migrateToV35(db);
+            com.bluecodeltd.chimwemwe.chw.dao.AttendanceDao.migrateToV35(db);
         } catch (Exception e) {
             Timber.e(e, "upgradeToVersion35");
         }
@@ -1301,7 +1301,7 @@ public class ChwRepositoryFlv {
 
     private static void upgradeToVersion36(SQLiteDatabase db) {
         try {
-            com.bluecodeltd.ecap.chw.dao.HotspotGroupDao.migrateToV36(db);
+            com.bluecodeltd.chimwemwe.chw.dao.HotspotGroupDao.migrateToV36(db);
         } catch (Exception e) {
             Timber.e(e, "upgradeToVersion36 HotspotGroupDao");
         }
@@ -1343,7 +1343,7 @@ public class ChwRepositoryFlv {
 
     private static void upgradeToVersion41(SQLiteDatabase db) {
         try {
-            com.bluecodeltd.ecap.chw.dao.AttendanceDao.migrateToV41(db);
+            com.bluecodeltd.chimwemwe.chw.dao.AttendanceDao.migrateToV41(db);
         } catch (Exception e) {
             Timber.e(e, "upgradeToVersion41 AttendanceDao");
         }
@@ -1351,7 +1351,7 @@ public class ChwRepositoryFlv {
 
     private static void upgradeToVersion42(SQLiteDatabase db) {
         try {
-            com.bluecodeltd.ecap.chw.dao.SessionAttendanceDao.migrateToV42(db);
+            com.bluecodeltd.chimwemwe.chw.dao.SessionAttendanceDao.migrateToV42(db);
         } catch (Exception e) {
             Timber.e(e, "upgradeToVersion42 SessionAttendanceDao");
         }
@@ -1359,7 +1359,7 @@ public class ChwRepositoryFlv {
 
     private static void upgradeToVersion44(SQLiteDatabase db) {
         try {
-            com.bluecodeltd.ecap.chw.dao.SessionAttendanceDao.migrateToV44(db);
+            com.bluecodeltd.chimwemwe.chw.dao.SessionAttendanceDao.migrateToV44(db);
         } catch (Exception e) {
             Timber.e(e, "upgradeToVersion44 SessionAttendanceDao");
         }
@@ -1367,7 +1367,7 @@ public class ChwRepositoryFlv {
 
     private static void upgradeToVersion45(SQLiteDatabase db) {
         try {
-            com.bluecodeltd.ecap.chw.dao.SessionAttendanceDao.migrateToV45(db);
+            com.bluecodeltd.chimwemwe.chw.dao.SessionAttendanceDao.migrateToV45(db);
         } catch (Exception e) {
             Timber.e(e, "upgradeToVersion45 SessionAttendanceDao");
         }
@@ -1382,7 +1382,7 @@ public class ChwRepositoryFlv {
     private static void upgradeToVersion47(SQLiteDatabase db) {
         // Unlimited participants per session: normalized session attendance lines table.
         try {
-            com.bluecodeltd.ecap.chw.dao.SessionAttendanceParticipantDao.migrateToV47(db);
+            com.bluecodeltd.chimwemwe.chw.dao.SessionAttendanceParticipantDao.migrateToV47(db);
         } catch (Exception e) {
             Timber.e(e, "upgradeToVersion47 SessionAttendanceParticipantDao");
         }
@@ -1391,7 +1391,7 @@ public class ChwRepositoryFlv {
     private static void upgradeToVersion48(SQLiteDatabase db) {
         // Add OpenSRP standard is_closed field expected by the client processor for case models.
         try {
-            com.bluecodeltd.ecap.chw.dao.SessionAttendanceParticipantDao.migrateToV48(db);
+            com.bluecodeltd.chimwemwe.chw.dao.SessionAttendanceParticipantDao.migrateToV48(db);
         } catch (Exception e) {
             Timber.e(e, "upgradeToVersion48 SessionAttendanceParticipantDao");
         }
@@ -1400,29 +1400,29 @@ public class ChwRepositoryFlv {
     private static void upgradeToVersion49(SQLiteDatabase db) {
         // Local facilities cache (synced from Firebase RTDB)
         try {
-            com.bluecodeltd.ecap.chw.dao.ChimwemweFacilitiesDao.migrateToV49(db);
+            com.bluecodeltd.chimwemwe.chw.dao.ChimwemweFacilitiesDao.migrateToV49(db);
         } catch (Exception e) {
             Timber.e(e, "upgradeToVersion49 ChimwemweFacilitiesDao");
         }
     }
 
     private static void upgradeToVersion43(SQLiteDatabase db) {
-        try { com.bluecodeltd.ecap.chw.dao.HotspotGroupDao.migrateToV43(db); } catch (Exception e) {
+        try { com.bluecodeltd.chimwemwe.chw.dao.HotspotGroupDao.migrateToV43(db); } catch (Exception e) {
             Timber.e(e, "upgradeToVersion43 HotspotGroupDao");
         }
-        try { com.bluecodeltd.ecap.chw.dao.ParticipantDao.migrateToV43(db); } catch (Exception e) {
+        try { com.bluecodeltd.chimwemwe.chw.dao.ParticipantDao.migrateToV43(db); } catch (Exception e) {
             Timber.e(e, "upgradeToVersion43 ParticipantDao");
         }
-        try { com.bluecodeltd.ecap.chw.dao.AttendanceDao.migrateToV43(db); } catch (Exception e) {
+        try { com.bluecodeltd.chimwemwe.chw.dao.AttendanceDao.migrateToV43(db); } catch (Exception e) {
             Timber.e(e, "upgradeToVersion43 AttendanceDao");
         }
-        try { com.bluecodeltd.ecap.chw.dao.SessionAttendanceDao.migrateToV43(db); } catch (Exception e) {
+        try { com.bluecodeltd.chimwemwe.chw.dao.SessionAttendanceDao.migrateToV43(db); } catch (Exception e) {
             Timber.e(e, "upgradeToVersion43 SessionAttendanceDao");
         }
-        try { com.bluecodeltd.ecap.chw.dao.MonthlyReviewDao.migrateToV43(db); } catch (Exception e) {
+        try { com.bluecodeltd.chimwemwe.chw.dao.MonthlyReviewDao.migrateToV43(db); } catch (Exception e) {
             Timber.e(e, "upgradeToVersion43 MonthlyReviewDao");
         }
-        try { com.bluecodeltd.ecap.chw.dao.ChimwemweReferralDao.migrateToV43(db); } catch (Exception e) {
+        try { com.bluecodeltd.chimwemwe.chw.dao.ChimwemweReferralDao.migrateToV43(db); } catch (Exception e) {
             Timber.e(e, "upgradeToVersion43 ChimwemweReferralDao");
         }
     }
@@ -1447,7 +1447,7 @@ public class ChwRepositoryFlv {
     private static void upgradeToVersion37(SQLiteDatabase db) {
         try { db.execSQL("ALTER TABLE ec_chimwemwe_group ADD COLUMN group_id TEXT"); } catch (Exception ignored) {}
         try {
-            com.bluecodeltd.ecap.chw.dao.HotspotGroupDao.migrateToV37(db);
+            com.bluecodeltd.chimwemwe.chw.dao.HotspotGroupDao.migrateToV37(db);
         } catch (Exception e) {
             Timber.e(e, "upgradeToVersion37 HotspotGroupDao");
         }

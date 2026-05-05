@@ -1,9 +1,9 @@
-package com.bluecodeltd.ecap.chw.contract;
+package com.bluecodeltd.chimwemwe.chw.contract;
 
 import org.json.JSONObject;
 import org.smartregister.chw.anc.contract.BaseAncMemberProfileContract;
 import org.smartregister.chw.core.listener.OnRetrieveNotifications;
-import com.bluecodeltd.ecap.chw.model.ReferralTypeModel;
+import com.bluecodeltd.chimwemwe.chw.model.ReferralTypeModel;
 import org.smartregister.chw.pnc.contract.BasePncMemberProfileContract;
 import org.smartregister.repository.AllSharedPreferences;
 

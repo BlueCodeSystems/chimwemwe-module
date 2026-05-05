@@ -1,13 +1,13 @@
-package com.bluecodeltd.ecap.chw.util;
+package com.bluecodeltd.chimwemwe.chw.util;
 
-import static com.bluecodeltd.ecap.chw.util.IndexClientsUtils.getAllSharedPreferences;
-import static com.bluecodeltd.ecap.chw.util.IndexClientsUtils.getFormTag;
-import static com.bluecodeltd.ecap.chw.util.JsonFormUtils.tagSyncMetadata;
+import static com.bluecodeltd.chimwemwe.chw.util.IndexClientsUtils.getAllSharedPreferences;
+import static com.bluecodeltd.chimwemwe.chw.util.IndexClientsUtils.getFormTag;
+import static com.bluecodeltd.chimwemwe.chw.util.JsonFormUtils.tagSyncMetadata;
 import static org.smartregister.chw.fp.util.FpUtil.getClientProcessorForJava;
 
 import androidx.annotation.Nullable;
 
-import com.bluecodeltd.ecap.chw.application.ChwApplication;
+import com.bluecodeltd.chimwemwe.chw.application.ChwApplication;
 
 import org.json.JSONArray;
 import org.json.JSONObject;

@@ -1,10 +1,10 @@
-package com.bluecodeltd.ecap.chw.activity;
+package com.bluecodeltd.chimwemwe.chw.activity;
 
 import android.view.Menu;
 
-import com.bluecodeltd.ecap.chw.R;
+import com.bluecodeltd.chimwemwe.chw.R;
 import org.smartregister.chw.fp.dao.FpDao;
-import com.bluecodeltd.ecap.chw.util.UtilsFlv;
+import com.bluecodeltd.chimwemwe.chw.util.UtilsFlv;
 
 public class PncMemberProfileActivityFlv implements PncMemberProfileActivity.Flavor {
 

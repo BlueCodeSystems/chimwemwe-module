@@ -33,14 +33,25 @@
             android:inputType="text"
             android:maxLines="1" />
 
-        <com.google.android.material.button.MaterialButton
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btn_sync"
             android:layout_width="wrap_content"
             android:layout_height="44dp"
             android:layout_marginStart="10dp"
             android:text="Sync"
             android:textAllCaps="false"
-            android:backgroundTint="@color/chimwemwe_primary" />
+            android:background="@color/chimwemwe_primary"
+            android:textColor="@android:color/white" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_seed"
+            android:layout_width="wrap_content"
+            android:layout_height="44dp"
+            android:layout_marginStart="6dp"
+            android:text="Seed"
+            android:textAllCaps="false"
+            android:background="@color/chimwemwe_primary_dark"
+            android:textColor="@android:color/white" />
 
     </LinearLayout>
 
@@ -61,4 +72,3 @@
         android:clipToPadding="false" />
 
 </LinearLayout>
-

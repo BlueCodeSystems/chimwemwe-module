@@ -1,6 +1,6 @@
-package com.bluecodeltd.ecap.chw.dao;
+package com.bluecodeltd.chimwemwe.chw.dao;
 
-import com.bluecodeltd.ecap.chw.model.TbScreeningOutcomeModel;
+import com.bluecodeltd.chimwemwe.chw.model.TbScreeningOutcomeModel;
 import org.smartregister.dao.AbstractDao;
 
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.model;
+package com.bluecodeltd.chimwemwe.chw.model;
 
 import static org.smartregister.client.utils.constants.JsonFormConstants.TYPE;
 import static org.smartregister.util.JsonFormUtils.KEY;
@@ -7,10 +7,10 @@ import static org.smartregister.util.JsonFormUtils.VALUE;
 
 import androidx.annotation.NonNull;
 
-import com.bluecodeltd.ecap.chw.BuildConfig;
-import com.bluecodeltd.ecap.chw.application.ChwApplication;
-import com.bluecodeltd.ecap.chw.contract.MotherIndexContract;
-import com.bluecodeltd.ecap.chw.util.Constants;
+import com.bluecodeltd.chimwemwe.chw.BuildConfig;
+import com.bluecodeltd.chimwemwe.chw.application.ChwApplication;
+import com.bluecodeltd.chimwemwe.chw.contract.MotherIndexContract;
+import com.bluecodeltd.chimwemwe.chw.util.Constants;
 import com.vijay.jsonwizard.constants.JsonFormConstants;
 
 import org.json.JSONArray;

@@ -1,6 +1,6 @@
-package com.bluecodeltd.ecap.chw.contract;
+package com.bluecodeltd.chimwemwe.chw.contract;
 
-import com.bluecodeltd.ecap.chw.model.HotspotGroupModel;
+import com.bluecodeltd.chimwemwe.chw.model.HotspotGroupModel;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;

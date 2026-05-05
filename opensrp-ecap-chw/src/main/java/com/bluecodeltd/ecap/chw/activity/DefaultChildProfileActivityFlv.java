@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.activity;
+package com.bluecodeltd.chimwemwe.chw.activity;
 
 import android.app.Activity;
 import android.content.Context;
@@ -14,12 +14,12 @@ import com.vijay.jsonwizard.domain.Form;
 import org.joda.time.LocalDate;
 import org.joda.time.Months;
 import org.json.JSONObject;
-import com.bluecodeltd.ecap.chw.R;
+import com.bluecodeltd.chimwemwe.chw.R;
 import org.smartregister.chw.anc.domain.MemberObject;
 import org.smartregister.chw.core.fragment.FamilyCallDialogFragment;
 import org.smartregister.chw.core.listener.OnClickFloatingMenu;
-import com.bluecodeltd.ecap.chw.presenter.ChildProfilePresenter;
-import com.bluecodeltd.ecap.chw.util.Utils;
+import com.bluecodeltd.chimwemwe.chw.presenter.ChildProfilePresenter;
+import com.bluecodeltd.chimwemwe.chw.util.Utils;
 import org.smartregister.commonregistry.CommonPersonObjectClient;
 import org.smartregister.family.util.DBConstants;
 

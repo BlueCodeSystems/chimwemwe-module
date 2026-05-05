@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.shadows;
+package com.bluecodeltd.chimwemwe.chw.shadows;
 
 import org.mockito.Mockito;
 import org.robolectric.annotation.Implementation;

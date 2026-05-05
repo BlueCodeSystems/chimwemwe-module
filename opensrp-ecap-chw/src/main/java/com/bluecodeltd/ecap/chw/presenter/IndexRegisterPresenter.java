@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.presenter;
+package com.bluecodeltd.chimwemwe.chw.presenter;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -6,13 +6,13 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
-import com.bluecodeltd.ecap.chw.R;
-import com.bluecodeltd.ecap.chw.activity.IndexDetailsActivity;
-import com.bluecodeltd.ecap.chw.activity.IndexRegisterActivity;
-import com.bluecodeltd.ecap.chw.contract.IndexRegisterContract;
-import com.bluecodeltd.ecap.chw.interactor.IndexRegisterInteractor;
-import com.bluecodeltd.ecap.chw.model.EventClient;
-import com.bluecodeltd.ecap.chw.model.IndexRegisterModel;
+import com.bluecodeltd.chimwemwe.chw.R;
+import com.bluecodeltd.chimwemwe.chw.activity.IndexDetailsActivity;
+import com.bluecodeltd.chimwemwe.chw.activity.IndexRegisterActivity;
+import com.bluecodeltd.chimwemwe.chw.contract.IndexRegisterContract;
+import com.bluecodeltd.chimwemwe.chw.interactor.IndexRegisterInteractor;
+import com.bluecodeltd.chimwemwe.chw.model.EventClient;
+import com.bluecodeltd.chimwemwe.chw.model.IndexRegisterModel;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;

@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.viewholder;
+package com.bluecodeltd.chimwemwe.chw.viewholder;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -8,9 +8,9 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
-import com.bluecodeltd.ecap.chw.R;
-import com.bluecodeltd.ecap.chw.contract.ListContract;
-import com.bluecodeltd.ecap.chw.domain.VillageDose;
+import com.bluecodeltd.chimwemwe.chw.R;
+import com.bluecodeltd.chimwemwe.chw.contract.ListContract;
+import com.bluecodeltd.chimwemwe.chw.domain.VillageDose;
 
 import java.util.Map;
 

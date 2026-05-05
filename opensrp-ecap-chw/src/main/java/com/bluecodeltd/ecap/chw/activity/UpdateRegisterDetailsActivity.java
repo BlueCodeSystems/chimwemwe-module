@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.activity;
+package com.bluecodeltd.chimwemwe.chw.activity;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -10,7 +10,7 @@ import androidx.annotation.Nullable;
 import org.smartregister.chw.core.activity.BaseChwNotificationDetailsActivity;
 import org.smartregister.chw.core.activity.BaseChwNotificationRegister;
 import org.smartregister.chw.core.utils.CoreConstants;
-import com.bluecodeltd.ecap.chw.task.ChwGoToMemberProfileBasedOnRegisterTask;
+import com.bluecodeltd.chimwemwe.chw.task.ChwGoToMemberProfileBasedOnRegisterTask;
 import org.smartregister.commonregistry.CommonPersonObjectClient;
 
 import static org.smartregister.chw.core.utils.CoreConstants.DB_CONSTANTS.NOTIFICATION_ID;

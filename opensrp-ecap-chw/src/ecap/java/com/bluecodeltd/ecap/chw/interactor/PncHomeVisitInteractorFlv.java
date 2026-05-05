@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.interactor;
+package com.bluecodeltd.chimwemwe.chw.interactor;
 
 import android.content.Context;
 
@@ -10,8 +10,8 @@ import org.joda.time.format.DateTimeFormat;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.bluecodeltd.ecap.chw.R;
-import com.bluecodeltd.ecap.chw.actionhelper.ImmunizationActionHelper;
+import com.bluecodeltd.chimwemwe.chw.R;
+import com.bluecodeltd.chimwemwe.chw.actionhelper.ImmunizationActionHelper;
 import org.smartregister.chw.anc.AncLibrary;
 import org.smartregister.chw.anc.actionhelper.HomeVisitActionHelper;
 import org.smartregister.chw.anc.contract.BaseAncHomeVisitContract;
@@ -26,12 +26,12 @@ import org.smartregister.chw.anc.util.VisitUtils;
 import org.smartregister.chw.core.domain.Person;
 import org.smartregister.chw.core.rule.PNCHealthFacilityVisitRule;
 import org.smartregister.chw.core.utils.VaccineScheduleUtil;
-import com.bluecodeltd.ecap.chw.dao.ChwPNCDao;
-import com.bluecodeltd.ecap.chw.dao.ChwPNCDaoFlv;
-import com.bluecodeltd.ecap.chw.dao.PersonDao;
-import com.bluecodeltd.ecap.chw.domain.PNCHealthFacilityVisitSummary;
-import com.bluecodeltd.ecap.chw.util.Constants;
-import com.bluecodeltd.ecap.chw.util.PNCVisitUtil;
+import com.bluecodeltd.chimwemwe.chw.dao.ChwPNCDao;
+import com.bluecodeltd.chimwemwe.chw.dao.ChwPNCDaoFlv;
+import com.bluecodeltd.chimwemwe.chw.dao.PersonDao;
+import com.bluecodeltd.chimwemwe.chw.domain.PNCHealthFacilityVisitSummary;
+import com.bluecodeltd.chimwemwe.chw.util.Constants;
+import com.bluecodeltd.chimwemwe.chw.util.PNCVisitUtil;
 import org.smartregister.immunization.domain.VaccineWrapper;
 import org.smartregister.util.JsonFormUtils;
 
@@ -106,7 +106,7 @@ public class PncHomeVisitInteractorFlv extends DefaultPncHomeVisitInteractorFlv 
             public void onPayloadReceived(String s) {
                 try {
                     JSONObject jsonObject = new JSONObject(s);
-                    danger_signs_present_mama = com.bluecodeltd.ecap.chw.util.JsonFormUtils.getCheckBoxValue(jsonObject, "danger_signs_present_mama");
+                    danger_signs_present_mama = com.bluecodeltd.chimwemwe.chw.util.JsonFormUtils.getCheckBoxValue(jsonObject, "danger_signs_present_mama");
                 } catch (JSONException e) {
                     Timber.e(e);
                 }
@@ -148,7 +148,7 @@ public class PncHomeVisitInteractorFlv extends DefaultPncHomeVisitInteractorFlv 
             public void onPayloadReceived(String s) {
                 try {
                     JSONObject jsonObject = new JSONObject(s);
-                    danger_signs_present_child = com.bluecodeltd.ecap.chw.util.JsonFormUtils.getCheckBoxValue(jsonObject, "danger_signs_present_child");
+                    danger_signs_present_child = com.bluecodeltd.chimwemwe.chw.util.JsonFormUtils.getCheckBoxValue(jsonObject, "danger_signs_present_child");
                 } catch (JSONException e) {
                     Timber.e(e);
                 }
@@ -210,10 +210,10 @@ public class PncHomeVisitInteractorFlv extends DefaultPncHomeVisitInteractorFlv 
             public void onPayloadReceived(String jsonPayload) {
                 try {
                     JSONObject jsonObject = new JSONObject(jsonPayload);
-                    fp_counseling = com.bluecodeltd.ecap.chw.util.JsonFormUtils.getValue(jsonObject, "fp_counseling");
-                    fp_method = com.bluecodeltd.ecap.chw.util.JsonFormUtils.getValue(jsonObject, "fp_method");
-                    fp_start_date = com.bluecodeltd.ecap.chw.util.JsonFormUtils.getValue(jsonObject, "fp_start_date");
-                    fp_period_received = com.bluecodeltd.ecap.chw.util.JsonFormUtils.getValue(jsonObject, "fp_period_received");
+                    fp_counseling = com.bluecodeltd.chimwemwe.chw.util.JsonFormUtils.getValue(jsonObject, "fp_counseling");
+                    fp_method = com.bluecodeltd.chimwemwe.chw.util.JsonFormUtils.getValue(jsonObject, "fp_method");
+                    fp_start_date = com.bluecodeltd.chimwemwe.chw.util.JsonFormUtils.getValue(jsonObject, "fp_start_date");
+                    fp_period_received = com.bluecodeltd.chimwemwe.chw.util.JsonFormUtils.getValue(jsonObject, "fp_period_received");
 
                     if (StringUtils.isNotBlank(fp_start_date)) {
                         start_date = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).parse(fp_start_date);
@@ -352,7 +352,7 @@ public class PncHomeVisitInteractorFlv extends DefaultPncHomeVisitInteractorFlv 
             public void onPayloadReceived(String jsonPayload) {
                 try {
                     JSONObject jsonObject = new JSONObject(jsonPayload);
-                    exclusive_breast_feeding = com.bluecodeltd.ecap.chw.util.JsonFormUtils.getValue(jsonObject, "exclusive_breast_feeding");
+                    exclusive_breast_feeding = com.bluecodeltd.chimwemwe.chw.util.JsonFormUtils.getValue(jsonObject, "exclusive_breast_feeding");
                 } catch (JSONException e) {
                     Timber.e(e);
                 }
@@ -410,7 +410,7 @@ public class PncHomeVisitInteractorFlv extends DefaultPncHomeVisitInteractorFlv 
             public void onPayloadReceived(String jsonPayload) {
                 try {
                     JSONObject jsonObject = new JSONObject(jsonPayload);
-                    couselling_pnc = com.bluecodeltd.ecap.chw.util.JsonFormUtils.getCheckBoxValue(jsonObject, "couselling_pnc");
+                    couselling_pnc = com.bluecodeltd.chimwemwe.chw.util.JsonFormUtils.getCheckBoxValue(jsonObject, "couselling_pnc");
                 } catch (JSONException e) {
                     Timber.e(e);
                 }
@@ -449,7 +449,7 @@ public class PncHomeVisitInteractorFlv extends DefaultPncHomeVisitInteractorFlv 
             public void onPayloadReceived(String jsonPayload) {
                 try {
                     JSONObject jsonObject = new JSONObject(jsonPayload);
-                    nutrition_status_mama = com.bluecodeltd.ecap.chw.util.JsonFormUtils.getValue(jsonObject, "nutrition_status_mama");
+                    nutrition_status_mama = com.bluecodeltd.chimwemwe.chw.util.JsonFormUtils.getValue(jsonObject, "nutrition_status_mama");
                 } catch (JSONException e) {
                     Timber.e(e);
                 }
@@ -492,7 +492,7 @@ public class PncHomeVisitInteractorFlv extends DefaultPncHomeVisitInteractorFlv 
             public void onPayloadReceived(String jsonPayload) {
                 try {
                     JSONObject jsonObject = new JSONObject(jsonPayload);
-                    nutrition_status_1m = com.bluecodeltd.ecap.chw.util.JsonFormUtils.getValue(jsonObject, "nutrition_status_1m");
+                    nutrition_status_1m = com.bluecodeltd.chimwemwe.chw.util.JsonFormUtils.getValue(jsonObject, "nutrition_status_1m");
                 } catch (JSONException e) {
                     Timber.e(e);
                 }
@@ -544,9 +544,9 @@ public class PncHomeVisitInteractorFlv extends DefaultPncHomeVisitInteractorFlv 
             public void onPayloadReceived(String jsonPayload) {
                 try {
                     JSONObject jsonObject = new JSONObject(jsonPayload);
-                    fam_llin = com.bluecodeltd.ecap.chw.util.JsonFormUtils.getValue(jsonObject, "fam_llin");
-                    llin_2days = com.bluecodeltd.ecap.chw.util.JsonFormUtils.getValue(jsonObject, "llin_2days");
-                    llin_condition = com.bluecodeltd.ecap.chw.util.JsonFormUtils.getValue(jsonObject, "llin_condition");
+                    fam_llin = com.bluecodeltd.chimwemwe.chw.util.JsonFormUtils.getValue(jsonObject, "fam_llin");
+                    llin_2days = com.bluecodeltd.chimwemwe.chw.util.JsonFormUtils.getValue(jsonObject, "llin_2days");
+                    llin_condition = com.bluecodeltd.chimwemwe.chw.util.JsonFormUtils.getValue(jsonObject, "llin_condition");
                 } catch (JSONException e) {
                     Timber.e(e);
                 }
@@ -599,9 +599,9 @@ public class PncHomeVisitInteractorFlv extends DefaultPncHomeVisitInteractorFlv 
             public void onPayloadReceived(String jsonPayload) {
                 try {
                     JSONObject jsonObject = new JSONObject(jsonPayload);
-                    date_of_illness = com.bluecodeltd.ecap.chw.util.JsonFormUtils.getValue(jsonObject, "date_of_illness_mama");
-                    illness_description = com.bluecodeltd.ecap.chw.util.JsonFormUtils.getValue(jsonObject, "illness_description_mama");
-                    action_taken = com.bluecodeltd.ecap.chw.util.JsonFormUtils.getCheckBoxValue(jsonObject, "action_taken_mama");
+                    date_of_illness = com.bluecodeltd.chimwemwe.chw.util.JsonFormUtils.getValue(jsonObject, "date_of_illness_mama");
+                    illness_description = com.bluecodeltd.chimwemwe.chw.util.JsonFormUtils.getValue(jsonObject, "illness_description_mama");
+                    action_taken = com.bluecodeltd.chimwemwe.chw.util.JsonFormUtils.getCheckBoxValue(jsonObject, "action_taken_mama");
                     illnessDate = DateTimeFormat.forPattern("dd-MM-yyyy").parseLocalDate(date_of_illness);
                 } catch (Exception e) {
                     Timber.e(e);
@@ -650,9 +650,9 @@ public class PncHomeVisitInteractorFlv extends DefaultPncHomeVisitInteractorFlv 
             public void onPayloadReceived(String jsonPayload) {
                 try {
                     JSONObject jsonObject = new JSONObject(jsonPayload);
-                    date_of_illness = com.bluecodeltd.ecap.chw.util.JsonFormUtils.getValue(jsonObject, "date_of_illness_child");
-                    illness_description = com.bluecodeltd.ecap.chw.util.JsonFormUtils.getValue(jsonObject, "illness_description_child");
-                    action_taken = com.bluecodeltd.ecap.chw.util.JsonFormUtils.getCheckBoxValue(jsonObject, "action_taken_child");
+                    date_of_illness = com.bluecodeltd.chimwemwe.chw.util.JsonFormUtils.getValue(jsonObject, "date_of_illness_child");
+                    illness_description = com.bluecodeltd.chimwemwe.chw.util.JsonFormUtils.getValue(jsonObject, "illness_description_child");
+                    action_taken = com.bluecodeltd.chimwemwe.chw.util.JsonFormUtils.getCheckBoxValue(jsonObject, "action_taken_child");
                     illnessDate = DateTimeFormat.forPattern("dd-MM-yyyy").parseLocalDate(date_of_illness);
                 } catch (Exception e) {
                     Timber.e(e);
@@ -848,12 +848,12 @@ public class PncHomeVisitInteractorFlv extends DefaultPncHomeVisitInteractorFlv 
         public void onPayloadReceived(String jsonPayload) {
             try {
                 JSONObject jsonObject = new JSONObject(jsonPayload);
-                pnc_visit = com.bluecodeltd.ecap.chw.util.JsonFormUtils.getValue(jsonObject, MessageFormat.format("pnc_visit_{0}", visit_num));
-                pnc_hf_visit_date = com.bluecodeltd.ecap.chw.util.JsonFormUtils.getValue(jsonObject, MessageFormat.format("pnc_hf_visit{0}_date", visit_num));
+                pnc_visit = com.bluecodeltd.chimwemwe.chw.util.JsonFormUtils.getValue(jsonObject, MessageFormat.format("pnc_visit_{0}", visit_num));
+                pnc_hf_visit_date = com.bluecodeltd.chimwemwe.chw.util.JsonFormUtils.getValue(jsonObject, MessageFormat.format("pnc_hf_visit{0}_date", visit_num));
 
                 if (visit_num == 1) {
-                    vit_a_mother = com.bluecodeltd.ecap.chw.util.JsonFormUtils.getValue(jsonObject, "vit_a_mother");
-                    ifa_mother = com.bluecodeltd.ecap.chw.util.JsonFormUtils.getValue(jsonObject, "ifa_mother");
+                    vit_a_mother = com.bluecodeltd.chimwemwe.chw.util.JsonFormUtils.getValue(jsonObject, "vit_a_mother");
+                    ifa_mother = com.bluecodeltd.chimwemwe.chw.util.JsonFormUtils.getValue(jsonObject, "ifa_mother");
                 }
 
                 if (StringUtils.isNotBlank(pnc_hf_visit_date)) {
@@ -884,10 +884,10 @@ public class PncHomeVisitInteractorFlv extends DefaultPncHomeVisitInteractorFlv 
                 JSONArray field = JsonFormUtils.fields(jsonObject);
                 JSONObject confirmed_visits = JsonFormUtils.getFieldJSONObject(field, "confirmed_health_facility_visits");
                 JSONObject facility_visit_date = JsonFormUtils.getFieldJSONObject(field, "last_health_facility_visit_date");
-                pnc_hf_visit_date = com.bluecodeltd.ecap.chw.util.JsonFormUtils.getValue(jsonObject, MessageFormat.format("pnc_hf_visit{0}_date", visit_num));
+                pnc_hf_visit_date = com.bluecodeltd.chimwemwe.chw.util.JsonFormUtils.getValue(jsonObject, MessageFormat.format("pnc_hf_visit{0}_date", visit_num));
 
                 String count = String.valueOf(visit_num);
-                String value = com.bluecodeltd.ecap.chw.util.JsonFormUtils.getValue(jsonObject, MessageFormat.format("pnc_visit_{0}", visit_num));
+                String value = com.bluecodeltd.chimwemwe.chw.util.JsonFormUtils.getValue(jsonObject, MessageFormat.format("pnc_visit_{0}", visit_num));
                 if (value.equalsIgnoreCase("Yes")) {
                     count = String.valueOf(visit_num + 1);
                     facility_visit_date.put(JsonFormConstants.VALUE, pnc_hf_visit_date);

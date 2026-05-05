@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.interactor;
+package com.bluecodeltd.chimwemwe.chw.interactor;
 
 public class ChildProfileInteractorFlv extends DefaultChildProfileInteractor {
 }

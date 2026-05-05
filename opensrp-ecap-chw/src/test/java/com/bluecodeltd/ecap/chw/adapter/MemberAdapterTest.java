@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.adapter;
+package com.bluecodeltd.chimwemwe.chw.adapter;
 
 import org.junit.Before;
 import org.junit.Test;

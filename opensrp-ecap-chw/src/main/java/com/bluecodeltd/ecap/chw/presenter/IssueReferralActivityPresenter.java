@@ -1,15 +1,15 @@
-package com.bluecodeltd.ecap.chw.presenter;
+package com.bluecodeltd.chimwemwe.chw.presenter;
 
 import android.app.Activity;
 
 import org.jetbrains.annotations.NotNull;
 import org.smartregister.chw.core.custom_views.NavigationMenu;
-import com.bluecodeltd.ecap.chw.model.IssueReferralActivityModel;
+import com.bluecodeltd.chimwemwe.chw.model.IssueReferralActivityModel;
 import org.smartregister.chw.referral.contract.BaseIssueReferralContract;
 import org.smartregister.chw.referral.model.AbstractIssueReferralModel;
 import org.smartregister.chw.referral.presenter.BaseIssueReferralPresenter;
 import org.smartregister.chw.referral.util.DBConstants;
-import com.bluecodeltd.ecap.chw.util.Constants;
+import com.bluecodeltd.chimwemwe.chw.util.Constants;
 
 public class IssueReferralActivityPresenter extends BaseIssueReferralPresenter {
 

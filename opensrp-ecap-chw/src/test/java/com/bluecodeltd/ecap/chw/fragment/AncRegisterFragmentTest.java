@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.fragment;
+package com.bluecodeltd.chimwemwe.chw.fragment;
 
 import android.app.Activity;
 
@@ -19,8 +19,8 @@ import org.robolectric.util.ReflectionHelpers;
 import org.smartregister.Context;
 import org.smartregister.CoreLibrary;
 
-import com.bluecodeltd.ecap.chw.activity.AncHomeVisitActivity;
-import com.bluecodeltd.ecap.chw.activity.AncMemberProfileActivity;
+import com.bluecodeltd.chimwemwe.chw.activity.AncHomeVisitActivity;
+import com.bluecodeltd.chimwemwe.chw.activity.AncMemberProfileActivity;
 import org.smartregister.chw.core.presenter.AncRegisterFragmentPresenter;
 import org.smartregister.commonregistry.CommonPersonObjectClient;
 import org.smartregister.commonregistry.CommonRepository;

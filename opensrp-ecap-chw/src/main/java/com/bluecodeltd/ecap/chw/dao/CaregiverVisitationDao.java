@@ -1,6 +1,6 @@
-package com.bluecodeltd.ecap.chw.dao;
+package com.bluecodeltd.chimwemwe.chw.dao;
 
-import com.bluecodeltd.ecap.chw.model.CaregiverVisitationModel;
+import com.bluecodeltd.chimwemwe.chw.model.CaregiverVisitationModel;
 
 import org.smartregister.dao.AbstractDao;
 

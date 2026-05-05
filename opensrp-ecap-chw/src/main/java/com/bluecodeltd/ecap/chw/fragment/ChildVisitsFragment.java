@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.fragment;
+package com.bluecodeltd.chimwemwe.chw.fragment;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -12,19 +12,19 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bluecodeltd.ecap.chw.R;
-import com.bluecodeltd.ecap.chw.activity.IndexDetailsActivity;
-import com.bluecodeltd.ecap.chw.adapter.CasePlanAdapter;
-import com.bluecodeltd.ecap.chw.adapter.VisitAdapter;
-import com.bluecodeltd.ecap.chw.dao.IndexPersonDao;
-import com.bluecodeltd.ecap.chw.dao.VcaVisitationDao;
-import com.bluecodeltd.ecap.chw.model.CasePlanModel;
-import com.bluecodeltd.ecap.chw.model.VcaVisitationModel;
+import com.bluecodeltd.chimwemwe.chw.R;
+import com.bluecodeltd.chimwemwe.chw.activity.IndexDetailsActivity;
+import com.bluecodeltd.chimwemwe.chw.adapter.CasePlanAdapter;
+import com.bluecodeltd.chimwemwe.chw.adapter.VisitAdapter;
+import com.bluecodeltd.chimwemwe.chw.dao.IndexPersonDao;
+import com.bluecodeltd.chimwemwe.chw.dao.VcaVisitationDao;
+import com.bluecodeltd.chimwemwe.chw.model.CasePlanModel;
+import com.bluecodeltd.chimwemwe.chw.model.VcaVisitationModel;
 import androidx.lifecycle.ViewModelProvider;
-import com.bluecodeltd.ecap.chw.viewmodel.ChildVisitsViewModel;
+import com.bluecodeltd.chimwemwe.chw.viewmodel.ChildVisitsViewModel;
 
 import java.util.ArrayList;
-import com.bluecodeltd.ecap.chw.util.Threading;
+import com.bluecodeltd.chimwemwe.chw.util.Threading;
 
 public class ChildVisitsFragment extends Fragment {
 

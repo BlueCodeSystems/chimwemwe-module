@@ -40,7 +40,7 @@ if (project.rootProject.file("local.properties").exists()) {
 
 
 android {
-    namespace  = "com.bluecodeltd.ecap.chw"
+    namespace  = "com.bluecodeltd.chimwemwe.chw"
     useLibrary 'org.apache.http.legacy'
     compileSdkVersion 35
     buildToolsVersion '35.0.0'

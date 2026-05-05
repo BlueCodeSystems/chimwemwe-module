@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.activity;
+package com.bluecodeltd.chimwemwe.chw.activity;
 
 import org.smartregister.chw.core.helper.BaMedicalHistoryActivityHelper;
 

@@ -1,9 +1,9 @@
-package com.bluecodeltd.ecap.chw.fragment;
+package com.bluecodeltd.chimwemwe.chw.fragment;
 
 import android.view.View;
 
 import org.smartregister.chw.core.fragment.BaseChwNotificationFragment;
-import com.bluecodeltd.ecap.chw.presenter.UpdatesFragmentPresenter;
+import com.bluecodeltd.chimwemwe.chw.presenter.UpdatesFragmentPresenter;
 import org.smartregister.commonregistry.CommonPersonObjectClient;
 import org.smartregister.family.util.Utils;
 

@@ -1,10 +1,10 @@
-package com.bluecodeltd.ecap.chw.activity;
+package com.bluecodeltd.chimwemwe.chw.activity;
 
 import android.app.Activity;
 import android.content.Intent;
 
 import androidx.annotation.Nullable;
-import com.bluecodeltd.ecap.chw.fragment.MalariaRegisterFragment;
+import com.bluecodeltd.chimwemwe.chw.fragment.MalariaRegisterFragment;
 
 import org.smartregister.chw.core.activity.CoreMalariaRegisterActivity;
 import org.smartregister.helper.BottomNavigationHelper;

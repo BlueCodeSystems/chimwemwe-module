@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.fragment;
+package com.bluecodeltd.chimwemwe.chw.fragment;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -13,10 +13,10 @@ import androidx.fragment.app.Fragment;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.AsyncTaskLoader;
 import androidx.loader.content.Loader;
-import com.bluecodeltd.ecap.chw.presenter.JobAidsDashboardFragmentPresenter;
-import com.bluecodeltd.ecap.chw.reporting.ChwReport;
+import com.bluecodeltd.chimwemwe.chw.presenter.JobAidsDashboardFragmentPresenter;
+import com.bluecodeltd.chimwemwe.chw.reporting.ChwReport;
 
-import com.bluecodeltd.ecap.chw.R;
+import com.bluecodeltd.chimwemwe.chw.R;
 import org.smartregister.reporting.contract.ReportContract;
 import org.smartregister.reporting.domain.IndicatorTally;
 

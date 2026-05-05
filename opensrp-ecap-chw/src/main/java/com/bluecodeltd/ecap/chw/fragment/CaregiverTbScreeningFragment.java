@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.fragment;
+package com.bluecodeltd.chimwemwe.chw.fragment;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -11,13 +11,13 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bluecodeltd.ecap.chw.activity.HouseholdDetails;
-import com.bluecodeltd.ecap.chw.adapter.TbScreeningCaregiverAdapter;
-import com.bluecodeltd.ecap.chw.dao.TbScreeningCaregiverDao;
-import com.bluecodeltd.ecap.chw.databinding.FragmentCaregiverTbScreeningBinding;
-import com.bluecodeltd.ecap.chw.model.Household;
-import com.bluecodeltd.ecap.chw.model.TbScreeningCaregiverModel;
-import com.bluecodeltd.ecap.chw.util.Threading;
+import com.bluecodeltd.chimwemwe.chw.activity.HouseholdDetails;
+import com.bluecodeltd.chimwemwe.chw.adapter.TbScreeningCaregiverAdapter;
+import com.bluecodeltd.chimwemwe.chw.dao.TbScreeningCaregiverDao;
+import com.bluecodeltd.chimwemwe.chw.databinding.FragmentCaregiverTbScreeningBinding;
+import com.bluecodeltd.chimwemwe.chw.model.Household;
+import com.bluecodeltd.chimwemwe.chw.model.TbScreeningCaregiverModel;
+import com.bluecodeltd.chimwemwe.chw.util.Threading;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vijay.jsonwizard.constants.JsonFormConstants;
 
@@ -120,10 +120,10 @@ public class CaregiverTbScreeningFragment extends Fragment {
             f.setWizard(false);
             f.setName(getString(org.smartregister.chw.core.R.string.child_details));
             f.setHideSaveLabel(true);
-            f.setNextLabel(getString(com.bluecodeltd.ecap.chw.R.string.next));
-            f.setPreviousLabel(getString(com.bluecodeltd.ecap.chw.R.string.previous));
-            f.setSaveLabel(getString(com.bluecodeltd.ecap.chw.R.string.submit));
-            f.setNavigationBackground(com.bluecodeltd.ecap.chw.R.color.primary);
+            f.setNextLabel(getString(com.bluecodeltd.chimwemwe.chw.R.string.next));
+            f.setPreviousLabel(getString(com.bluecodeltd.chimwemwe.chw.R.string.previous));
+            f.setSaveLabel(getString(com.bluecodeltd.chimwemwe.chw.R.string.submit));
+            f.setNavigationBackground(com.bluecodeltd.chimwemwe.chw.R.color.primary);
             android.content.Intent intent = new android.content.Intent(requireActivity(), org.smartregister.family.util.Utils.metadata().familyFormActivity);
             intent.putExtra(JsonFormConstants.JSON_FORM_KEY.FORM, f);
             intent.putExtra(JsonFormConstants.JSON_FORM_KEY.JSON, form.toString());

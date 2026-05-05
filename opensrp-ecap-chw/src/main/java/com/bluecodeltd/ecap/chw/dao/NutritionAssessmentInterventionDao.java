@@ -1,7 +1,7 @@
-package com.bluecodeltd.ecap.chw.dao;
+package com.bluecodeltd.chimwemwe.chw.dao;
 
-import com.bluecodeltd.ecap.chw.model.NutritionAssessmentInterventionModel;
-import com.bluecodeltd.ecap.chw.model.TbScreeningModel;
+import com.bluecodeltd.chimwemwe.chw.model.NutritionAssessmentInterventionModel;
+import com.bluecodeltd.chimwemwe.chw.model.TbScreeningModel;
 
 import org.smartregister.dao.AbstractDao;
 

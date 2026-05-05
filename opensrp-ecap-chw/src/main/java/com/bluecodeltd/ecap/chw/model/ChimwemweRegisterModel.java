@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.model;
+package com.bluecodeltd.chimwemwe.chw.model;
 
 import static com.vijay.jsonwizard.utils.FormUtils.fields;
 import static com.vijay.jsonwizard.utils.FormUtils.getFieldJSONObject;
@@ -6,7 +6,7 @@ import static org.smartregister.util.JsonFormUtils.ENCOUNTER_LOCATION;
 
 import androidx.annotation.Nullable;
 
-import com.bluecodeltd.ecap.chw.contract.ChimwemweRegisterContract;
+import com.bluecodeltd.chimwemwe.chw.contract.ChimwemweRegisterContract;
 
 import org.json.JSONArray;
 import org.json.JSONObject;

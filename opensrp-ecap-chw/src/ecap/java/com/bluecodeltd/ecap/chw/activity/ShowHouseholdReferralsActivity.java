@@ -1,6 +1,6 @@
-package com.bluecodeltd.ecap.chw.activity;
+package com.bluecodeltd.chimwemwe.chw.activity;
 
-import static com.bluecodeltd.ecap.chw.util.JsonFormUtils.tagSyncMetadata;
+import static com.bluecodeltd.chimwemwe.chw.util.JsonFormUtils.tagSyncMetadata;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -16,16 +16,16 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bluecodeltd.ecap.chw.BuildConfig;
-import com.bluecodeltd.ecap.chw.R;
-import com.bluecodeltd.ecap.chw.adapter.ShowHouseholdReferralsAdapter;
-import com.bluecodeltd.ecap.chw.application.ChwApplication;
-import com.bluecodeltd.ecap.chw.dao.ReferralDao;
-import com.bluecodeltd.ecap.chw.dao.newCaregiverDao;
-import com.bluecodeltd.ecap.chw.domain.ChildIndexEventClient;
-import com.bluecodeltd.ecap.chw.model.ReferralModel;
-import com.bluecodeltd.ecap.chw.model.newCaregiverModel;
-import com.bluecodeltd.ecap.chw.util.Constants;
+import com.bluecodeltd.chimwemwe.chw.BuildConfig;
+import com.bluecodeltd.chimwemwe.chw.R;
+import com.bluecodeltd.chimwemwe.chw.adapter.ShowHouseholdReferralsAdapter;
+import com.bluecodeltd.chimwemwe.chw.application.ChwApplication;
+import com.bluecodeltd.chimwemwe.chw.dao.ReferralDao;
+import com.bluecodeltd.chimwemwe.chw.dao.newCaregiverDao;
+import com.bluecodeltd.chimwemwe.chw.domain.ChildIndexEventClient;
+import com.bluecodeltd.chimwemwe.chw.model.ReferralModel;
+import com.bluecodeltd.chimwemwe.chw.model.newCaregiverModel;
+import com.bluecodeltd.chimwemwe.chw.util.Constants;
 import com.vijay.jsonwizard.constants.JsonFormConstants;
 
 import org.json.JSONArray;

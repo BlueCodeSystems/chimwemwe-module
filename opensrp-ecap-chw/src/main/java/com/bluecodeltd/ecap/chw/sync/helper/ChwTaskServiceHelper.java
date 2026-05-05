@@ -1,7 +1,7 @@
-package com.bluecodeltd.ecap.chw.sync.helper;
+package com.bluecodeltd.chimwemwe.chw.sync.helper;
 
 import org.smartregister.CoreLibrary;
-import com.bluecodeltd.ecap.chw.application.ChwApplication;
+import com.bluecodeltd.chimwemwe.chw.application.ChwApplication;
 import org.smartregister.chw.core.utils.CoreConstants;
 import org.smartregister.domain.Task;
 import org.smartregister.location.helper.LocationHelper;

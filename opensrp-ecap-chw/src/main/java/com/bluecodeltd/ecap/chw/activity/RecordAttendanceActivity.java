@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.activity;
+package com.bluecodeltd.chimwemwe.chw.activity;
 
 import android.Manifest;
 import android.content.Context;
@@ -26,14 +26,14 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bluecodeltd.ecap.chw.R;
-import com.bluecodeltd.ecap.chw.dao.ParticipantDao;
-import com.bluecodeltd.ecap.chw.dao.SessionAttendanceDao;
-import com.bluecodeltd.ecap.chw.dao.SessionAttendanceParticipantDao;
-import com.bluecodeltd.ecap.chw.model.AttendanceModel;
-import com.bluecodeltd.ecap.chw.model.ParticipantModel;
-import com.bluecodeltd.ecap.chw.util.ChimwemweFormUtils;
-import com.bluecodeltd.ecap.chw.util.Threading;
+import com.bluecodeltd.chimwemwe.chw.R;
+import com.bluecodeltd.chimwemwe.chw.dao.ParticipantDao;
+import com.bluecodeltd.chimwemwe.chw.dao.SessionAttendanceDao;
+import com.bluecodeltd.chimwemwe.chw.dao.SessionAttendanceParticipantDao;
+import com.bluecodeltd.chimwemwe.chw.model.AttendanceModel;
+import com.bluecodeltd.chimwemwe.chw.model.ParticipantModel;
+import com.bluecodeltd.chimwemwe.chw.util.ChimwemweFormUtils;
+import com.bluecodeltd.chimwemwe.chw.util.Threading;
 
 import org.json.JSONObject;
 import org.smartregister.util.FormUtils;
