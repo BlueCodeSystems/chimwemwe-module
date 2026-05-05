@@ -1,5 +1,6 @@
 *.iml
 .gradle
+.gradle-project-cache/
 .gradle-user-home/
 /captures
 /local.properties
