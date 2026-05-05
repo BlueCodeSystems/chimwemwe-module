@@ -18,11 +18,6 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -192,8 +187,6 @@ public class DashboardActivity extends AppCompatActivity implements GenerateCSVC
                             getString(R.string.csv_generated_location, getString(R.string.app_name))));
         } else if (id == R.id.import_csv) {
             openCsvPicker();
-        } else if (id == R.id.add_facility) {
-            seedAllFacilitiesToFirebase();
         }
         return super.onOptionsItemSelected(item);
     }
@@ -386,84 +379,6 @@ public class DashboardActivity extends AppCompatActivity implements GenerateCSVC
             }
         }
         return uris;
-    }
-
-    // ── Add Facility (seed all 655 Zambian facilities) ────────────
-
-    private void seedAllFacilitiesToFirebase() {
-        Threading.io(() -> {
-            try {
-                InputStream is = getResources().openRawResource(R.raw.zambia_facilities);
-                BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
-                JSONObject payload = new JSONObject();
-                java.util.Map<String, Integer> seen = new java.util.HashMap<>();
-                String line;
-                int count = 0;
-                while ((line = reader.readLine()) != null) {
-                    String[] parts = line.split("\t", -1);
-                    if (parts.length < 3) continue;
-                    String name = parts[0].trim();
-                    String province = parts[1].trim();
-                    String district = parts[2].trim();
-                    if (name.isEmpty()) continue;
-
-                    String baseKey = facilitySlugify(name + "_" + district);
-                    String key = baseKey;
-                    if (seen.containsKey(baseKey)) {
-                        int n = seen.get(baseKey);
-                        key = baseKey + "_" + n;
-                        seen.put(baseKey, n + 1);
-                    } else {
-                        seen.put(baseKey, 1);
-                    }
-                    JSONObject row = new JSONObject();
-                    row.put("facility_name", name);
-                    row.put("province", province);
-                    row.put("district", district);
-                    payload.put(key, row);
-                    count++;
-                }
-                reader.close();
-
-                int finalCount = count;
-                String jsonBody = payload.toString();
-                Threading.main(() -> pushAllFacilitiesToFirebase(jsonBody, finalCount));
-            } catch (Exception e) {
-                Timber.e(e, "Facility seed failed");
-                Threading.main(() -> Toast.makeText(this, "Failed to load facilities: " + e.getMessage(), Toast.LENGTH_LONG).show());
-            }
-        });
-    }
-
-    private void pushAllFacilitiesToFirebase(String jsonBody, int count) {
-        String url = "https://chimwemwe-app-default-rtdb.firebaseio.com/facilities.json";
-        try {
-            com.android.volley.toolbox.StringRequest req = new com.android.volley.toolbox.StringRequest(
-                    Request.Method.PATCH, url,
-                    response -> Toast.makeText(this, count + " facilities saved to Firebase.", Toast.LENGTH_LONG).show(),
-                    error -> {
-                        Timber.e(error, "Facility seed push failed");
-                        Toast.makeText(this, "Saved locally but Firebase push failed.", Toast.LENGTH_LONG).show();
-                    }) {
-                @Override
-                public byte[] getBody() {
-                    return jsonBody.getBytes(StandardCharsets.UTF_8);
-                }
-                @Override
-                public String getBodyContentType() {
-                    return "application/json; charset=utf-8";
-                }
-            };
-            ((ChwApplication) ChwApplication.getInstance()).getRequestQueue().add(req);
-        } catch (Exception e) {
-            Timber.e(e, "Volley queue not available for facility seed push");
-            Toast.makeText(this, "Firebase push failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
-        }
-    }
-
-    private static String facilitySlugify(String s) {
-        String result = s.toLowerCase().replaceAll("[^a-z0-9]+", "_").replaceAll("^_|_$", "");
-        return result.substring(0, Math.min(result.length(), 60));
     }
 
     // ── Dialog helper ─────────────────────────────────────────────
