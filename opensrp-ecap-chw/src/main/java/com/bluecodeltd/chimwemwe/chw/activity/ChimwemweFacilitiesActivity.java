@@ -2,6 +2,8 @@ package com.bluecodeltd.chimwemwe.chw.activity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -89,7 +91,13 @@ public class ChimwemweFacilitiesActivity extends AppCompatActivity {
             findViewById(R.id.btn_sync).setVisibility(View.GONE);
             findViewById(R.id.btn_seed).setVisibility(View.GONE);
         } else {
-            findViewById(R.id.btn_sync).setOnClickListener(v -> syncFromFirebase());
+            findViewById(R.id.btn_sync).setOnClickListener(v -> {
+                if (isOnline()) {
+                    syncFromFirebase();
+                } else {
+                    Toast.makeText(this, "No internet connection. Using local data.", Toast.LENGTH_SHORT).show();
+                }
+            });
             findViewById(R.id.btn_seed).setOnClickListener(v -> confirmAndSeedAll());
         }
 
@@ -230,13 +238,22 @@ public class ChimwemweFacilitiesActivity extends AppCompatActivity {
         });
     }
 
-    /** Select mode: show cached facilities for user's district, then always refresh from Firebase. */
+    private boolean isOnline() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+        if (cm == null) return false;
+        NetworkInfo info = cm.getActiveNetworkInfo();
+        return info != null && info.isConnected();
+    }
+
+    /** Select mode: show cached facilities for user's district, then refresh from Firebase if online. */
     private void loadLocalThenSync() {
         Threading.io(() -> {
             List<ChimwemweFacilityModel> list = ChimwemweFacilitiesDao.getFacilities("", userDistrict);
             Threading.main(() -> {
                 adapter.setData(list);
-                syncFromFirebase();
+                if (isOnline()) {
+                    syncFromFirebase();
+                }
             });
         });
     }
@@ -246,7 +263,7 @@ public class ChimwemweFacilitiesActivity extends AppCompatActivity {
             List<ChimwemweFacilityModel> list = ChimwemweFacilitiesDao.getFacilities("", null);
             Threading.main(() -> {
                 adapter.setData(list);
-                if (list.isEmpty()) {
+                if (list.isEmpty() && isOnline()) {
                     syncFromFirebase();
                 }
             });
@@ -341,9 +358,8 @@ public class ChimwemweFacilitiesActivity extends AppCompatActivity {
                             batch.put(key, new String[]{name, district, province});
                         }
 
-                        int saved = ChimwemweFacilitiesDao.batchUpsert(batch);
+                        ChimwemweFacilitiesDao.batchUpsert(batch);
                         Threading.main(() -> {
-                            Toast.makeText(this, "Synced " + saved + " facilities.", Toast.LENGTH_SHORT).show();
                             setLoading(false);
                             loadLocal(etSearch.getText() != null ? etSearch.getText().toString() : "");
                         });
