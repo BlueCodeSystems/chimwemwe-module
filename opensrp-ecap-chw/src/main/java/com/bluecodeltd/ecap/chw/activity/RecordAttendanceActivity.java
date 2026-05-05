@@ -312,6 +312,15 @@ public class RecordAttendanceActivity extends AppCompatActivity {
                         entityId
                 );
                 ChimwemweFormUtils.saveRegistration(processedLine, true);
+
+                // Force the bind_type table columns to the values the user actually picked.
+                // The OpenSRP saveRegistration above runs Client merge in edit mode, which
+                // preserves existing non-empty attribute values when the new value is empty —
+                // so toggling a participant from Group/Home Visit to Absent ('') would silently
+                // be discarded. upsertLine writes the columns directly to bypass that.
+                SessionAttendanceParticipantDao.upsertLine(
+                        groupId, sessionNumber, date, pid,
+                        row.caregiverAttendance, row.childAttendance);
             }
         } catch (Exception e) {
             timber.log.Timber.e(e, "saveFormEvent failed for session attendance");
