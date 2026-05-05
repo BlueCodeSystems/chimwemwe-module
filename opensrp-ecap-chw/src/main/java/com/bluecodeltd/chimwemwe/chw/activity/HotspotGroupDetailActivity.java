@@ -51,7 +51,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Random;
 import androidx.preference.PreferenceManager;
@@ -517,25 +516,12 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
             return;
         }
         Threading.io(() -> {
-            List<ParticipantModel> existing = ParticipantDao.getParticipants(groupIdentifier);
             int nextSn = ParticipantDao.nextSn(groupIdentifier);
-
-            // Deduplicate caregivers by full name for the picker list
-            LinkedHashMap<String, ParticipantModel> uniqueCaregivers = new LinkedHashMap<>();
-            for (ParticipantModel p : existing) {
-                String name = p.getCaregiverFullName().trim();
-                if (!name.isEmpty() && !uniqueCaregivers.containsKey(name)) {
-                    uniqueCaregivers.put(name, p);
-                }
-            }
-
-            Threading.main(() ->
-                    showOvcEnrollmentDialog(
-                            new ArrayList<>(uniqueCaregivers.values()), nextSn));
+            Threading.main(() -> showOvcEnrollmentDialog(nextSn));
         });
     }
 
-    private void showOvcEnrollmentDialog(List<ParticipantModel> uniqueCaregivers, int nextSn) {
+    private void showOvcEnrollmentDialog(int nextSn) {
         new AlertDialog.Builder(this)
                 .setTitle("Add Participant")
                 .setMessage("Is the child enrolled in the OVC Comprehensive program?")
@@ -545,50 +531,10 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
                     intent.putExtra(ChimwemweSearchActivity.EXTRA_SELECTION_MODE, true);
                     startActivityForResult(intent, REQUEST_CODE_OVC_SEARCH);
                 })
-                .setNegativeButton("No", (d, w) -> {
-                    if (uniqueCaregivers.isEmpty()) {
-                        launchParticipantForm(null, nextSn);
-                    } else {
-                        showCaregiverChoiceDialog(uniqueCaregivers, nextSn);
-                    }
-                })
+                .setNegativeButton("No", (d, w) -> launchParticipantForm(null, nextSn))
                 .show();
     }
 
-    private void showCaregiverChoiceDialog(List<ParticipantModel> uniqueCaregivers, int nextSn) {
-        new AlertDialog.Builder(this)
-                .setTitle("Add Participant")
-                .setMessage("Is this a new caregiver or does the caregiver already attend this group?")
-                .setPositiveButton("New Caregiver", (d, w) -> launchParticipantForm(null, nextSn))
-                .setNegativeButton("Copy Existing", (d, w) ->
-                        showCaregiverPickerDialog(uniqueCaregivers, nextSn))
-                .show();
-    }
-
-    private void showCaregiverPickerDialog(List<ParticipantModel> caregivers, int nextSn) {
-        String[] names = new String[caregivers.size()];
-        for (int i = 0; i < caregivers.size(); i++) {
-            ParticipantModel p = caregivers.get(i);
-            String name = p.getCaregiverFullName();
-            String id   = p.getCaregiverId();
-            names[i] = name + (id != null && !id.isEmpty() ? "  (" + id + ")" : "");
-        }
-
-        new AlertDialog.Builder(this)
-                .setTitle("Select Caregiver")
-                .setItems(names, (d, which) -> {
-                    ParticipantModel source = caregivers.get(which);
-                    // Build a template: caregiver fields copied, child fields blank, id = -1 (new insert)
-                    ParticipantModel template = new ParticipantModel();
-                    template.setId(-1L);
-                    template.setCaregiverFirstName(source.getCaregiverFirstName());
-                    template.setCaregiverSurname(source.getCaregiverSurname());
-                    template.setCaregiverId(source.getCaregiverId());
-                    launchParticipantForm(template, nextSn);
-                })
-                .setNegativeButton("Cancel", null)
-                .show();
-    }
 
     /**
      * Launch chimwemwe_participant_register.json.
@@ -634,22 +580,25 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
 
     private String normalizeDob(String dob) {
         if (dob == null || dob.isEmpty()) return "";
-        // Strip time component if present (e.g. "2020-04-20T00:00:00")
-        String datePart = dob.contains("T") ? dob.substring(0, dob.indexOf('T')) : dob.trim();
+        // Strip time component: "2020-04-20T00:00:00" or "2020-04-20 00:00:00"
+        String datePart = dob.trim();
+        if (datePart.contains("T")) datePart = datePart.substring(0, datePart.indexOf('T'));
+        else if (datePart.contains(" ")) datePart = datePart.substring(0, datePart.indexOf(' '));
+        datePart = datePart.trim();
+
         String[] inputFormats = {
                 "yyyy-MM-dd", "dd-MM-yyyy", "dd/MM/yyyy", "MM/dd/yyyy",
-                "yyyy/MM/dd", "dd.MM.yyyy", "yyyy.MM.dd"
+                "yyyy/MM/dd", "dd.MM.yyyy", "yyyy.MM.dd",
+                "yyyy-MM-dd'Z'", "d-M-yyyy", "d/M/yyyy"
         };
-        DateTimeFormatter out =
-                DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        DateTimeFormatter out = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         for (String fmt : inputFormats) {
             try {
-                LocalDate d = LocalDate.parse(
-                        datePart, DateTimeFormatter.ofPattern(fmt));
+                LocalDate d = LocalDate.parse(datePart, DateTimeFormatter.ofPattern(fmt));
                 return d.format(out);
             } catch (Exception ignored) {}
         }
-        return "";
+        return datePart; // unrecognised format — pass through and let the form handle it
     }
 
     @Override
@@ -928,25 +877,27 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
         if (existing != null) {
             setFieldValue(form, "step1", "caregiver_first_name", existing.getCaregiverFirstName());
             setFieldValue(form, "step1", "caregiver_surname", existing.getCaregiverSurname());
-            setFieldValue(form, "step2", "child_first_name", existing.getChildFirstName());
-            setFieldValue(form, "step2", "child_surname", existing.getChildSurname());
-            setFieldValue(form, "step2", "child_dob", existing.getChildDob());
-            setFieldValue(form, "step2", "child_sex", existing.getChildSex());
-            setFieldValue(form, "step2", "is_enrolled_ovc", existing.getIsEnrolledOvc());
-            setFieldValue(form, "step3", "who_referred", existing.getWhoReferred());
-            setFieldValue(form, "step3", "service_referred_for", existing.getServiceReferredFor());
-            setFieldValue(form, "step3", "referral_date", existing.getReferralDate());
-            setFieldValue(form, "step3", "receiving_org", existing.getReceivingOrg());
-            setFieldValue(form, "step3", "job_title", existing.getJobTitle());
-            setFieldValue(form, "step3", "service_date", existing.getServiceDate());
+            setFieldValue(form, "step1", "child_first_name", existing.getChildFirstName());
+            setFieldValue(form, "step1", "child_surname", existing.getChildSurname());
+            setFieldValue(form, "step1", "child_dob", existing.getChildDob());
+            setFieldValue(form, "step1", "child_sex", existing.getChildSex());
+            setFieldValue(form, "step1", "is_enrolled_ovc", existing.getIsEnrolledOvc());
+            setFieldValue(form, "step1", "who_referred", existing.getWhoReferred());
+            setFieldValue(form, "step1", "service_referred_for", existing.getServiceReferredFor());
+            setFieldValue(form, "step1", "referral_date", existing.getReferralDate());
+            setFieldValue(form, "step1", "receiving_org", existing.getReceivingOrg());
+            setFieldValue(form, "step1", "job_title", existing.getJobTitle());
+            setFieldValue(form, "step1", "service_date", existing.getServiceDate());
+        } else {
+            setFieldValue(form, "step1", "is_enrolled_ovc", "No");
         }
 
         if (isEdit) {
-            setFieldValue(form, "step2", "vca_id", existing.getVcaId());
-            setFieldValue(form, "step2", "caregiver_id", existing.getCaregiverId());
+            setFieldValue(form, "step1", "vca_id", existing.getVcaId());
+            setFieldValue(form, "step1", "caregiver_id", existing.getCaregiverId());
         } else {
-            setFieldValue(form, "step2", "vca_id", generateNumericIdentifier());
-            setFieldValue(form, "step2", "caregiver_id", generateNumericIdentifier());
+            setFieldValue(form, "step1", "vca_id", generateNumericIdentifier());
+            setFieldValue(form, "step1", "caregiver_id", generateNumericIdentifier());
         }
 
         setFieldValue(form, "step1", "group_id", groupIdentifier);
@@ -958,10 +909,13 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
     private void populateOvcParticipantForm(JSONObject form, ChimwemweIndexModel ovcRecord, int sn)
             throws Exception {
         if (form == null || ovcRecord == null) return;
+        String rawDob = ovcRecord.getBirthdate();
+        String normalizedDob = normalizeDob(rawDob);
+        Timber.d("OVC DOB — raw: [%s]  normalized: [%s]", rawDob, normalizedDob);
         setFieldValue(form, "step1", "group_id", groupIdentifier);
         setFieldValue(form, "step1", "child_first_name", ovcRecord.getFirstName());
         setFieldValue(form, "step1", "child_surname", ovcRecord.getLastName());
-        setFieldValue(form, "step1", "child_dob", normalizeDob(ovcRecord.getBirthdate()));
+        setFieldValue(form, "step1", "child_dob", normalizedDob);
         setFieldValue(form, "step1", "child_sex", normalizeGender(ovcRecord.getGender()));
         setFieldValue(form, "step1", "is_enrolled_ovc", "Yes");
         setFieldValue(form, "step1", "vca_id", ovcRecord.getUniqueId());
