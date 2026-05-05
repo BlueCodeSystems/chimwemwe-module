@@ -88,16 +88,17 @@
             android:layout_height="wrap_content"
             android:background="@android:color/transparent"
             android:paddingStart="12dp"
-            android:paddingTop="6dp"
+            android:paddingTop="8dp"
             android:paddingEnd="12dp"
             android:paddingBottom="10dp"
             app:tabGravity="fill"
             app:tabIndicatorColor="@android:color/transparent"
             app:tabIndicatorHeight="0dp"
-            app:tabInlineLabel="true"
+            app:tabMaxWidth="0dp"
             app:tabMode="fixed"
             app:tabRippleColor="#D76024"
-            app:tabSelectedTextColor="#D76024"
+            app:tabSelectedTextColor="@color/chimwemwe_primary"
+            app:tabTextAppearance="@style/CustomFontTextViewStyle.tabIndicator.sub.white"
             app:tabTextColor="#E6FFFFFF" />
 
     </com.google.android.material.appbar.AppBarLayout>

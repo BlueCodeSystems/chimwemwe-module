@@ -113,7 +113,6 @@
             android:paddingTop="8dp"
             android:paddingEnd="12dp"
             android:paddingBottom="10dp"
-            app:tabBackground="@drawable/bg_hotspot_group_tab"
             app:tabMode="fixed"
             app:tabGravity="fill"
             app:tabMaxWidth="0dp"
