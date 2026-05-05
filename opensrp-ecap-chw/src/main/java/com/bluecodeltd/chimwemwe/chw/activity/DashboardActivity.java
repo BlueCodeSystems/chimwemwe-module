@@ -14,6 +14,7 @@ import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -101,11 +102,16 @@ public class DashboardActivity extends AppCompatActivity implements GenerateCSVC
         String password = extras != null ? extras.getString("password") : null;
 
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
-        String facility = sp.getString("facility", "");
+        String district = sp.getString("district", "");
         phone = sp.getString("phone", "");
 
         if (binding.dashFacilityName != null) {
-            binding.dashFacilityName.setText(facility);
+            binding.dashFacilityName.setText(district);
+        }
+        String caseworkerName = sp.getString("caseworker_name", "");
+        TextView dashName = findViewById(R.id.dash_caseworker_name);
+        if (dashName != null) {
+            dashName.setText(caseworkerName.isEmpty() ? "Chimwemwe" : caseworkerName);
         }
 
         // Token refresh on first launch
@@ -120,14 +126,15 @@ public class DashboardActivity extends AppCompatActivity implements GenerateCSVC
         dashboardViewModel = new ViewModelProvider(this).get(DashboardViewModel.class);
         dashboardViewModel.getState().observe(this, state -> {
             if (binding.dashProgressbar != null) {
-                binding.dashProgressbar.setVisibility(android.view.View.GONE);
+                binding.dashProgressbar.setVisibility(View.GONE);
             }
             if (state == null) return;
             try {
+                ((TextView) findViewById(R.id.stat_facilities)).setText(String.valueOf(state.getFacilitiesCount()));
+                ((TextView) findViewById(R.id.stat_hotspots)).setText(String.valueOf(state.getHotspotsCount()));
                 binding.statGroups.setText(String.valueOf(state.getGroupsCount()));
                 binding.statParticipants.setText(String.valueOf(state.getParticipantsCount()));
-                String sessionText = state.getSessionsRecorded() + " / " + state.getMaxSessions();
-                binding.statSessions.setText(sessionText);
+                binding.statSessions.setText(state.getSessionsRecorded() + " / " + state.getMaxSessions());
                 binding.statCompleted.setText(String.valueOf(state.getCompletedCount()));
                 if (state.getLastUpdated() != null) {
                     binding.lastUpdated.setText(dtf.format(state.getLastUpdated()));
@@ -143,7 +150,7 @@ public class DashboardActivity extends AppCompatActivity implements GenerateCSVC
 
     private void loadData() {
         if (binding.dashProgressbar != null) {
-            binding.dashProgressbar.setVisibility(android.view.View.VISIBLE);
+            binding.dashProgressbar.setVisibility(View.VISIBLE);
         }
         dashboardViewModel.refresh();
     }
@@ -379,6 +386,12 @@ public class DashboardActivity extends AppCompatActivity implements GenerateCSVC
             }
         }
         return uris;
+    }
+
+    // ── Dimension helper ──────────────────────────────────────────
+
+    private int dpToPx(int dp) {
+        return Math.round(dp * getResources().getDisplayMetrics().density);
     }
 
     // ── Dialog helper ─────────────────────────────────────────────

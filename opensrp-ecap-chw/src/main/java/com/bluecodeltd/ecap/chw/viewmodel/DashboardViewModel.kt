@@ -9,6 +9,7 @@ import com.bluecodeltd.chimwemwe.chw.dao.ParticipantDao
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
+import java.util.LinkedHashMap
 
 data class DashboardState(
     val groupsCount: Int = 0,
@@ -16,7 +17,10 @@ data class DashboardState(
     val sessionsRecorded: Int = 0,
     val maxSessions: Int = 0,
     val completedCount: Int = 0,
-    val lastUpdated: LocalDateTime? = null
+    val lastUpdated: LocalDateTime? = null,
+    val facilityCounts: LinkedHashMap<String, Int> = LinkedHashMap(),
+    val facilitiesCount: Int = 0,
+    val hotspotsCount: Int = 0
 )
 
 class DashboardViewModel : ViewModel() {
@@ -33,6 +37,29 @@ class DashboardViewModel : ViewModel() {
                 val maxSessions = groupsCount * 14
                 val completedCount = try { ParticipantDao.countCompletedParticipants() } catch (_: Exception) { 0 }
 
+                // Compute facility counts (case-insensitive key dedup, preserve first-occurrence casing)
+                val rawCounts = mutableMapOf<String, Int>()   // lowercase key → count
+                val keyToLabel = mutableMapOf<String, String>() // lowercase key → display label
+                for (group in groups) {
+                    val raw = group.getNearestHealthFacility() ?: continue
+                    val trimmed = raw.trim()
+                    if (trimmed.isBlank()) continue
+                    val lower = trimmed.lowercase()
+                    if (!keyToLabel.containsKey(lower)) keyToLabel[lower] = trimmed
+                    rawCounts[lower] = (rawCounts[lower] ?: 0) + 1
+                }
+                val facilityCounts = rawCounts.entries
+                    .sortedByDescending { it.value }
+                    .fold(LinkedHashMap<String, Int>()) { map, entry ->
+                        map[keyToLabel[entry.key]!!] = entry.value
+                        map
+                    }
+
+                val facilitiesCount = facilityCounts.size
+                val hotspotsCount = groups
+                    .mapNotNull { it.hotspotName?.trim()?.lowercase()?.takeIf { s -> s.isNotBlank() } }
+                    .toSet().size
+
                 _state.postValue(
                     DashboardState(
                         groupsCount = groupsCount,
@@ -40,7 +67,10 @@ class DashboardViewModel : ViewModel() {
                         sessionsRecorded = sessionsRecorded,
                         maxSessions = maxSessions,
                         completedCount = completedCount,
-                        lastUpdated = LocalDateTime.now()
+                        lastUpdated = LocalDateTime.now(),
+                        facilityCounts = facilityCounts,
+                        facilitiesCount = facilitiesCount,
+                        hotspotsCount = hotspotsCount
                     )
                 )
             } catch (_: Exception) {
