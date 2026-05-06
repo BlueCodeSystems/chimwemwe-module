@@ -24,9 +24,14 @@ import java.util.List;
 
 public class HotspotGroupListActivity extends AppCompatActivity {
 
+    public static final String EXTRA_FILTER_TYPE  = "filter_type";   // "facility" or "hotspot"
+    public static final String EXTRA_FILTER_VALUE = "filter_value";
+
     private RecyclerView recycler;
     private View emptyState;
     private GroupAdapter adapter;
+    private String filterType;
+    private String filterValue;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +42,12 @@ public class HotspotGroupListActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         toolbar.setNavigationOnClickListener(v -> finish());
+
+        filterType  = getIntent().getStringExtra(EXTRA_FILTER_TYPE);
+        filterValue = getIntent().getStringExtra(EXTRA_FILTER_VALUE);
+        if (filterValue != null && !filterValue.isEmpty() && getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(filterValue);
+        }
 
         recycler = findViewById(R.id.recycler_groups);
         emptyState = findViewById(R.id.empty_state);
@@ -59,10 +70,18 @@ public class HotspotGroupListActivity extends AppCompatActivity {
 
     private void loadGroups() {
         Threading.io(() -> {
-            List<HotspotGroupModel> groups = HotspotGroupDao.getAllGroups();
+            List<HotspotGroupModel> groups;
+            if ("facility".equals(filterType) && filterValue != null && !filterValue.isEmpty()) {
+                groups = HotspotGroupDao.getGroupsByFacility(filterValue);
+            } else if ("hotspot".equals(filterType) && filterValue != null && !filterValue.isEmpty()) {
+                groups = HotspotGroupDao.getGroupsByHotspot(filterValue);
+            } else {
+                groups = HotspotGroupDao.getAllGroups();
+            }
+            final List<HotspotGroupModel> finalGroups = groups;
             Threading.main(() -> {
-                adapter.setData(groups);
-                boolean empty = groups == null || groups.isEmpty();
+                adapter.setData(finalGroups);
+                boolean empty = finalGroups == null || finalGroups.isEmpty();
                 emptyState.setVisibility(empty ? View.VISIBLE : View.GONE);
                 recycler.setVisibility(empty ? View.GONE : View.VISIBLE);
             });

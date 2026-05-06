@@ -265,6 +265,49 @@ public class ParticipantDao extends AbstractDao {
         return (res != null && !res.isEmpty()) ? res.get(0) : 0;
     }
 
+    /** All participants across all groups, with sessions_done. */
+    public static List<ParticipantModel> getAllParticipantsWithSessions() {
+        String sql = "SELECT p.id, p.participant_id, p.group_id, p.sn, p.caregiver_first_name, p.caregiver_surname," +
+                "  p.child_first_name, p.child_surname, p.child_dob, p.child_sex," +
+                "  p.is_enrolled_ovc, p.caregiver_id, p.vca_id," +
+                "  p.who_referred, p.service_referred_for, p.referral_date," +
+                "  p.receiving_org, p.job_title, p.service_date," +
+                sessionsDoneSelect() +
+                " FROM " + TABLE + " p WHERE (p.delete_status IS NULL OR p.delete_status <> '1')" +
+                " ORDER BY p.caregiver_surname ASC, p.caregiver_first_name ASC";
+        return AbstractDao.readData(sql, cursor -> {
+            ParticipantModel m = mapParticipant(cursor);
+            int done = cursor.getInt(19);
+            m.setSessionsCompleted(done);
+            m.setCompletedProgram(done >= 14);
+            return m;
+        });
+    }
+
+    /** Participants who have attended all 14 sessions. */
+    public static List<ParticipantModel> getGraduatesWithSessions() {
+        String inner = "SELECT p.id, p.participant_id, p.group_id, p.sn, p.caregiver_first_name, p.caregiver_surname," +
+                "  p.child_first_name, p.child_surname, p.child_dob, p.child_sex," +
+                "  p.is_enrolled_ovc, p.caregiver_id, p.vca_id," +
+                "  p.who_referred, p.service_referred_for, p.referral_date," +
+                "  p.receiving_org, p.job_title, p.service_date," +
+                sessionsDoneSelect() +
+                " FROM " + TABLE + " p WHERE (p.delete_status IS NULL OR p.delete_status <> '1')";
+        String sql = "SELECT * FROM (" + inner + ") WHERE sessions_done >= 14" +
+                " ORDER BY caregiver_surname ASC, caregiver_first_name ASC";
+        try {
+            return AbstractDao.readData(sql, cursor -> {
+                ParticipantModel m = mapParticipant(cursor);
+                int done = cursor.getInt(19);
+                m.setSessionsCompleted(done);
+                m.setCompletedProgram(true);
+                return m;
+            });
+        } catch (Exception e) {
+            return new java.util.ArrayList<>();
+        }
+    }
+
     public static int countCompletedParticipants() {
         try {
             String sql = "SELECT COUNT(*) FROM " + TABLE + " p WHERE (" +

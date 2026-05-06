@@ -103,11 +103,16 @@
             android:name=".activity.HotspotGroupListActivity"
             android:exported="false"
             android:label="Chimwemwe Groups"
-            android:theme="@style/ChwTheme.NoActionBar" />
+            android:theme="@style/ChwTheme.Material" />
         <activity
             android:name=".activity.HotspotGroupDetailActivity"
             android:exported="false"
             android:label="Group Details"
+            android:theme="@style/ChwTheme.Material" />
+        <activity
+            android:name=".activity.ChimwemweSummaryListActivity"
+            android:exported="false"
+            android:label="Summary"
             android:theme="@style/ChwTheme.Material" />
         <activity
             android:name=".activity.AddParticipantActivity"
