@@ -369,6 +369,26 @@ public class HotspotGroupDao extends AbstractDao {
         return AbstractDao.readData(sql, cursor -> new String[]{cursor.getString(0), cursor.getString(1)});
     }
 
+    /**
+     * Returns rows of [hotspot_name, group_names_csv, count] for the hotspot summary screen.
+     * group_names_csv is a comma-separated list of all group names under each hotspot.
+     */
+    public static List<String[]> getHotspotsWithGroupNames() {
+        String sql = "SELECT hotspot_name," +
+                " GROUP_CONCAT(group_name, ', ') AS group_names," +
+                " COUNT(*) AS cnt" +
+                " FROM " + TABLE +
+                " WHERE (delete_status IS NULL OR delete_status <> '1')" +
+                " AND hotspot_name IS NOT NULL AND TRIM(hotspot_name) != ''" +
+                " GROUP BY TRIM(LOWER(hotspot_name))" +
+                " ORDER BY cnt DESC, hotspot_name ASC";
+        return AbstractDao.readData(sql, cursor -> new String[]{
+                cursor.getString(0),
+                cursor.getString(1),
+                cursor.getString(2)
+        });
+    }
+
     /** Returns rows of [hotspot_name, count] for distinct hotspots within a specific facility. */
     public static List<String[]> getDistinctHotspotsByFacility(String facility) {
         String f = facility.trim().replace("'", "''");

@@ -19,27 +19,20 @@
         android:gravity="center_vertical"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
-        android:paddingTop="12dp"
-        android:paddingBottom="12dp"
+        android:paddingTop="14dp"
+        android:paddingBottom="14dp"
         android:background="?attr/selectableItemBackground"
         android:clickable="true"
         android:focusable="true">
 
-        <!-- Avatar circle -->
-        <FrameLayout
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="@drawable/bg_avatar_circle"
-            android:layout_marginEnd="12dp">
-            <ImageView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:layout_gravity="center"
-                android:src="@drawable/ic_children"
-                app:tint="#FFFFFF" />
-        </FrameLayout>
+        <!-- Left accent bar -->
+        <View
+            android:layout_width="4dp"
+            android:layout_height="match_parent"
+            android:background="@color/chimwemwe_primary"
+            android:layout_marginEnd="12dp" />
 
-        <!-- Text content -->
+        <!-- Hotspot name + group names -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -47,7 +40,7 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/tv_caregiver"
+                android:id="@+id/tv_hotspot_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textSize="14sp"
@@ -57,42 +50,33 @@
                 android:ellipsize="end" />
 
             <TextView
-                android:id="@+id/tv_child"
+                android:id="@+id/tv_group_names"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
+                android:layout_marginTop="4dp"
                 android:textSize="12sp"
                 android:textColor="@color/chimwemwe_text_secondary"
-                android:maxLines="1"
+                android:maxLines="2"
                 android:ellipsize="end" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="4dp">
-
-                <TextView
-                    android:id="@+id/tv_group"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:textSize="11sp"
-                    android:textColor="@color/chimwemwe_text_secondary"
-                    android:maxLines="1"
-                    android:ellipsize="end" />
-
-                <TextView
-                    android:id="@+id/tv_sessions"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="11sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/chimwemwe_primary" />
-
-            </LinearLayout>
-
         </LinearLayout>
+
+        <!-- Group count badge -->
+        <TextView
+            android:id="@+id/tv_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:textColor="@color/chimwemwe_primary" />
+
+        <ImageView
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_marginStart="6dp"
+            android:src="@drawable/ic_navigate_next_black_24dp"
+            app:tint="@color/chimwemwe_text_secondary" />
 
     </LinearLayout>
 
