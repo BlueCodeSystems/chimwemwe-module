@@ -284,11 +284,102 @@ public class HotspotGroupDao extends AbstractDao {
         }
     }
 
+    /** Groups filtered by nearest_health_facility (case-insensitive). */
+    public static List<HotspotGroupModel> getGroupsByFacility(String facility) {
+        String f = facility.trim().replace("'", "''");
+        String sql = "SELECT g.id, g.group_id, g.hotspot_name, g.group_name, g.created_date," +
+                " g.province, g.district," +
+                " g.location_of_session, g.location_gps, g.nearest_health_facility," +
+                " g.facilitator_name_1, g.facilitator_name_2," +
+                " g.session_1_date,  g.session_2_date,  g.session_3_date,  g.session_4_date," +
+                " g.session_5_date,  g.session_6_date,  g.session_7_date,  g.session_8_date," +
+                " g.session_9_date,  g.session_10_date, g.session_11_date, g.session_12_date," +
+                " g.session_13_date, g.session_14_date," +
+                " (SELECT COUNT(*) FROM ec_chimwemwe_participant p WHERE p.group_id=g.group_id AND (p.delete_status IS NULL OR p.delete_status <> '1')) AS p_count," +
+                " (SELECT COUNT(DISTINCT session_number) FROM ec_chimwemwe_session_attendance sa WHERE sa.group_id=g.group_id) AS s_count" +
+                " FROM " + TABLE + " g WHERE (g.delete_status IS NULL OR g.delete_status <> '1')" +
+                " AND TRIM(LOWER(g.nearest_health_facility)) = LOWER('" + f + "')" +
+                " ORDER BY g.id DESC";
+        try {
+            return AbstractDao.readData(sql, cursor -> {
+                HotspotGroupModel m = mapFull(cursor);
+                m.setParticipantCount(cursor.getInt(26));
+                m.setSessionsRecorded(cursor.getInt(27));
+                return m;
+            });
+        } catch (Exception e) {
+            return new java.util.ArrayList<>();
+        }
+    }
+
+    /** Groups filtered by hotspot_name (case-insensitive). */
+    public static List<HotspotGroupModel> getGroupsByHotspot(String hotspot) {
+        String h = hotspot.trim().replace("'", "''");
+        String sql = "SELECT g.id, g.group_id, g.hotspot_name, g.group_name, g.created_date," +
+                " g.province, g.district," +
+                " g.location_of_session, g.location_gps, g.nearest_health_facility," +
+                " g.facilitator_name_1, g.facilitator_name_2," +
+                " g.session_1_date,  g.session_2_date,  g.session_3_date,  g.session_4_date," +
+                " g.session_5_date,  g.session_6_date,  g.session_7_date,  g.session_8_date," +
+                " g.session_9_date,  g.session_10_date, g.session_11_date, g.session_12_date," +
+                " g.session_13_date, g.session_14_date," +
+                " (SELECT COUNT(*) FROM ec_chimwemwe_participant p WHERE p.group_id=g.group_id AND (p.delete_status IS NULL OR p.delete_status <> '1')) AS p_count," +
+                " (SELECT COUNT(DISTINCT session_number) FROM ec_chimwemwe_session_attendance sa WHERE sa.group_id=g.group_id) AS s_count" +
+                " FROM " + TABLE + " g WHERE (g.delete_status IS NULL OR g.delete_status <> '1')" +
+                " AND TRIM(LOWER(g.hotspot_name)) = LOWER('" + h + "')" +
+                " ORDER BY g.id DESC";
+        try {
+            return AbstractDao.readData(sql, cursor -> {
+                HotspotGroupModel m = mapFull(cursor);
+                m.setParticipantCount(cursor.getInt(26));
+                m.setSessionsRecorded(cursor.getInt(27));
+                return m;
+            });
+        } catch (Exception e) {
+            return new java.util.ArrayList<>();
+        }
+    }
+
     public static int countGroups() {
         List<Integer> counts = AbstractDao.readData(
                 "SELECT COUNT(*) FROM " + TABLE + " WHERE (delete_status IS NULL OR delete_status <> '1')",
                 cursor -> cursor.getInt(0));
         return (counts != null && !counts.isEmpty()) ? counts.get(0) : 0;
+    }
+
+    /** Returns rows of [name, count] for distinct non-empty nearest_health_facility values. */
+    public static List<String[]> getDistinctFacilitiesWithCount() {
+        String sql = "SELECT nearest_health_facility, COUNT(*) AS cnt" +
+                " FROM " + TABLE +
+                " WHERE (delete_status IS NULL OR delete_status <> '1')" +
+                " AND nearest_health_facility IS NOT NULL AND TRIM(nearest_health_facility) != ''" +
+                " GROUP BY TRIM(LOWER(nearest_health_facility))" +
+                " ORDER BY cnt DESC, nearest_health_facility ASC";
+        return AbstractDao.readData(sql, cursor -> new String[]{cursor.getString(0), cursor.getString(1)});
+    }
+
+    /** Returns rows of [name, count] for distinct non-empty hotspot_name values. */
+    public static List<String[]> getDistinctHotspotsWithCount() {
+        String sql = "SELECT hotspot_name, COUNT(*) AS cnt" +
+                " FROM " + TABLE +
+                " WHERE (delete_status IS NULL OR delete_status <> '1')" +
+                " AND hotspot_name IS NOT NULL AND TRIM(hotspot_name) != ''" +
+                " GROUP BY TRIM(LOWER(hotspot_name))" +
+                " ORDER BY cnt DESC, hotspot_name ASC";
+        return AbstractDao.readData(sql, cursor -> new String[]{cursor.getString(0), cursor.getString(1)});
+    }
+
+    /** Returns rows of [hotspot_name, count] for distinct hotspots within a specific facility. */
+    public static List<String[]> getDistinctHotspotsByFacility(String facility) {
+        String f = facility.trim().replace("'", "''");
+        String sql = "SELECT hotspot_name, COUNT(*) AS cnt" +
+                " FROM " + TABLE +
+                " WHERE (delete_status IS NULL OR delete_status <> '1')" +
+                " AND TRIM(LOWER(nearest_health_facility)) = LOWER('" + f + "')" +
+                " AND hotspot_name IS NOT NULL AND TRIM(hotspot_name) != ''" +
+                " GROUP BY TRIM(LOWER(hotspot_name))" +
+                " ORDER BY cnt DESC, hotspot_name ASC";
+        return AbstractDao.readData(sql, cursor -> new String[]{cursor.getString(0), cursor.getString(1)});
     }
 
     /** Soft-delete group + related Chimwemwe records using delete_status='1'. */

@@ -35,6 +35,7 @@ import com.bluecodeltd.chimwemwe.chw.application.ChwApplication;
 import com.bluecodeltd.chimwemwe.chw.contract.GenerateCSVContract;
 import com.bluecodeltd.chimwemwe.chw.presenter.GenerateCSVPresenter;
 import com.bluecodeltd.chimwemwe.chw.util.CsvFormImportService;
+import com.bluecodeltd.chimwemwe.chw.activity.ChimwemweSummaryListActivity;
 import com.bluecodeltd.chimwemwe.chw.util.Threading;
 import com.bluecodeltd.chimwemwe.chw.util.UpdateManager;
 import com.bluecodeltd.chimwemwe.chw.viewmodel.DashboardViewModel;
@@ -95,6 +96,30 @@ public class DashboardActivity extends AppCompatActivity implements GenerateCSVC
             binding.registerRowGroups.setOnClickListener(v ->
                     startActivity(new Intent(this, ChimwemweRegisterActivity.class)));
         }
+
+        // Overview stat rows — tap to view the full list
+        findViewById(R.id.row_facilities).setOnClickListener(v -> {
+            Intent i = new Intent(this, ChimwemweSummaryListActivity.class);
+            i.putExtra(ChimwemweSummaryListActivity.EXTRA_TYPE, ChimwemweSummaryListActivity.TYPE_FACILITIES);
+            startActivity(i);
+        });
+        findViewById(R.id.row_hotspots).setOnClickListener(v -> {
+            Intent i = new Intent(this, ChimwemweSummaryListActivity.class);
+            i.putExtra(ChimwemweSummaryListActivity.EXTRA_TYPE, ChimwemweSummaryListActivity.TYPE_HOTSPOTS);
+            startActivity(i);
+        });
+        findViewById(R.id.row_groups).setOnClickListener(v ->
+                startActivity(new Intent(this, HotspotGroupListActivity.class)));
+        findViewById(R.id.row_participants).setOnClickListener(v -> {
+            Intent i = new Intent(this, ChimwemweSummaryListActivity.class);
+            i.putExtra(ChimwemweSummaryListActivity.EXTRA_TYPE, ChimwemweSummaryListActivity.TYPE_PARTICIPANTS);
+            startActivity(i);
+        });
+        findViewById(R.id.row_graduates).setOnClickListener(v -> {
+            Intent i = new Intent(this, ChimwemweSummaryListActivity.class);
+            i.putExtra(ChimwemweSummaryListActivity.EXTRA_TYPE, ChimwemweSummaryListActivity.TYPE_GRADUATES);
+            startActivity(i);
+        });
 
         // Shared prefs
         Bundle extras = getIntent().getExtras();
