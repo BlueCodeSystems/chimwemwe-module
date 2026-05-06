@@ -2,6 +2,7 @@ package com.bluecodeltd.chimwemwe.chw.activity;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -103,6 +104,8 @@ public class ChimwemweSearchActivity extends AppCompatActivity {
 
     /** District from Keycloak attributes (stored in SharedPreferences by DashboardActivity). */
     private String district = "";
+    /** Lowercased/trimmed district for comparisons. */
+    private String districtNormalized = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -135,7 +138,9 @@ public class ChimwemweSearchActivity extends AppCompatActivity {
 
         // District is stored by DashboardActivity after Keycloak /userinfo call
         district = PreferenceManager.getDefaultSharedPreferences(this)
-                .getString("district", "").toLowerCase().trim();
+                .getString("district", "")
+                .trim();
+        districtNormalized = district.toLowerCase();
 
         // Re-filter the cached list whenever the chip selection changes
         filterChipGroup.setOnCheckedStateChangeListener((group, checkedIds) -> applyFilters());
@@ -168,6 +173,18 @@ public class ChimwemweSearchActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == android.R.id.home) { finish(); return true; }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Refresh district in case DashboardActivity updated SharedPrefs after login.
+        String latest = PreferenceManager.getDefaultSharedPreferences(this).getString("district", "");
+        latest = latest == null ? "" : latest.trim();
+        if (!latest.equals(district)) {
+            district = latest;
+            districtNormalized = district.toLowerCase();
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -348,7 +365,7 @@ public class ChimwemweSearchActivity extends AppCompatActivity {
         for (String[] pair : new String[][]{{ENDPOINT_CHILD, "vca"}, {ENDPOINT_HOUSEHOLD, "household"}}) {
             final String endpoint = pair[0];
             final String type     = pair[1];
-            String url = DATA_BASE_URL + endpoint + district;
+            String url = DATA_BASE_URL + endpoint + Uri.encode(district);
 
             StringRequest request = new StringRequest(
                     Request.Method.GET,
@@ -493,7 +510,14 @@ public class ChimwemweSearchActivity extends AppCompatActivity {
             if (!TextUtils.isEmpty(cgFull)) m.setCaregiverName(cgFull);
 
             m.setPhone(firstNonEmpty(obj, "phone", "phone_number", "phoneNumber", "mobile"));
-            m.setDistrict(firstNonEmpty(obj, "district", "district_name"));
+            String recordDistrict = firstNonEmpty(obj, "district", "district_name");
+            // Defensive: if server returns out-of-district records, drop them client-side too.
+            if (!TextUtils.isEmpty(recordDistrict)
+                    && !TextUtils.isEmpty(districtNormalized)
+                    && !recordDistrict.trim().toLowerCase().equals(districtNormalized)) {
+                return null;
+            }
+            m.setDistrict(recordDistrict);
             m.setFacility(firstNonEmpty(obj, "facility", "health_facility", "clinic"));
             m.setProvince(firstNonEmpty(obj, "province"));
             m.setCaseStatus(firstNonEmpty(obj, "case_status", "status", "caseStatus"));
