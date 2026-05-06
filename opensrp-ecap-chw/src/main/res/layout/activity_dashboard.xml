@@ -236,6 +236,7 @@
 
                     <!-- Row 1: Facilities -->
                     <LinearLayout
+                        android:id="@+id/row_facilities"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
@@ -243,7 +244,10 @@
                         android:paddingStart="16dp"
                         android:paddingEnd="16dp"
                         android:paddingTop="16dp"
-                        android:paddingBottom="16dp">
+                        android:paddingBottom="16dp"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true">
 
                         <FrameLayout
                             android:layout_width="42dp"
@@ -297,6 +301,7 @@
 
                     <!-- Row 2: Hotspots -->
                     <LinearLayout
+                        android:id="@+id/row_hotspots"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
@@ -304,7 +309,10 @@
                         android:paddingStart="16dp"
                         android:paddingEnd="16dp"
                         android:paddingTop="16dp"
-                        android:paddingBottom="16dp">
+                        android:paddingBottom="16dp"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true">
 
                         <FrameLayout
                             android:layout_width="42dp"
@@ -358,6 +366,7 @@
 
                     <!-- Row 3: Groups Enrolled -->
                     <LinearLayout
+                        android:id="@+id/row_groups"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
@@ -365,7 +374,10 @@
                         android:paddingStart="16dp"
                         android:paddingEnd="16dp"
                         android:paddingTop="16dp"
-                        android:paddingBottom="16dp">
+                        android:paddingBottom="16dp"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true">
 
                         <FrameLayout
                             android:layout_width="42dp"
@@ -419,6 +431,7 @@
 
                     <!-- Row 4: Total Participants -->
                     <LinearLayout
+                        android:id="@+id/row_participants"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
@@ -426,7 +439,10 @@
                         android:paddingStart="16dp"
                         android:paddingEnd="16dp"
                         android:paddingTop="16dp"
-                        android:paddingBottom="16dp">
+                        android:paddingBottom="16dp"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true">
 
                         <FrameLayout
                             android:layout_width="42dp"
@@ -541,6 +557,7 @@
 
                     <!-- Row 6: Programme Graduates -->
                     <LinearLayout
+                        android:id="@+id/row_graduates"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
@@ -548,7 +565,10 @@
                         android:paddingStart="16dp"
                         android:paddingEnd="16dp"
                         android:paddingTop="16dp"
-                        android:paddingBottom="16dp">
+                        android:paddingBottom="16dp"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true">
 
                         <FrameLayout
                             android:layout_width="42dp"
