@@ -1,8 +1,8 @@
-package com.bluecodeltd.ecap.chw.adapter;
+package com.bluecodeltd.chimwemwe.chw.adapter;
 
-import static com.bluecodeltd.ecap.chw.util.IndexClientsUtils.getAllSharedPreferences;
-import static com.bluecodeltd.ecap.chw.util.IndexClientsUtils.getFormTag;
-import static com.bluecodeltd.ecap.chw.util.JsonFormUtils.tagSyncMetadata;
+import static com.bluecodeltd.chimwemwe.chw.util.IndexClientsUtils.getAllSharedPreferences;
+import static com.bluecodeltd.chimwemwe.chw.util.IndexClientsUtils.getFormTag;
+import static com.bluecodeltd.chimwemwe.chw.util.JsonFormUtils.tagSyncMetadata;
 import static org.smartregister.chw.fp.util.FpUtil.getClientProcessorForJava;
 
 import android.app.Activity;
@@ -16,11 +16,11 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bluecodeltd.ecap.chw.R;
-import com.bluecodeltd.ecap.chw.application.ChwApplication;
-import com.bluecodeltd.ecap.chw.domain.ChildIndexEventClient;
-import com.bluecodeltd.ecap.chw.model.MotherAncModel;
-import com.bluecodeltd.ecap.chw.util.Constants;
+import com.bluecodeltd.chimwemwe.chw.R;
+import com.bluecodeltd.chimwemwe.chw.application.ChwApplication;
+import com.bluecodeltd.chimwemwe.chw.domain.ChildIndexEventClient;
+import com.bluecodeltd.chimwemwe.chw.model.MotherAncModel;
+import com.bluecodeltd.chimwemwe.chw.util.Constants;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vijay.jsonwizard.constants.JsonFormConstants;
 

@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.domain;
+package com.bluecodeltd.chimwemwe.chw.domain;
 
 import java.util.List;
 

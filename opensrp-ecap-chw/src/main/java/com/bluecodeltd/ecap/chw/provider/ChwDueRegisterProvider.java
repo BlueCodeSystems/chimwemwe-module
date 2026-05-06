@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.provider;
+package com.bluecodeltd.chimwemwe.chw.provider;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -6,10 +6,10 @@ import android.util.TypedValue;
 import android.view.View;
 
 import org.apache.commons.lang3.StringUtils;
-import com.bluecodeltd.ecap.chw.R;
+import com.bluecodeltd.chimwemwe.chw.R;
 import org.smartregister.chw.core.utils.ChildDBConstants;
 import org.smartregister.chw.core.utils.CoreConstants;
-import com.bluecodeltd.ecap.chw.util.Utils;
+import com.bluecodeltd.chimwemwe.chw.util.Utils;
 import org.smartregister.commonregistry.CommonPersonObjectClient;
 import org.smartregister.commonregistry.CommonRepository;
 import org.smartregister.family.fragment.BaseFamilyProfileMemberFragment;
@@ -25,7 +25,7 @@ import java.util.Set;
 
 import timber.log.Timber;
 
-import static com.bluecodeltd.ecap.chw.util.Utils.getClientName;
+import static com.bluecodeltd.chimwemwe.chw.util.Utils.getClientName;
 
 public class ChwDueRegisterProvider extends FamilyDueRegisterProvider {
 

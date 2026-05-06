@@ -1,6 +1,6 @@
-package com.bluecodeltd.ecap.chw.interactor;
+package com.bluecodeltd.chimwemwe.chw.interactor;
 
-import com.bluecodeltd.ecap.chw.contract.AllClientsMemberContract;
+import com.bluecodeltd.chimwemwe.chw.contract.AllClientsMemberContract;
 import org.smartregister.chw.core.utils.CoreConstants;
 import org.smartregister.family.contract.FamilyOtherMemberContract;
 import org.smartregister.family.contract.FamilyProfileContract;

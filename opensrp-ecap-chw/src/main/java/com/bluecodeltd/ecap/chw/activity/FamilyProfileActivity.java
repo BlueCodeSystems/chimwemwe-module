@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.activity;
+package com.bluecodeltd.chimwemwe.chw.activity;
 
 import android.app.Activity;
 import android.content.Context;
@@ -15,15 +15,15 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.viewpager.widget.ViewPager;
-import com.bluecodeltd.ecap.chw.application.ChwApplication;
-import com.bluecodeltd.ecap.chw.fragment.FamilyProfileActivityFragment;
-import com.bluecodeltd.ecap.chw.fragment.FamilyProfileDueFragment;
-import com.bluecodeltd.ecap.chw.fragment.FamilyProfileMemberFragment;
-import com.bluecodeltd.ecap.chw.presenter.FamilyProfilePresenter;
+import com.bluecodeltd.chimwemwe.chw.application.ChwApplication;
+import com.bluecodeltd.chimwemwe.chw.fragment.FamilyProfileActivityFragment;
+import com.bluecodeltd.chimwemwe.chw.fragment.FamilyProfileDueFragment;
+import com.bluecodeltd.chimwemwe.chw.fragment.FamilyProfileMemberFragment;
+import com.bluecodeltd.chimwemwe.chw.presenter.FamilyProfilePresenter;
 
 import org.joda.time.DateTime;
 import org.joda.time.Days;
-import com.bluecodeltd.ecap.chw.R;
+import com.bluecodeltd.chimwemwe.chw.R;
 import org.smartregister.chw.anc.activity.BaseAncMemberProfileActivity;
 import org.smartregister.chw.anc.domain.MemberObject;
 import org.smartregister.chw.core.activity.CoreAboveFiveChildProfileActivity;
@@ -32,10 +32,10 @@ import org.smartregister.chw.core.activity.CoreFamilyProfileActivity;
 import org.smartregister.chw.core.activity.CoreFamilyProfileMenuActivity;
 import org.smartregister.chw.core.activity.CoreFamilyRemoveMemberActivity;
 import org.smartregister.chw.core.utils.CoreConstants;
-import com.bluecodeltd.ecap.chw.dao.ChwChildDao;
+import com.bluecodeltd.chimwemwe.chw.dao.ChwChildDao;
 import org.smartregister.chw.fp.dao.FpDao;
 
-import com.bluecodeltd.ecap.chw.model.FamilyProfileModel;
+import com.bluecodeltd.chimwemwe.chw.model.FamilyProfileModel;
 import timber.log.Timber;
 
 import org.smartregister.chw.pnc.activity.BasePncMemberProfileActivity;

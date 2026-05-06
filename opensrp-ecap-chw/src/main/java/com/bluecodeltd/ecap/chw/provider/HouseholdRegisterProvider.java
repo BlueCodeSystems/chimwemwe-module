@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.provider;
+package com.bluecodeltd.chimwemwe.chw.provider;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -8,11 +8,11 @@ import android.view.ViewGroup;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bluecodeltd.ecap.chw.R;
-import com.bluecodeltd.ecap.chw.dao.HouseholdDao;
-import com.bluecodeltd.ecap.chw.dao.IndexPersonDao;
-import com.bluecodeltd.ecap.chw.util.Threading;
-import com.bluecodeltd.ecap.chw.view_holder.HouseholdRegisterViewHolder;
+import com.bluecodeltd.chimwemwe.chw.R;
+import com.bluecodeltd.chimwemwe.chw.dao.HouseholdDao;
+import com.bluecodeltd.chimwemwe.chw.dao.IndexPersonDao;
+import com.bluecodeltd.chimwemwe.chw.util.Threading;
+import com.bluecodeltd.chimwemwe.chw.view_holder.HouseholdRegisterViewHolder;
 
 import org.smartregister.chw.core.holders.FooterViewHolder;
 import org.smartregister.commonregistry.CommonPersonObjectClient;

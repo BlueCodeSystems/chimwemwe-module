@@ -1,8 +1,8 @@
-package com.bluecodeltd.ecap.chw.presenter;
+package com.bluecodeltd.chimwemwe.chw.presenter;
 
-import com.bluecodeltd.ecap.chw.contract.IndexRegisterFragmentContract;
-import com.bluecodeltd.ecap.chw.contract.MotherIndexFragmentContract;
-import com.bluecodeltd.ecap.chw.util.Constants;
+import com.bluecodeltd.chimwemwe.chw.contract.IndexRegisterFragmentContract;
+import com.bluecodeltd.chimwemwe.chw.contract.MotherIndexFragmentContract;
+import com.bluecodeltd.chimwemwe.chw.util.Constants;
 
 public class MotherIndexFragmentPresenter implements MotherIndexFragmentContract.Presenter{
 

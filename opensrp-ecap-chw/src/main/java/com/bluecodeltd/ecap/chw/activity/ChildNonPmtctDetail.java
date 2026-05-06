@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.activity;
+package com.bluecodeltd.chimwemwe.chw.activity;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -19,19 +19,19 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.viewpager2.widget.ViewPager2;
 
-import com.bluecodeltd.ecap.chw.R;
-import com.bluecodeltd.ecap.chw.adapter.ViewPager2Adapter;
-import com.bluecodeltd.ecap.chw.application.ChwApplication;
-import com.bluecodeltd.ecap.chw.dao.ChildLongitudinalFollowUpDao;
-import com.bluecodeltd.ecap.chw.dao.ChildPostnatalCareDao;
-import com.bluecodeltd.ecap.chw.dao.IndexPersonDao;
-import com.bluecodeltd.ecap.chw.dao.EcMotherIndexDao;
-import com.bluecodeltd.ecap.chw.domain.ChildIndexEventClient;
-import com.bluecodeltd.ecap.chw.fragment.ChildFinalOutcomeFragment;
-import com.bluecodeltd.ecap.chw.fragment.ChildLongitudinalFragment;
-import com.bluecodeltd.ecap.chw.fragment.ChildPostnatalFragment;
-import com.bluecodeltd.ecap.chw.model.Child;
-import com.bluecodeltd.ecap.chw.util.Constants;
+import com.bluecodeltd.chimwemwe.chw.R;
+import com.bluecodeltd.chimwemwe.chw.adapter.ViewPager2Adapter;
+import com.bluecodeltd.chimwemwe.chw.application.ChwApplication;
+import com.bluecodeltd.chimwemwe.chw.dao.ChildLongitudinalFollowUpDao;
+import com.bluecodeltd.chimwemwe.chw.dao.ChildPostnatalCareDao;
+import com.bluecodeltd.chimwemwe.chw.dao.IndexPersonDao;
+import com.bluecodeltd.chimwemwe.chw.dao.EcMotherIndexDao;
+import com.bluecodeltd.chimwemwe.chw.domain.ChildIndexEventClient;
+import com.bluecodeltd.chimwemwe.chw.fragment.ChildFinalOutcomeFragment;
+import com.bluecodeltd.chimwemwe.chw.fragment.ChildLongitudinalFragment;
+import com.bluecodeltd.chimwemwe.chw.fragment.ChildPostnatalFragment;
+import com.bluecodeltd.chimwemwe.chw.model.Child;
+import com.bluecodeltd.chimwemwe.chw.util.Constants;
 import com.vijay.jsonwizard.constants.JsonFormConstants;
 
 import org.json.JSONArray;
@@ -66,7 +66,7 @@ import com.google.android.material.tabs.TabLayoutMediator;
 import timber.log.Timber;
 import es.dmoral.toasty.Toasty;
 
-import static com.bluecodeltd.ecap.chw.util.JsonFormUtils.tagSyncMetadata;
+import static com.bluecodeltd.chimwemwe.chw.util.JsonFormUtils.tagSyncMetadata;
 import static com.vijay.jsonwizard.utils.FormUtils.fields;
 import static com.vijay.jsonwizard.utils.FormUtils.getFieldJSONObject;
 

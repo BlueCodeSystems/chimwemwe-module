@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.fragment;
+package com.bluecodeltd.chimwemwe.chw.fragment;
 
 
 import android.content.Intent;
@@ -10,9 +10,9 @@ import android.view.ViewGroup;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 
-import com.bluecodeltd.ecap.chw.R;
-import com.bluecodeltd.ecap.chw.activity.GuideBooksCounselingActivity;
-import com.bluecodeltd.ecap.chw.activity.GuideBooksTutorialsActivity;
+import com.bluecodeltd.chimwemwe.chw.R;
+import com.bluecodeltd.chimwemwe.chw.activity.GuideBooksCounselingActivity;
+import com.bluecodeltd.chimwemwe.chw.activity.GuideBooksTutorialsActivity;
 
 
 public class GuideBooksFragment extends Fragment {

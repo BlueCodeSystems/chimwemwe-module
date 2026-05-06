@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.adapter;
+package com.bluecodeltd.chimwemwe.chw.adapter;
 
 import android.content.Context;
 import android.view.ViewGroup;

@@ -1,10 +1,10 @@
-package com.bluecodeltd.ecap.chw.model;
+package com.bluecodeltd.chimwemwe.chw.model;
 
 import org.smartregister.chw.anc.util.DBConstants;
-import com.bluecodeltd.ecap.chw.application.ChwApplication;
+import com.bluecodeltd.chimwemwe.chw.application.ChwApplication;
 import org.smartregister.chw.core.model.CoreFamilyRemoveMemberModel;
 import org.smartregister.chw.core.utils.CoreConstants;
-import com.bluecodeltd.ecap.chw.util.Utils;
+import com.bluecodeltd.chimwemwe.chw.util.Utils;
 import org.smartregister.commonregistry.CommonPersonObjectClient;
 
 import java.util.Date;

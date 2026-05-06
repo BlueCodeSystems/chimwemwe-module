@@ -1,9 +1,9 @@
-package com.bluecodeltd.ecap.chw.fragment;
+package com.bluecodeltd.chimwemwe.chw.fragment;
 
 import android.os.Bundle;
 
 import org.smartregister.chw.core.fragment.CoreFamilyOtherMemberProfileFragment;
-import com.bluecodeltd.ecap.chw.presenter.FamilyOtherMemberProfileFragmentPresenter;
+import com.bluecodeltd.chimwemwe.chw.presenter.FamilyOtherMemberProfileFragmentPresenter;
 import org.smartregister.family.fragment.BaseFamilyOtherMemberProfileFragment;
 import org.smartregister.family.model.BaseFamilyOtherMemberProfileFragmentModel;
 import org.smartregister.view.contract.BaseRegisterFragmentContract;

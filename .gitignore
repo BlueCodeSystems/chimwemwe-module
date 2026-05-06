@@ -1,5 +1,7 @@
 *.iml
 .gradle
+.gradle-user-home/
+.gradle-project-cache/
 /captures
 /local.properties
 *.ipr
@@ -31,5 +33,6 @@ opensrp-chw/lmh/
 hs_err_pid*
 opensrp-ecap-chw/ecap/*
 Task
+.claude/settings.local.json
 .claude/
 .gradle-user-home/

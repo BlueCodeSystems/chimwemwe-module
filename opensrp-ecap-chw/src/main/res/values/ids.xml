@@ -11,4 +11,10 @@
     <item name="action_scan_qr" type="id" />
     <item name="action_job_aids" type="id" />
     <item name="details_container" type="id" />
+    <item name="referralReasonTextView" type="id" />
+    <item name="referralTypeRecyclerView" type="id" />
+    <item name="app_bar" type="id" />
+    <item name="detail_toolbar" type="id" />
+    <item name="close" type="id" />
+    <item name="textview_title" type="id" />
 </resources>

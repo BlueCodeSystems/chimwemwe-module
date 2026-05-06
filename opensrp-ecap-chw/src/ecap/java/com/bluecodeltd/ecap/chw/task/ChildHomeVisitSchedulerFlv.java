@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.task;
+package com.bluecodeltd.chimwemwe.chw.task;
 
 public class ChildHomeVisitSchedulerFlv extends DefaultChildHomeVisitSchedulerFlv {
 }

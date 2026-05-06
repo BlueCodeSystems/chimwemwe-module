@@ -1,14 +1,14 @@
-package com.bluecodeltd.ecap.chw.activity;
+package com.bluecodeltd.chimwemwe.chw.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
-import com.bluecodeltd.ecap.chw.fragment.FamilyProfileChangeHead;
-import com.bluecodeltd.ecap.chw.fragment.FamilyProfileChangePrimaryCG;
+import com.bluecodeltd.chimwemwe.chw.fragment.FamilyProfileChangeHead;
+import com.bluecodeltd.chimwemwe.chw.fragment.FamilyProfileChangePrimaryCG;
 
-import com.bluecodeltd.ecap.chw.R;
+import com.bluecodeltd.chimwemwe.chw.R;
 import org.smartregister.chw.core.activity.CoreFamilyProfileMenuActivity;
 import org.smartregister.chw.core.utils.CoreConstants;
 import org.smartregister.family.util.Constants;

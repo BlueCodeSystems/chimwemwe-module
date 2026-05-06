@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.util;
+package com.bluecodeltd.chimwemwe.chw.util;
 
 public interface RepositoryUtilsFlv {
 

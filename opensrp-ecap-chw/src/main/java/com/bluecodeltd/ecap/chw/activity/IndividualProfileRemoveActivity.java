@@ -1,11 +1,11 @@
-package com.bluecodeltd.ecap.chw.activity;
+package com.bluecodeltd.chimwemwe.chw.activity;
 
 import android.app.Activity;
 import android.content.Intent;
 
 import org.smartregister.chw.core.activity.CoreIndividualProfileRemoveActivity;
-import com.bluecodeltd.ecap.chw.fragment.IndividualProfileRemoveFragment;
-import com.bluecodeltd.ecap.chw.util.Constants;
+import com.bluecodeltd.chimwemwe.chw.fragment.IndividualProfileRemoveFragment;
+import com.bluecodeltd.chimwemwe.chw.util.Constants;
 import org.smartregister.commonregistry.CommonPersonObjectClient;
 
 public class IndividualProfileRemoveActivity extends CoreIndividualProfileRemoveActivity {

@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.provider;
+package com.bluecodeltd.chimwemwe.chw.provider;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -7,13 +7,13 @@ import android.view.View;
 import android.widget.Button;
 
 import org.jeasy.rules.api.Rules;
-import com.bluecodeltd.ecap.chw.R;
-import com.bluecodeltd.ecap.chw.application.ChwApplication;
+import com.bluecodeltd.chimwemwe.chw.R;
+import com.bluecodeltd.chimwemwe.chw.application.ChwApplication;
 import org.smartregister.chw.core.model.ChildVisit;
 import org.smartregister.chw.core.provider.CoreRegisterProvider;
 import org.smartregister.chw.core.utils.ChildDBConstants;
 import org.smartregister.chw.core.utils.CoreConstants;
-import com.bluecodeltd.ecap.chw.dao.FamilyDao;
+import com.bluecodeltd.chimwemwe.chw.dao.FamilyDao;
 import org.smartregister.chw.fp.dao.FpDao;
 import org.smartregister.chw.malaria.dao.MalariaDao;
 import org.smartregister.commonregistry.CommonPersonObjectClient;
@@ -93,7 +93,7 @@ public class FamilyRegisterProvider extends CoreRegisterProvider {
     @Override
     public String getChildAgeLimitFilter(){
         if(ChwApplication.getApplicationFlavor().showIconsForChildrenUnderTwoAndGirlsAgeNineToEleven()){
-          return com.bluecodeltd.ecap.chw.util.ChildDBConstants.childDueVaccinesFilterForChildrenBelowTwoAndGirlsAgeNineToEleven();
+          return com.bluecodeltd.chimwemwe.chw.util.ChildDBConstants.childDueVaccinesFilterForChildrenBelowTwoAndGirlsAgeNineToEleven();
         }
         else {
             return ChildDBConstants.childAgeLimitFilter();

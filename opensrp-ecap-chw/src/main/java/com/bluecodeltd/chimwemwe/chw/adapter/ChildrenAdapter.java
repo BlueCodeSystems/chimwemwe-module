@@ -1,0 +1,641 @@
+package com.bluecodeltd.chimwemwe.chw.adapter;
+
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Color;
+import android.text.TextUtils;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.bluecodeltd.chimwemwe.chw.R;
+import com.bluecodeltd.chimwemwe.chw.activity.IndexDetailsActivity;
+import com.bluecodeltd.chimwemwe.chw.activity.ChildNonPmtctDetail;
+import com.bluecodeltd.chimwemwe.chw.dao.GradDao;
+import com.bluecodeltd.chimwemwe.chw.dao.IndexPersonDao;
+import com.bluecodeltd.chimwemwe.chw.dao.MuacDao;
+import com.bluecodeltd.chimwemwe.chw.dao.VCAServiceReportDao;
+import com.bluecodeltd.chimwemwe.chw.dao.VcaVisitationDao;
+import com.bluecodeltd.chimwemwe.chw.model.Child;
+import com.bluecodeltd.chimwemwe.chw.model.GradModel;
+import com.bluecodeltd.chimwemwe.chw.model.MuacModel;
+import com.bluecodeltd.chimwemwe.chw.model.VCAServiceModel;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rey.material.widget.Button;
+import com.vijay.jsonwizard.constants.JsonFormConstants;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.smartregister.chw.core.utils.CoreJsonFormUtils;
+import org.smartregister.client.utils.domain.Form;
+import org.smartregister.family.util.JsonFormUtils;
+import org.smartregister.util.FormUtils;
+
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import com.bluecodeltd.chimwemwe.chw.util.Threading;
+
+import es.dmoral.toasty.Toasty;
+
+public class ChildrenAdapter extends RecyclerView.Adapter<ChildrenAdapter.ViewHolder>{
+
+    Context context;
+
+    List<Child> children;
+    String txtMuac;
+    GradModel gradModel;
+    MuacModel muacModel, cModel;
+    ObjectMapper oMapper, gradMapper;
+    String dob;
+    String caseStatus;
+    // Use centralized Threading
+
+
+    public ChildrenAdapter(List<Child> children, Context context, String txtMuac){
+
+        super();
+
+        this.children = children;
+        this.txtMuac = txtMuac;
+        this.context = context;
+    }
+
+    @Override
+    public ChildrenAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.single_child, parent, false);
+
+        ChildrenAdapter.ViewHolder viewHolder = new ChildrenAdapter.ViewHolder(v);
+
+        return viewHolder;
+    }
+
+    @Override
+    public void onBindViewHolder(ChildrenAdapter.ViewHolder holder, final int position) {
+
+        final Child listChild = (position >= 0 && position < children.size()) ? children.get(position) : null;
+        if (listChild == null) {
+            Log.w("ChildrenAdapter", "Null child entry at adapter position " + position);
+            resetViewHolder(holder);
+            return;
+        }
+
+        final String childUniqueID = listChild.getUnique_id();
+        if (TextUtils.isEmpty(childUniqueID)) {
+            Log.w("ChildrenAdapter", "Missing unique_id for child at position " + position);
+            resetViewHolder(holder);
+            return;
+        }
+
+        final Child initialChild = listChild;
+        final String rowTag = childUniqueID;
+        holder.itemView.setTag(R.id.tag_row_id, rowTag);
+        holder.itemView.setTag(initialChild);
+
+        try{
+
+            if(initialChild.getFirst_name() == null || initialChild.getLast_name() == null){
+                holder.fullName.setText("");
+            } else {
+                holder.fullName.setText(initialChild.getFirst_name() + " " + initialChild.getLast_name());
+            }
+        } catch (NullPointerException e) {
+            holder.fullName.setText("");
+        }
+
+
+        try{
+
+            dob = checkAndConvertDateFormat(initialChild.getAdolescent_birthdate());
+
+        } catch (NullPointerException e) {
+
+            dob = "01-01-2005";
+        }
+
+
+
+        String memberAge = getAgeWithoutText(dob);
+        final String dobLocal = dob;
+
+
+        try{
+            if(initialChild.getIndex_check_box() != null && (initialChild.getIndex_check_box().equals("1") || initialChild.getIndex_check_box().equals("yes"))){
+                holder.is_index.setVisibility(View.VISIBLE);
+            } else {
+                holder.is_index.setVisibility(View.GONE);
+            }
+        } catch(NullPointerException e) {
+            holder.is_index.setVisibility(View.GONE);
+        }
+
+
+
+
+        // Graduation button and form are no longer used
+
+//        newCaregiverModel caregiverModel = newCaregiverDao.getNewCaregiverById(child.getHousehold_id());
+
+        holder.colorView.setBackgroundColor(Color.parseColor("#696969"));
+
+//        if(caregiverModel.getHousehold_case_status() != null && caregiverModel.getHousehold_case_status().equals("0")){
+//
+//            holder.colorView.setBackgroundColor(Color.parseColor("#ff0000"));
+//        }
+
+        // Populate age and gender line
+        String ageText = (dob != null && !"Invalid birthdate format".equals(dob)) ? getAge(dob) : null;
+        String gender = initialChild.getGender();
+        StringBuilder ageGenderLine = new StringBuilder();
+        if (ageText != null && !ageText.isEmpty()) {
+            ageGenderLine.append(ageText);
+        }
+        if (gender != null && !gender.isEmpty()) {
+            if (ageGenderLine.length() > 0) ageGenderLine.append(" \u2022 ");
+            ageGenderLine.append(gender.substring(0, 1).toUpperCase(Locale.ENGLISH))
+                    .append(gender.length() > 1 ? gender.substring(1).toLowerCase(Locale.ENGLISH) : "");
+        }
+        holder.ageGender.setText(ageGenderLine.toString());
+
+        // Caregiver / mother name
+        String caregiver = initialChild.getCaregiver_name();
+        if (caregiver != null && !caregiver.isEmpty()) {
+            holder.caregiverName.setText("Mother: " + caregiver);
+        } else {
+            holder.caregiverName.setText("");
+        }
+
+        holder.muacButton.setVisibility(View.GONE);
+        holder.muacButton.setTag(null);
+
+        Threading.ioBestEffort(() -> {
+            Child fetchedChild = null;
+            try { fetchedChild = IndexPersonDao.getChildByBaseId(childUniqueID); } catch (Exception ignored) {}
+            Child effectiveChild = fetchedChild != null ? fetchedChild : initialChild;
+
+            String resolvedCaseStatus = null;
+            try {
+                String baseEntityId = effectiveChild != null ? effectiveChild.getBaseEntity_id() : null;
+                if (!TextUtils.isEmpty(baseEntityId)) {
+                    resolvedCaseStatus = IndexPersonDao.getIndexStatus(baseEntityId);
+                }
+            } catch (Exception ignored) {}
+
+            boolean eligibleForMuac = resolvedCaseStatus != null &&
+                    (resolvedCaseStatus.equals("0") || resolvedCaseStatus.equals("1")) &&
+                    isAgeBetween6MonthsAnd5Years(dobLocal);
+
+            MuacModel muac = null;
+            if (eligibleForMuac) {
+                try { muac = MuacDao.getMuac(childUniqueID); } catch (Exception ignored) {}
+            }
+
+            Child finalChild = effectiveChild;
+            String finalCaseStatus = resolvedCaseStatus;
+            boolean finalEligibleForMuac = eligibleForMuac;
+            boolean hasMuac = muac != null;
+
+            Threading.main(() -> {
+                Object currentTag = holder.itemView.getTag(R.id.tag_row_id);
+                if (!(currentTag instanceof String) || !rowTag.equals(currentTag)) return;
+
+                if (finalChild != null) {
+                    holder.itemView.setTag(finalChild);
+
+                    try{
+                        if(finalChild.getFirst_name() == null || finalChild.getLast_name() == null){
+                            holder.fullName.setText("");
+                        } else {
+                            holder.fullName.setText(finalChild.getFirst_name() + " " + finalChild.getLast_name());
+                        }
+                    } catch (Exception ignored) {}
+
+                    try{
+                        String resolvedDob = checkAndConvertDateFormat(finalChild.getAdolescent_birthdate());
+                        String resolvedAgeText = (resolvedDob != null && !"Invalid birthdate format".equals(resolvedDob)) ? getAge(resolvedDob) : null;
+                        String resolvedGender = finalChild.getGender();
+                        StringBuilder resolvedAgeGender = new StringBuilder();
+                        if (resolvedAgeText != null && !resolvedAgeText.isEmpty()) resolvedAgeGender.append(resolvedAgeText);
+                        if (resolvedGender != null && !resolvedGender.isEmpty()) {
+                            if (resolvedAgeGender.length() > 0) resolvedAgeGender.append(" \u2022 ");
+                            resolvedAgeGender.append(resolvedGender.substring(0, 1).toUpperCase(Locale.ENGLISH))
+                                    .append(resolvedGender.length() > 1 ? resolvedGender.substring(1).toLowerCase(Locale.ENGLISH) : "");
+                        }
+                        holder.ageGender.setText(resolvedAgeGender.toString());
+                    } catch (Exception ignored) {}
+
+                    try{
+                        String cg = finalChild.getCaregiver_name();
+                        holder.caregiverName.setText(!TextUtils.isEmpty(cg) ? ("Mother: " + cg) : "");
+                    } catch (Exception ignored) {}
+
+                    try{
+                        if(finalChild.getIndex_check_box() != null && (finalChild.getIndex_check_box().equals("1") || finalChild.getIndex_check_box().equals("yes"))){
+                            holder.is_index.setVisibility(View.VISIBLE);
+                        } else {
+                            holder.is_index.setVisibility(View.GONE);
+                        }
+                    } catch (Exception ignored) {
+                        holder.is_index.setVisibility(View.GONE);
+                    }
+                }
+
+                if(finalCaseStatus != null && finalCaseStatus.equals("1")){
+                    holder.colorView.setBackgroundColor(Color.parseColor("#05b714"));
+                } else if (finalCaseStatus != null && finalCaseStatus.equals("0")) {
+                    holder.colorView.setBackgroundColor(Color.parseColor("#ff0000"));
+                } else if(finalCaseStatus != null && finalCaseStatus.equals("2")){
+                    holder.colorView.setBackgroundColor(Color.parseColor("#ffa500"));
+                } else{
+                    holder.colorView.setBackgroundColor(Color.parseColor("#696969"));
+                }
+
+                if (finalEligibleForMuac) {
+                    holder.muacButton.setTag(childUniqueID);
+                    holder.muacButton.setCompoundDrawablesWithIntrinsicBounds(
+                            hasMuac ? R.drawable.ic_info_outline_blue : R.drawable.ic_warning_orange,
+                            0, 0, 0
+                    );
+                } else {
+                    holder.muacButton.setVisibility(View.GONE);
+                    holder.muacButton.setTag(null);
+                }
+
+                try {
+                    Child current = holder.itemView.getTag() instanceof Child ? (Child) holder.itemView.getTag() : null;
+                    String caregiverStatusLocal = current != null ? current.getCaregiver_hiv_status() : null;
+                    boolean caregiverPositive = caregiverStatusLocal != null &&
+                            (caregiverStatusLocal.equalsIgnoreCase("positive") || caregiverStatusLocal.equalsIgnoreCase("HIV+"));
+                    holder.openProfileBtn.setVisibility(caregiverPositive ? View.GONE : View.VISIBLE);
+                } catch (Exception ignored) {}
+            });
+        });
+
+
+        holder.muacButton.setOnClickListener(v -> {
+
+            Child child = holder.itemView.getTag() instanceof Child ? (Child) holder.itemView.getTag() : initialChild;
+            FormUtils formUtils = null;
+            try {
+                formUtils = new FormUtils(context);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            JSONObject formToBeOpened;
+
+            formToBeOpened = formUtils.getFormJson("muac");
+            try {
+                String titleAge = holder.ageGender.getText() != null ? holder.ageGender.getText().toString() : "";
+                formToBeOpened.getJSONObject("step1").put("title",
+                        child.getFirst_name() + " " + child.getLast_name() + " : " + titleAge);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            try {
+                formToBeOpened.getJSONObject("step1").getJSONArray("fields").getJSONObject(0).put("value", child.getUnique_id());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+
+            if (v.getId() == R.id.muac) {
+                try {
+                    String titleAge = holder.ageGender.getText() != null ? holder.ageGender.getText().toString() : "";
+                    openFormUsingFormUtils(context,"muac", child, titleAge);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        } );
+
+        holder.openProfileBtn.setOnClickListener(v -> {
+            try {
+                Child child = holder.itemView.getTag() instanceof Child ? (Child) holder.itemView.getTag() : initialChild;
+                String baseEntityId = child != null ? child.getBase_entity_id() : null;
+                String householdId = child != null ? child.getHousehold_id() : null;
+                String uniqueId = child != null ? child.getUnique_id() : null;
+                ChildNonPmtctDetail.start((Activity) context, baseEntityId, householdId, uniqueId);
+            } catch (Exception e) {
+                Toasty.error(context, "Unable to open child profile", Toast.LENGTH_LONG, true).show();
+            }
+        });
+        // Show child profile button only when caregiver HIV status is negative/unknown
+        String caregiverStatus = initialChild.getCaregiver_hiv_status();
+        boolean caregiverPositive = caregiverStatus != null &&
+                (caregiverStatus.equalsIgnoreCase("positive") || caregiverStatus.equalsIgnoreCase("HIV+"));
+        holder.openProfileBtn.setVisibility(caregiverPositive ? View.GONE : View.VISIBLE);
+
+        holder.lview.setOnClickListener(v -> {
+
+            if (v.getId() == R.id.register_columns) {
+                Child child = holder.itemView.getTag() instanceof Child ? (Child) holder.itemView.getTag() : initialChild;
+                String subpop3 = child != null ? child.getSubpop3() : null;
+                if (subpop3 == null) {
+                    Intent editIntent = new Intent(context, IndexDetailsActivity.class);
+                    editIntent.putExtra("Child", child != null ? child.getUnique_id() : childUniqueID);
+                    editIntent.putExtra("open_vca_edit_if_incomplete", true);
+                    context.startActivity(editIntent);
+                    return;
+                }
+
+                if((Integer.parseInt(memberAge) < 24) ){
+
+                    Intent intent = new Intent(context, IndexDetailsActivity.class);
+                    intent.putExtra("fromIndex", "321");
+                    intent.putExtra("Child",  child != null ? child.getUnique_id() : childUniqueID);
+                    context.startActivity(intent);
+
+                } /*else if (!isEligibleForEnrollment(child)){
+                    Toasty.warning(context, "Member is not eligible on the Program", Toast.LENGTH_LONG, true).show();
+
+                }*/else {
+                    Toasty.warning(context, "Member is not enrolled on the Program", Toast.LENGTH_LONG, true).show();
+                }
+            }
+        });
+
+    }
+
+
+
+    private void resetViewHolder(ViewHolder holder) {
+        holder.fullName.setText("");
+        holder.ageGender.setText("Not Set");
+        holder.muacButton.setVisibility(View.GONE);
+        holder.muacButton.setTag(null);
+        holder.is_index.setVisibility(View.GONE);
+        holder.colorView.setBackgroundColor(Color.parseColor("#696969"));
+    }
+
+    private String getAge(String birthdate){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        try {
+            LocalDate localDateBirthdate = LocalDate.parse(birthdate, formatter);
+            LocalDate today = LocalDate.now();
+            Period periodBetweenDateOfBirthAndNow = Period.between(localDateBirthdate, today);
+            if(periodBetweenDateOfBirthAndNow.getYears() > 0) {
+                return periodBetweenDateOfBirthAndNow.getYears() +" Years";
+            } else if (periodBetweenDateOfBirthAndNow.getYears() == 0 && periodBetweenDateOfBirthAndNow.getMonths() > 0) {
+                return periodBetweenDateOfBirthAndNow.getMonths() +" Months ";
+            } else if(periodBetweenDateOfBirthAndNow.getYears() == 0 && periodBetweenDateOfBirthAndNow.getMonths() == 0) {
+                return periodBetweenDateOfBirthAndNow.getDays() +" Days ";
+            } else return "Not Set";
+        } catch (DateTimeParseException e) {
+            Log.e("TAG", "Invalid birthdate format: " + e.getMessage());
+            return "Invalid birthdate format";
+        }
+    }
+
+    private String getAgeWithoutText(String birthdate){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        try {
+            LocalDate localDateBirthdate = LocalDate.parse(birthdate, formatter);
+            LocalDate today = LocalDate.now();
+            Period periodBetweenDateOfBirthAndNow = Period.between(localDateBirthdate, today);
+            if(periodBetweenDateOfBirthAndNow.getYears() > 0) {
+                return String.valueOf(periodBetweenDateOfBirthAndNow.getYears());
+            } else if (periodBetweenDateOfBirthAndNow.getYears() == 0 && periodBetweenDateOfBirthAndNow.getMonths() > 0) {
+                return String.valueOf(periodBetweenDateOfBirthAndNow.getMonths());
+            } else if(periodBetweenDateOfBirthAndNow.getYears() == 0 && periodBetweenDateOfBirthAndNow.getMonths() == 0) {
+                return String.valueOf(periodBetweenDateOfBirthAndNow.getDays());
+            } else return "Not Set";
+        } catch (DateTimeParseException e) {
+            Log.e("TAG", "Invalid birthdate format: " + e.getMessage());
+            return "Invalid birthdate format";
+        }
+    }
+
+    private int getAgeForGraduation(String birthdate) throws DateTimeParseException {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        LocalDate localDateBirthdate = LocalDate.parse(birthdate, formatter);
+        LocalDate today = LocalDate.now();
+        Period periodBetweenDateOfBirthAndNow = Period.between(localDateBirthdate, today);
+
+        if (periodBetweenDateOfBirthAndNow.getYears() > 0) {
+            return periodBetweenDateOfBirthAndNow.getYears();
+        } else if (periodBetweenDateOfBirthAndNow.getMonths() > 0) {
+            return periodBetweenDateOfBirthAndNow.getMonths();
+        } else if (periodBetweenDateOfBirthAndNow.getDays() >= 0) {
+            return periodBetweenDateOfBirthAndNow.getDays();
+        } else {
+            return 0;
+        }
+    }
+
+    private static boolean isAgeBetween6MonthsAnd5Years(String birthdate) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        try {
+            LocalDate localDateBirthdate = LocalDate.parse(birthdate, formatter);
+            LocalDate today = LocalDate.now();
+            Period periodBetweenDateOfBirthAndNow = Period.between(localDateBirthdate, today);
+
+            int years = periodBetweenDateOfBirthAndNow.getYears();
+            int months = periodBetweenDateOfBirthAndNow.getMonths();
+            int totalMonths = years * 12 + months;
+
+            return (totalMonths >= 6) && (years < 5 || (years == 5 && months == 6));
+        } catch (DateTimeParseException e) {
+            System.err.println("Invalid birthdate format: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public void openFormUsingFormUtils(Context context, String formName, Child child, String myage) throws JSONException {
+
+        oMapper = new ObjectMapper();
+        FormUtils formUtils = null;
+        try {
+            formUtils = new FormUtils(context);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        JSONObject formToBeOpened;
+
+        formToBeOpened = formUtils.getFormJson(formName);
+        formToBeOpened.getJSONObject("step1").put("title", child.getFirst_name() + " " + child.getLast_name() + " : " + myage + " - " + child.getGender());
+        formToBeOpened.getJSONObject("step1").getJSONArray("fields").getJSONObject(0).put("value", child.getUnique_id());
+
+        switch (formName) {
+
+
+
+            case "muac":
+
+                muacModel = MuacDao.getMuac(child.getUnique_id());
+
+
+                if(muacModel == null){
+
+                    CoreJsonFormUtils.populateJsonForm(formToBeOpened, oMapper.convertValue(child, Map.class));
+
+                } else {
+
+                    formToBeOpened.put("entity_id", this.muacModel.getBase_entity_id());
+                    CoreJsonFormUtils.populateJsonForm(formToBeOpened, oMapper.convertValue(muacModel, Map.class));
+                }
+
+                break;
+
+            case "grad":
+                //Initialize Graduation Button
+                GradModel graduationModel = populateGraduationModel(child.getUnique_id());
+//                VCAServiceModel serviceModel = (VCAServiceModel) VCAServiceReportDao.getRecentServicesByVCAID(child.getUnique_id());
+                Child childModel = new Child();
+                List<VCAServiceModel> serviceModels = VCAServiceReportDao.getRecentServicesByVCAID(child.getUnique_id());
+
+//                if (!serviceModels.isEmpty()) {
+//                    VCAServiceModel serviceModel = serviceModels.get(0);
+//                    if (serviceModel.getDate_last_vl() != null){
+//                        childModel.setDate_last_vl(serviceModel.getDate_last_vl());
+//                   //     graduationModel.setDate_last_vl(serviceModel.getDate_last_vl());
+//                    } else {
+//                        childModel.setDate_last_vl(child.getDate_last_vl());
+//                 //       graduationModel.setDate_last_vl(child.getDate_last_vl());
+//                    }
+//
+//                    if (serviceModel.getVl_last_result() != null){
+//                        childModel.setVl_last_result(serviceModel.getVl_last_result());
+//                        graduationModel.setVl_last_result(serviceModel.getVl_last_result());
+//                    } else {
+//                        childModel.setVl_last_result(child.getVl_last_result());
+//                        graduationModel.setVl_last_result(child.getVl_last_result());
+//                    }
+//
+//                }
+                childModel.setHousehold_id(child.getHousehold_id());
+                childModel.setAdolescent_birthdate(child.getAdolescent_birthdate());
+                childModel.setUnique_id(child.getUnique_id());
+                childModel.setIs_hiv_positive(child.getIs_hiv_positive());
+                childModel.setFacility(child.getFacility());
+                childModel.setArt_number(child.getArt_number());
+
+                if (graduationModel == null) {
+                    CoreJsonFormUtils.populateJsonForm(formToBeOpened, oMapper.convertValue(childModel, Map.class));
+                } else {
+                    formToBeOpened.put("entity_id", graduationModel.getBase_entity_id());
+                    CoreJsonFormUtils.populateJsonForm(formToBeOpened, oMapper.convertValue(graduationModel, Map.class));
+                }
+
+                break;
+        }
+
+        startFormActivity(formToBeOpened);
+
+    }
+
+    public void startFormActivity(JSONObject jsonObject) {
+
+        Intent intent = new Intent(context, org.smartregister.family.util.Utils.metadata().familyFormActivity);
+        Form form = new Form();
+
+        form.setWizard(false);
+        form.setHideSaveLabel(true);
+        form.setNextLabel("");
+
+        intent = new Intent(context, org.smartregister.family.util.Utils.metadata().familyFormActivity);
+
+        intent.putExtra(JsonFormConstants.JSON_FORM_KEY.FORM, form);
+        intent.putExtra(JsonFormConstants.JSON_FORM_KEY.JSON, jsonObject.toString());
+        ((Activity) context).startActivityForResult(intent, JsonFormUtils.REQUEST_CODE_GET_JSON);
+
+    }
+
+    @Override
+    public int getItemCount() {
+
+        return children.size();
+    }
+
+    class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+
+        TextView fullName;
+        TextView ageGender;
+        TextView caregiverName;
+        TextView is_index;
+        View colorView;
+        RelativeLayout lview;
+        Button muacButton;
+        Button openProfileBtn;
+
+        public ViewHolder(View itemView) {
+
+            super(itemView);
+
+            lview = itemView.findViewById(R.id.register_columns);
+            colorView = itemView.findViewById(R.id.mycolor);
+            fullName = itemView.findViewById(R.id.child_name);
+            ageGender = itemView.findViewById(R.id.child_age_gender);
+            caregiverName = itemView.findViewById(R.id.caregiver_name);
+            muacButton = itemView.findViewById(R.id.muac);
+            openProfileBtn = itemView.findViewById(R.id.btn_open_profile);
+            is_index = itemView.findViewById(R.id.index_icon);
+
+        }
+
+        // Click event for all items
+        @Override
+        public void onClick(View v) {
+
+        }
+
+
+
+    }
+
+    // Graduation-related helpers removed – feature no longer used
+    private String checkAndConvertDateFormat(String date){
+        if (date.matches("\\d{2}-\\d{2}-\\d{4}")) {
+            return date;
+        } else {
+            DateTimeFormatter oldFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.ENGLISH);
+            DateTimeFormatter newFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+            try {
+                LocalDate localDate = LocalDate.parse(date, oldFormatter);
+                return localDate.format(newFormatter);
+            } catch (DateTimeParseException e) {
+                Log.e("TAG", "Invalid date format: " + e.getMessage());
+                return "Invalid date format";
+            }
+        }
+    }
+    public GradModel populateGraduationModel(String uniqueId) {
+        GradModel gradModel = GradDao.getGrad(uniqueId);
+
+        if (gradModel == null) {
+            return null;
+        }
+
+        GradModel graduationModel = new GradModel();
+        graduationModel.setUnique_id(gradModel.getUnique_id());
+        graduationModel.setBase_entity_id(gradModel.getBase_entity_id());
+        graduationModel.setHousehold_id(gradModel.getHousehold_id());
+        graduationModel.setAdolescent_birthdate(gradModel.getAdolescent_birthdate());
+        graduationModel.setIs_hiv_positive(gradModel.getIs_hiv_positive());
+        graduationModel.setArt_number(gradModel.getArt_number());
+        graduationModel.setFacility(gradModel.getFacility());
+        graduationModel.setDate_last_vl(VcaVisitationDao.getRecentVisitDate(gradModel.getUnique_id()));
+        graduationModel.setVl_last_result(VcaVisitationDao.getRecentVcaVlResult(gradModel.getUnique_id()));
+        graduationModel.setInfected_community(gradModel.getInfected_community());
+        graduationModel.setInfection_correct(gradModel.getInfection_correct());
+        graduationModel.setProtect_infection(gradModel.getProtect_infection());
+        graduationModel.setPrevention_support(gradModel.getPrevention_support());
+        graduationModel.setPrevention_correct(gradModel.getPrevention_correct());
+        graduationModel.setProtect_correct(gradModel.getProtect_correct());
+        graduationModel.setSign_malnutrition(gradModel.getSign_malnutrition());
+
+        return graduationModel;
+    }
+
+}

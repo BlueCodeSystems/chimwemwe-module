@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.presenter;
+package com.bluecodeltd.chimwemwe.chw.presenter;
 
 import android.content.Context;
 
@@ -7,9 +7,9 @@ import org.smartregister.chw.core.domain.FamilyMember;
 import org.smartregister.chw.core.model.CoreChildRegisterModel;
 import org.smartregister.chw.core.presenter.CoreFamilyProfilePresenter;
 import org.smartregister.chw.core.utils.CoreJsonFormUtils;
-import com.bluecodeltd.ecap.chw.interactor.FamilyChangeContractInteractor;
-import com.bluecodeltd.ecap.chw.interactor.FamilyProfileInteractor;
-import com.bluecodeltd.ecap.chw.model.ChildRegisterModel;
+import com.bluecodeltd.chimwemwe.chw.interactor.FamilyChangeContractInteractor;
+import com.bluecodeltd.chimwemwe.chw.interactor.FamilyProfileInteractor;
+import com.bluecodeltd.chimwemwe.chw.model.ChildRegisterModel;
 import org.smartregister.family.contract.FamilyProfileContract;
 import org.smartregister.location.helper.LocationHelper;
 import org.smartregister.view.LocationPickerView;

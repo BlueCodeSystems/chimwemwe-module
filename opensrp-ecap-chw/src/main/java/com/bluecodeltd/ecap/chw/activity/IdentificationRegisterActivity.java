@@ -1,18 +1,18 @@
-package com.bluecodeltd.ecap.chw.activity;
+package com.bluecodeltd.chimwemwe.chw.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
 
-import com.bluecodeltd.ecap.chw.R;
-import com.bluecodeltd.ecap.chw.contract.IdentificationRegisterContract;
-import com.bluecodeltd.ecap.chw.contract.IndexRegisterContract;
-import com.bluecodeltd.ecap.chw.fragment.IdentificationFragmentRegister;
-import com.bluecodeltd.ecap.chw.fragment.IndexFragmentRegister;
-import com.bluecodeltd.ecap.chw.listener.ChwBottomNavigationListener;
-import com.bluecodeltd.ecap.chw.presenter.IdentificationRegisterPresenter;
-import com.bluecodeltd.ecap.chw.presenter.IndexRegisterPresenter;
-import com.bluecodeltd.ecap.chw.util.Constants;
-import com.bluecodeltd.ecap.chw.util.Utils;
+import com.bluecodeltd.chimwemwe.chw.R;
+import com.bluecodeltd.chimwemwe.chw.contract.IdentificationRegisterContract;
+import com.bluecodeltd.chimwemwe.chw.contract.IndexRegisterContract;
+import com.bluecodeltd.chimwemwe.chw.fragment.IdentificationFragmentRegister;
+import com.bluecodeltd.chimwemwe.chw.fragment.IndexFragmentRegister;
+import com.bluecodeltd.chimwemwe.chw.listener.ChwBottomNavigationListener;
+import com.bluecodeltd.chimwemwe.chw.presenter.IdentificationRegisterPresenter;
+import com.bluecodeltd.chimwemwe.chw.presenter.IndexRegisterPresenter;
+import com.bluecodeltd.chimwemwe.chw.util.Constants;
+import com.bluecodeltd.chimwemwe.chw.util.Utils;
 import com.vijay.jsonwizard.constants.JsonFormConstants;
 
 import org.json.JSONException;

@@ -1,0 +1,55 @@
+package com.bluecodeltd.chimwemwe.chw.model;
+
+import org.apache.commons.lang3.ArrayUtils;
+import org.smartregister.chw.core.model.CoreFamilyProfileMemberModel;
+import org.smartregister.chw.core.utils.ChildDBConstants;
+import org.smartregister.chw.core.utils.CoreConstants;
+import org.smartregister.cursoradapter.SmartRegisterQueryBuilder;
+import org.smartregister.family.util.DBConstants;
+
+public class FamilyProfileMemberModel extends CoreFamilyProfileMemberModel {
+
+    @Override
+    public String countSelect(String tableName, String mainCondition) {
+        SmartRegisterQueryBuilder queryBuilder = new SmartRegisterQueryBuilder();
+        queryBuilder.selectInitiateMainTableCounts(tableName);
+        queryBuilder.customJoin("LEFT JOIN " + CoreConstants.TABLE_NAME.CHILD + " ON  " + tableName + "." + DBConstants.KEY.BASE_ENTITY_ID + " = " + CoreConstants.TABLE_NAME.CHILD + "." + DBConstants.KEY.BASE_ENTITY_ID + " COLLATE NOCASE ");
+        return queryBuilder.mainCondition(mainCondition);
+    }
+
+    @Override
+    public String mainSelect(String tableName, String mainCondition) {
+        SmartRegisterQueryBuilder queryBuilder = new SmartRegisterQueryBuilder();
+        queryBuilder.selectInitiateMainTable(tableName, mainColumns(tableName));
+        queryBuilder.customJoin("LEFT JOIN " + CoreConstants.TABLE_NAME.CHILD + " ON  " + tableName + "." + DBConstants.KEY.BASE_ENTITY_ID + " = " + CoreConstants.TABLE_NAME.CHILD + "." + DBConstants.KEY.BASE_ENTITY_ID + " COLLATE NOCASE ");
+        return queryBuilder.mainCondition(mainCondition);
+    }
+
+    @Override
+    protected String[] mainColumns(String tableName) {
+        String[] columns = super.mainColumns(tableName);
+        String[] newColumns = new String[]{
+                tableName + "." + ChildDBConstants.KEY.ENTITY_TYPE,
+                tableName + "." + CoreConstants.JsonAssets.FAMILY_MEMBER.PHONE_NUMBER
+        };
+
+        return ArrayUtils.addAll(columns, newColumns);
+    }
+
+    private final java.util.Map<String, String> additionalFields = new java.util.HashMap<>();
+
+    public java.util.Map<String, String> getAdditionalFields() {
+        return additionalFields;
+    }
+
+    public String getAdditionalField(String key) {
+        if (key == null) return null;
+        return additionalFields.get(key);
+    }
+
+    public void setAdditionalField(String key, String value) {
+        if (key == null) return;
+        additionalFields.put(key, value);
+    }
+}
+

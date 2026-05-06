@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.dao;
+package com.bluecodeltd.chimwemwe.chw.dao;
 
 import net.sqlcipher.MatrixCursor;
 import net.sqlcipher.database.SQLiteDatabase;

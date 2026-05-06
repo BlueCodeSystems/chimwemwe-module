@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.fragment;
+package com.bluecodeltd.chimwemwe.chw.fragment;
 
 import android.view.View;
 import android.view.ViewGroup;
@@ -66,7 +66,7 @@ public abstract class BaseSafeRegisterFragment extends BaseRegisterFragment {
     protected void ensureRecycler(View root) {
         RecyclerView rv = null;
         try { rv = root.findViewById(org.smartregister.R.id.recycler_view); } catch (Exception ignored) {}
-        if (rv == null) { try { rv = root.findViewById(com.bluecodeltd.ecap.chw.R.id.recycler_view); } catch (Exception ignored) {} }
+        if (rv == null) { try { rv = root.findViewById(com.bluecodeltd.chimwemwe.chw.R.id.recycler_view); } catch (Exception ignored) {} }
         if (rv == null) {
             try {
                 RecyclerView newRv = new RecyclerView(requireContext());
@@ -85,11 +85,11 @@ public abstract class BaseSafeRegisterFragment extends BaseRegisterFragment {
 
     protected void ensureProgress(View root) {
         ProgressBar pb = null;
-        try { pb = root.findViewById(com.bluecodeltd.ecap.chw.R.id.client_list_progress); } catch (Exception ignored) {}
+        try { pb = root.findViewById(com.bluecodeltd.chimwemwe.chw.R.id.client_list_progress); } catch (Exception ignored) {}
         if (pb == null) {
             try {
                 ProgressBar newPb = new ProgressBar(requireContext());
-                newPb.setId(com.bluecodeltd.ecap.chw.R.id.client_list_progress);
+                newPb.setId(com.bluecodeltd.chimwemwe.chw.R.id.client_list_progress);
                 ViewGroup parent = (ViewGroup) root;
                 if (parent instanceof android.widget.RelativeLayout) {
                     android.widget.RelativeLayout.LayoutParams lp = new android.widget.RelativeLayout.LayoutParams(

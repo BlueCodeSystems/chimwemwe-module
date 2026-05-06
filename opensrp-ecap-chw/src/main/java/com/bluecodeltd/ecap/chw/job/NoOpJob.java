@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.job;
+package com.bluecodeltd.chimwemwe.chw.job;
 
 import androidx.annotation.NonNull;
 

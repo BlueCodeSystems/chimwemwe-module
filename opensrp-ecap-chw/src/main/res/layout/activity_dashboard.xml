@@ -72,12 +72,13 @@
                 android:layout_marginStart="14dp">
 
                 <TextView
+                    android:id="@+id/dash_caseworker_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Chimwemwe Programme"
                     android:textColor="#FFFFFF"
                     android:textSize="17sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    tools:text="Jane Phiri" />
 
                 <TextView
                     android:id="@+id/dash_facility_name"
@@ -86,7 +87,7 @@
                     android:layout_marginTop="2dp"
                     android:textColor="#B3FFFFFF"
                     android:textSize="13sp"
-                    tools:text="Chipata Urban Clinic" />
+                    tools:text="Kapirimposhi District" />
 
                 <!-- Badge row -->
                 <LinearLayout
@@ -117,7 +118,7 @@
                         android:paddingTop="3dp"
                         android:paddingBottom="3dp"
                         android:background="@drawable/bg_pill_translucent"
-                        android:text="Children &amp; Adolescents"
+                        android:text="Chimwemwe"
                         android:textColor="#FFFFFF"
                         android:textSize="11sp"
                         android:textStyle="bold" />
@@ -220,7 +221,7 @@
 
             </LinearLayout>
 
-            <!-- Stats card — 4 info rows matching participant profile pattern -->
+            <!-- Stats card — 6 rows: Facility → Hotspot → Group → Participant → Sessions → Graduates -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -233,8 +234,9 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <!-- Row 1: Groups Enrolled -->
+                    <!-- Row 1: Facilities -->
                     <LinearLayout
+                        android:id="@+id/row_facilities"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
@@ -242,7 +244,140 @@
                         android:paddingStart="16dp"
                         android:paddingEnd="16dp"
                         android:paddingTop="16dp"
-                        android:paddingBottom="16dp">
+                        android:paddingBottom="16dp"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                        <FrameLayout
+                            android:layout_width="42dp"
+                            android:layout_height="42dp"
+                            android:background="@drawable/bg_register_icon"
+                            android:backgroundTint="#FCE4EC"
+                            android:layout_marginEnd="14dp">
+                            <ImageView
+                                android:layout_width="22dp"
+                                android:layout_height="22dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/baseline_location_on_24"
+                                app:tint="#C62828" />
+                        </FrameLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Facilities"
+                                android:textSize="14sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/chimwemwe_text_primary" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:text="Nearest health facilities with active groups"
+                                android:textSize="12sp"
+                                android:textColor="@color/chimwemwe_text_secondary" />
+                        </LinearLayout>
+
+                        <TextView
+                            android:id="@+id/stat_facilities"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textColor="#C62828"
+                            android:textSize="30sp"
+                            android:textStyle="bold"
+                            tools:text="3" />
+
+                    </LinearLayout>
+
+                    <View android:layout_width="match_parent" android:layout_height="1dp"
+                        android:layout_marginStart="72dp" android:background="@color/chimwemwe_surface" />
+
+                    <!-- Row 2: Hotspots -->
+                    <LinearLayout
+                        android:id="@+id/row_hotspots"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:paddingTop="16dp"
+                        android:paddingBottom="16dp"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                        <FrameLayout
+                            android:layout_width="42dp"
+                            android:layout_height="42dp"
+                            android:background="@drawable/bg_register_icon"
+                            android:backgroundTint="#FFF8E1"
+                            android:layout_marginEnd="14dp">
+                            <ImageView
+                                android:layout_width="22dp"
+                                android:layout_height="22dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_baseline_event_note_24"
+                                app:tint="#F57F17" />
+                        </FrameLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Hotspots"
+                                android:textSize="14sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/chimwemwe_text_primary" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:text="Distinct hotspot locations"
+                                android:textSize="12sp"
+                                android:textColor="@color/chimwemwe_text_secondary" />
+                        </LinearLayout>
+
+                        <TextView
+                            android:id="@+id/stat_hotspots"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textColor="#F57F17"
+                            android:textSize="30sp"
+                            android:textStyle="bold"
+                            tools:text="5" />
+
+                    </LinearLayout>
+
+                    <View android:layout_width="match_parent" android:layout_height="1dp"
+                        android:layout_marginStart="72dp" android:background="@color/chimwemwe_surface" />
+
+                    <!-- Row 3: Groups Enrolled -->
+                    <LinearLayout
+                        android:id="@+id/row_groups"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:paddingTop="16dp"
+                        android:paddingBottom="16dp"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true">
 
                         <FrameLayout
                             android:layout_width="42dp"
@@ -266,7 +401,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Groups Enrolled"
+                                android:text="Groups"
                                 android:textSize="14sp"
                                 android:textStyle="bold"
                                 android:textColor="@color/chimwemwe_text_primary" />
@@ -294,8 +429,9 @@
                     <View android:layout_width="match_parent" android:layout_height="1dp"
                         android:layout_marginStart="72dp" android:background="@color/chimwemwe_surface" />
 
-                    <!-- Row 2: Total Participants -->
+                    <!-- Row 4: Total Participants -->
                     <LinearLayout
+                        android:id="@+id/row_participants"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
@@ -303,7 +439,10 @@
                         android:paddingStart="16dp"
                         android:paddingEnd="16dp"
                         android:paddingTop="16dp"
-                        android:paddingBottom="16dp">
+                        android:paddingBottom="16dp"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true">
 
                         <FrameLayout
                             android:layout_width="42dp"
@@ -327,7 +466,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Total Participants"
+                                android:text="Participants"
                                 android:textSize="14sp"
                                 android:textStyle="bold"
                                 android:textColor="@color/chimwemwe_text_primary" />
@@ -355,7 +494,7 @@
                     <View android:layout_width="match_parent" android:layout_height="1dp"
                         android:layout_marginStart="72dp" android:background="@color/chimwemwe_surface" />
 
-                    <!-- Row 3: Sessions Recorded -->
+                    <!-- Row 5: Sessions Recorded -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -388,7 +527,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Sessions Recorded"
+                                android:text="Sessions"
                                 android:textSize="14sp"
                                 android:textStyle="bold"
                                 android:textColor="@color/chimwemwe_text_primary" />
@@ -416,8 +555,9 @@
                     <View android:layout_width="match_parent" android:layout_height="1dp"
                         android:layout_marginStart="72dp" android:background="@color/chimwemwe_surface" />
 
-                    <!-- Row 4: Programme Graduates -->
+                    <!-- Row 6: Programme Graduates -->
                     <LinearLayout
+                        android:id="@+id/row_graduates"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
@@ -425,7 +565,10 @@
                         android:paddingStart="16dp"
                         android:paddingEnd="16dp"
                         android:paddingTop="16dp"
-                        android:paddingBottom="16dp">
+                        android:paddingBottom="16dp"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true">
 
                         <FrameLayout
                             android:layout_width="42dp"
@@ -557,6 +700,7 @@
                 </LinearLayout>
 
             </androidx.cardview.widget.CardView>
+
 
         </LinearLayout>
 

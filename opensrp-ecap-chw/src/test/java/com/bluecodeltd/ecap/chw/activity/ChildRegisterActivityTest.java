@@ -1,6 +1,6 @@
-package com.bluecodeltd.ecap.chw.activity;
+package com.bluecodeltd.chimwemwe.chw.activity;
 
-import com.bluecodeltd.ecap.chw.BaseActivityTest;
+import com.bluecodeltd.chimwemwe.chw.BaseActivityTest;
 
 public class ChildRegisterActivityTest extends BaseActivityTest<ChildRegisterActivity> {
     @Override

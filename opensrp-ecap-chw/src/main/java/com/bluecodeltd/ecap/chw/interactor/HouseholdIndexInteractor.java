@@ -1,6 +1,6 @@
-package com.bluecodeltd.ecap.chw.interactor;
+package com.bluecodeltd.chimwemwe.chw.interactor;
 
-import static com.bluecodeltd.ecap.chw.util.IndexClientsUtils.getAllSharedPreferences;
+import static com.bluecodeltd.chimwemwe.chw.util.IndexClientsUtils.getAllSharedPreferences;
 import static org.smartregister.chw.core.utils.CoreJsonFormUtils.getSyncHelper;
 import static org.smartregister.chw.fp.util.FpUtil.getClientProcessorForJava;
 
@@ -10,11 +10,11 @@ import android.content.SharedPreferences;
 import androidx.annotation.NonNull;
 import androidx.preference.PreferenceManager;
 
-import com.bluecodeltd.ecap.chw.application.ChwApplication;
-import com.bluecodeltd.ecap.chw.contract.HouseholdIndexContract;
-import com.bluecodeltd.ecap.chw.contract.IndexRegisterContract;
-import com.bluecodeltd.ecap.chw.model.EventClient;
-import com.bluecodeltd.ecap.chw.model.HouseholdIndexEventClient;
+import com.bluecodeltd.chimwemwe.chw.application.ChwApplication;
+import com.bluecodeltd.chimwemwe.chw.contract.HouseholdIndexContract;
+import com.bluecodeltd.chimwemwe.chw.contract.IndexRegisterContract;
+import com.bluecodeltd.chimwemwe.chw.model.EventClient;
+import com.bluecodeltd.chimwemwe.chw.model.HouseholdIndexEventClient;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
@@ -96,7 +96,7 @@ public class HouseholdIndexInteractor implements HouseholdIndexContract.Interact
     }
 
     @Override
-    public void saveRegistration(final List<com.bluecodeltd.ecap.chw.model.EventClient> eventClientList, final String jsonString,
+    public void saveRegistration(final List<com.bluecodeltd.chimwemwe.chw.model.EventClient> eventClientList, final String jsonString,
                                  final RegisterParams registerParams, final HouseholdIndexContract.InteractorCallBack callBack) {
         Runnable runnable = () -> {
             saveMe(eventClientList, jsonString, registerParams);
@@ -106,7 +106,7 @@ public class HouseholdIndexInteractor implements HouseholdIndexContract.Interact
         appExecutors.diskIO().execute(runnable);
     }
 
-    public void saveMe(@NonNull List<com.bluecodeltd.ecap.chw.model.EventClient> allClientEventList, @NonNull String jsonString,
+    public void saveMe(@NonNull List<com.bluecodeltd.chimwemwe.chw.model.EventClient> allClientEventList, @NonNull String jsonString,
                        @NonNull RegisterParams params) {
         try {
             List<String> currentFormSubmissionIds = new ArrayList<>();

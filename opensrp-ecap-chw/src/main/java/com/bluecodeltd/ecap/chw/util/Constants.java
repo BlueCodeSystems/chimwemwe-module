@@ -1,4 +1,4 @@
-package com.bluecodeltd.ecap.chw.util;
+package com.bluecodeltd.chimwemwe.chw.util;
 
 import org.smartregister.chw.core.utils.CoreConstants;
 import org.smartregister.chw.core.utils.Utils;

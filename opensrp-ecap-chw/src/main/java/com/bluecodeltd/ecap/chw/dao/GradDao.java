@@ -1,6 +1,6 @@
-package com.bluecodeltd.ecap.chw.dao;
+package com.bluecodeltd.chimwemwe.chw.dao;
 
-import com.bluecodeltd.ecap.chw.model.GradModel;
+import com.bluecodeltd.chimwemwe.chw.model.GradModel;
 
 import org.smartregister.dao.AbstractDao;
 
