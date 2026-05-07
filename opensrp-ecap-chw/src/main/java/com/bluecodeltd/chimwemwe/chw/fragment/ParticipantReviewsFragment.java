@@ -1,0 +1,152 @@
+package com.bluecodeltd.chimwemwe.chw.fragment;
+
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.bluecodeltd.chimwemwe.chw.R;
+import com.bluecodeltd.chimwemwe.chw.adapter.ParticipantReviewsAdapter;
+import com.bluecodeltd.chimwemwe.chw.dao.MonthlyReviewDao;
+import com.bluecodeltd.chimwemwe.chw.model.MonthlyReviewModel;
+import com.bluecodeltd.chimwemwe.chw.util.ChimwemweFormUtils;
+import com.bluecodeltd.chimwemwe.chw.util.Threading;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.json.JSONObject;
+import org.smartregister.chw.core.utils.CoreJsonFormUtils;
+import org.smartregister.util.FormUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import timber.log.Timber;
+
+public class ParticipantReviewsFragment extends Fragment implements ParticipantProfileSection {
+
+    private TextView tvEmpty;
+    private RecyclerView recycler;
+    private ParticipantReviewsAdapter adapter;
+
+    private List<MonthlyReviewModel> items = new ArrayList<>();
+
+    public ParticipantReviewsFragment() {}
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_participant_reviews, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        tvEmpty = view.findViewById(R.id.tv_empty);
+        recycler = view.findViewById(R.id.recycler);
+
+        adapter = new ParticipantReviewsAdapter(new ParticipantReviewsAdapter.Listener() {
+            @Override
+            public void onEdit(@NonNull MonthlyReviewModel review) {
+                requestEdit(review);
+            }
+
+            @Override
+            public void onDelete(@NonNull MonthlyReviewModel review) {
+                confirmDelete(review);
+            }
+        });
+
+        recycler.setLayoutManager(new LinearLayoutManager(requireContext()));
+        recycler.addItemDecoration(new DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL));
+        recycler.setAdapter(adapter);
+
+        refreshContent();
+    }
+
+    @Override
+    public void refreshContent() {
+        if (!(getActivity() instanceof com.bluecodeltd.chimwemwe.chw.activity.ChimwemweParticipantProfileActivity)) return;
+        com.bluecodeltd.chimwemwe.chw.activity.ChimwemweParticipantProfileActivity host =
+                (com.bluecodeltd.chimwemwe.chw.activity.ChimwemweParticipantProfileActivity) getActivity();
+        String participantCode = host.getParticipant() != null ? host.getParticipant().getParticipantId() : null;
+        if (participantCode == null || participantCode.trim().isEmpty()) {
+            items = new ArrayList<>();
+            render();
+            host.setReviewsCount(0);
+            return;
+        }
+
+        Threading.io(() -> {
+            List<MonthlyReviewModel> loaded = null;
+            int count = 0;
+            try {
+                loaded = MonthlyReviewDao.getParticipantReviews(participantCode);
+                count = MonthlyReviewDao.countParticipantReviews(participantCode);
+            } catch (Exception e) {
+                Timber.e(e, "Load participant reviews failed");
+            }
+            List<MonthlyReviewModel> finalLoaded = loaded != null ? loaded : new ArrayList<>();
+            int finalCount = count;
+            Threading.main(() -> {
+                items = finalLoaded;
+                render();
+                host.setReviewsCount(finalCount);
+            });
+        });
+    }
+
+    private void render() {
+        if (tvEmpty == null || recycler == null || adapter == null) return;
+        boolean empty = items == null || items.isEmpty();
+        tvEmpty.setVisibility(empty ? View.VISIBLE : View.GONE);
+        recycler.setVisibility(empty ? View.GONE : View.VISIBLE);
+        adapter.setData(items);
+    }
+
+    private void requestEdit(MonthlyReviewModel review) {
+        if (getActivity() instanceof ParticipantFormHost) {
+            ((ParticipantFormHost) getActivity()).launchReviewForm(review);
+        }
+    }
+
+    private void confirmDelete(MonthlyReviewModel review) {
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Delete review?")
+                .setMessage("This will permanently delete this review.")
+                .setNegativeButton("Cancel", null)
+                .setPositiveButton("Delete", (d, w) -> Threading.io(() -> {
+                    try {
+                        review.setDelete_status("1");
+                        FormUtils formUtils = new FormUtils(requireContext());
+                        JSONObject form = formUtils.getFormJson("chimwemwe_monthly_review");
+                        CoreJsonFormUtils.populateJsonForm(form, new ObjectMapper().convertValue(review, Map.class));
+                        ChimwemweFormUtils.ensureFieldValue(form, "delete_status", "1");
+                        form.put("entity_id", review.getBaseEntityId());
+                        ChimwemweFormUtils.saveRegistration(
+                                ChimwemweFormUtils.processRegistration(form, "ec_chimwemwe_monthly_review", null),
+                                true
+                        );
+                    } catch (Exception e) {
+                        Timber.e(e, "Delete review failed");
+                    }
+                    Threading.main(this::refreshContent);
+                }))
+                .show();
+    }
+
+    public interface ParticipantFormHost {
+        void launchReviewForm(@Nullable MonthlyReviewModel review);
+        void reloadParticipant();
+    }
+}

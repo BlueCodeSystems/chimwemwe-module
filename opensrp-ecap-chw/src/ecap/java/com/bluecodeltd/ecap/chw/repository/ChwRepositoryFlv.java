@@ -1422,7 +1422,7 @@ public class ChwRepositoryFlv {
         try { com.bluecodeltd.chimwemwe.chw.dao.MonthlyReviewDao.migrateToV43(db); } catch (Exception e) {
             Timber.e(e, "upgradeToVersion43 MonthlyReviewDao");
         }
-        try { com.bluecodeltd.chimwemwe.chw.dao.ChimwemweReferralDao.migrateToV43(db); } catch (Exception e) {
+        try { com.bluecodeltd.chimwemwe.chw.dao.ChimwemweReferralDao.migrateToV44(db); } catch (Exception e) {
             Timber.e(e, "upgradeToVersion43 ChimwemweReferralDao");
         }
     }

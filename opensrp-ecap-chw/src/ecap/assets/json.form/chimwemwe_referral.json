@@ -88,8 +88,8 @@
         "hint": "Who is being referred for services?",
         "values": ["-- Select --", "Caregiver", "Child", "Both"],
         "v_required": {
-          "value": "false",
-          "err": ""
+          "value": "true",
+          "err": "Please select who is being referred"
         }
       },
       {
@@ -101,8 +101,8 @@
         "hint": "Indicate the service(s) being referred for",
         "edit_type": "name",
         "v_required": {
-          "value": "false",
-          "err": ""
+          "value": "true",
+          "err": "Please indicate the service(s) being referred for"
         }
       },
       {
@@ -115,7 +115,7 @@
         "expanded": false,
         "min_date": "today-3y",
         "max_date": "today+1y",
-        "v_required": { "value": "false", "err": "" }
+        "v_required": { "value": "true", "err": "Please enter the date of referral" }
       },
       {
         "key": "receiving_org",
