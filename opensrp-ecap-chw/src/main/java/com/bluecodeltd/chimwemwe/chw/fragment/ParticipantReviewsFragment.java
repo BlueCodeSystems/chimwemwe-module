@@ -16,8 +16,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bluecodeltd.chimwemwe.chw.R;
 import com.bluecodeltd.chimwemwe.chw.adapter.ParticipantReviewsAdapter;
-import com.bluecodeltd.chimwemwe.chw.dao.MonthlyReviewDao;
-import com.bluecodeltd.chimwemwe.chw.model.MonthlyReviewModel;
+import com.bluecodeltd.chimwemwe.chw.dao.ChimwemweParticipantReviewDao;
+import com.bluecodeltd.chimwemwe.chw.model.chimwemweParticipantReviewModel;
 import com.bluecodeltd.chimwemwe.chw.util.ChimwemweFormUtils;
 import com.bluecodeltd.chimwemwe.chw.util.Threading;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -34,11 +34,13 @@ import timber.log.Timber;
 
 public class ParticipantReviewsFragment extends Fragment implements ParticipantProfileSection {
 
+    private static final int REQ_REVIEW = 3002;
+
     private TextView tvEmpty;
     private RecyclerView recycler;
     private ParticipantReviewsAdapter adapter;
 
-    private List<MonthlyReviewModel> items = new ArrayList<>();
+    private List<chimwemweParticipantReviewModel> items = new ArrayList<>();
 
     public ParticipantReviewsFragment() {}
 
@@ -57,12 +59,12 @@ public class ParticipantReviewsFragment extends Fragment implements ParticipantP
 
         adapter = new ParticipantReviewsAdapter(new ParticipantReviewsAdapter.Listener() {
             @Override
-            public void onEdit(@NonNull MonthlyReviewModel review) {
-                requestEdit(review);
+            public void onEdit(@NonNull chimwemweParticipantReviewModel review) {
+                launchReviewForm(review);
             }
 
             @Override
-            public void onDelete(@NonNull MonthlyReviewModel review) {
+            public void onDelete(@NonNull chimwemweParticipantReviewModel review) {
                 confirmDelete(review);
             }
         });
@@ -72,6 +74,61 @@ public class ParticipantReviewsFragment extends Fragment implements ParticipantP
         recycler.setAdapter(adapter);
 
         refreshContent();
+    }
+
+    public void launchReviewForm(@Nullable chimwemweParticipantReviewModel existing) {
+        if (!(getActivity() instanceof com.bluecodeltd.chimwemwe.chw.activity.ChimwemweParticipantProfileActivity)) return;
+        com.bluecodeltd.chimwemwe.chw.activity.ChimwemweParticipantProfileActivity host =
+                (com.bluecodeltd.chimwemwe.chw.activity.ChimwemweParticipantProfileActivity) getActivity();
+
+        Threading.io(() -> {
+            try {
+                FormUtils formUtils = new FormUtils(requireContext());
+                JSONObject form = formUtils.getFormJson("chimwemwe_participant_review");
+                if (form == null) return;
+
+                if (host.getParticipant() != null) {
+                    ChimwemweFormUtils.ensureFieldValue(form, "group_id", host.getParticipant().getGroupId());
+                    ChimwemweFormUtils.ensureFieldValue(form, "participant_id", host.getParticipant().getParticipantId());
+                }
+
+                if (existing != null) {
+                    try {
+                        CoreJsonFormUtils.populateJsonForm(
+                                form,
+                                new ObjectMapper().convertValue(existing, Map.class)
+                        );
+                    } catch (Exception e) {
+                        Timber.w(e, "populateJsonForm review");
+                    }
+                    String baseEntityId = existing.getBase_entity_id();
+                    if (baseEntityId != null && !baseEntityId.trim().isEmpty()) form.put("entity_id", baseEntityId);
+                }
+
+                Threading.main(() -> {
+                    try {
+                        android.content.Intent intent = new android.content.Intent(
+                                requireContext(),
+                                org.smartregister.family.util.Utils.metadata().familyFormActivity
+                        );
+                        com.vijay.jsonwizard.domain.Form cfg = new com.vijay.jsonwizard.domain.Form();
+                        cfg.setWizard(true);
+                        cfg.setHideSaveLabel(true);
+                        cfg.setNextLabel(getString(R.string.next));
+                        cfg.setPreviousLabel(getString(R.string.previous));
+                        cfg.setSaveLabel(getString(R.string.submit));
+                        cfg.setNavigationBackground(R.color.chimwemwe_primary);
+                        intent.putExtra(com.vijay.jsonwizard.constants.JsonFormConstants.JSON_FORM_KEY.FORM, cfg);
+                        intent.putExtra(com.vijay.jsonwizard.constants.JsonFormConstants.JSON_FORM_KEY.JSON, form.toString());
+                        startActivityForResult(intent, REQ_REVIEW);
+                    } catch (Exception e) {
+                        Timber.e(e, "launchReviewForm startActivityForResult");
+                    }
+                });
+            } catch (Exception e) {
+                Timber.e(e, "launchReviewForm");
+            }
+        });
     }
 
     @Override
@@ -88,21 +145,56 @@ public class ParticipantReviewsFragment extends Fragment implements ParticipantP
         }
 
         Threading.io(() -> {
-            List<MonthlyReviewModel> loaded = null;
+            List<chimwemweParticipantReviewModel> loaded = null;
             int count = 0;
             try {
-                loaded = MonthlyReviewDao.getParticipantReviews(participantCode);
-                count = MonthlyReviewDao.countParticipantReviews(participantCode);
+                loaded = ChimwemweParticipantReviewDao.getParticipantReviews(participantCode);
+                count = ChimwemweParticipantReviewDao.countParticipantReviews(participantCode);
             } catch (Exception e) {
                 Timber.e(e, "Load participant reviews failed");
             }
-            List<MonthlyReviewModel> finalLoaded = loaded != null ? loaded : new ArrayList<>();
+            List<chimwemweParticipantReviewModel> finalLoaded = loaded != null ? loaded : new ArrayList<>();
             int finalCount = count;
             Threading.main(() -> {
                 items = finalLoaded;
                 render();
                 host.setReviewsCount(finalCount);
             });
+        });
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable android.content.Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode != REQ_REVIEW) return;
+        if (resultCode != android.app.Activity.RESULT_OK || data == null) return;
+
+        String jsonString = data.getStringExtra(com.vijay.jsonwizard.constants.JsonFormConstants.JSON_FORM_KEY.JSON);
+        if (jsonString == null) return;
+
+        if (!(getActivity() instanceof com.bluecodeltd.chimwemwe.chw.activity.ChimwemweParticipantProfileActivity)) return;
+        com.bluecodeltd.chimwemwe.chw.activity.ChimwemweParticipantProfileActivity host =
+                (com.bluecodeltd.chimwemwe.chw.activity.ChimwemweParticipantProfileActivity) getActivity();
+
+        Threading.io(() -> {
+            try {
+                JSONObject form = new JSONObject(jsonString);
+                boolean isEdit = !form.optString("entity_id", "").isEmpty();
+                if (host.getParticipant() != null) {
+                    ChimwemweFormUtils.ensureFieldValue(form, "group_id", host.getParticipant().getGroupId());
+                    ChimwemweFormUtils.ensureFieldValue(form, "participant_id", host.getParticipant().getParticipantId());
+                }
+                ChimwemweFormUtils.saveRegistration(
+                        ChimwemweFormUtils.processRegistration(form, "ec_chimwemwe_review", null),
+                        isEdit
+                );
+                Threading.main(() -> {
+                    host.reloadParticipant();
+                    refreshContent();
+                });
+            } catch (Exception e) {
+                Timber.e(e, "onActivityResult review");
+            }
         });
     }
 
@@ -114,39 +206,20 @@ public class ParticipantReviewsFragment extends Fragment implements ParticipantP
         adapter.setData(items);
     }
 
-    private void requestEdit(MonthlyReviewModel review) {
-        if (getActivity() instanceof ParticipantFormHost) {
-            ((ParticipantFormHost) getActivity()).launchReviewForm(review);
-        }
-    }
-
-    private void confirmDelete(MonthlyReviewModel review) {
+    private void confirmDelete(chimwemweParticipantReviewModel review) {
         new AlertDialog.Builder(requireContext())
                 .setTitle("Delete review?")
                 .setMessage("This will permanently delete this review.")
                 .setNegativeButton("Cancel", null)
                 .setPositiveButton("Delete", (d, w) -> Threading.io(() -> {
-                    try {
-                        review.setDelete_status("1");
-                        FormUtils formUtils = new FormUtils(requireContext());
-                        JSONObject form = formUtils.getFormJson("chimwemwe_monthly_review");
-                        CoreJsonFormUtils.populateJsonForm(form, new ObjectMapper().convertValue(review, Map.class));
-                        ChimwemweFormUtils.ensureFieldValue(form, "delete_status", "1");
-                        form.put("entity_id", review.getBaseEntityId());
-                        ChimwemweFormUtils.saveRegistration(
-                                ChimwemweFormUtils.processRegistration(form, "ec_chimwemwe_monthly_review", null),
-                                true
-                        );
-                    } catch (Exception e) {
-                        Timber.e(e, "Delete review failed");
-                    }
+                    ChimwemweParticipantReviewDao.deleteReview(review.getBase_entity_id());
                     Threading.main(this::refreshContent);
                 }))
                 .show();
     }
 
     public interface ParticipantFormHost {
-        void launchReviewForm(@Nullable MonthlyReviewModel review);
+        void launchReviewForm(@Nullable chimwemweParticipantReviewModel review);
         void reloadParticipant();
     }
 }

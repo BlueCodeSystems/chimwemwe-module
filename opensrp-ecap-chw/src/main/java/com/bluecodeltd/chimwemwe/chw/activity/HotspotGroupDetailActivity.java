@@ -658,7 +658,7 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
         }
 
         if (requestCode == REQUEST_CODE_REVIEW_FORM) {
-            String jsonString = data.getStringExtra(OpdConstants.JSON_FORM_EXTRA.JSON);
+            String jsonString = data.getStringExtra(com.vijay.jsonwizard.constants.JsonFormConstants.JSON_FORM_KEY.JSON);
             if (jsonString == null) return;
             Threading.io(() -> {
                 try {
@@ -668,7 +668,7 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
                     boolean isEdit = !form.optString("entity_id", "").isEmpty();
                     ChimwemweFormUtils.ensureFieldValue(form, "group_id", groupIdentifier);
                     ChimwemweFormUtils.saveRegistration(
-                            ChimwemweFormUtils.processRegistration(form, "ec_chimwemwe_monthly_review", null),
+                            ChimwemweFormUtils.processRegistration(form, "ec_chimwemwe_review", null),
                             isEdit
                     );
 
@@ -987,7 +987,7 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
         Threading.io(() -> {
             try {
                 FormUtils formUtils = new FormUtils(this);
-                JSONObject form = formUtils.getFormJson("chimwemwe_monthly_review");
+                JSONObject form = formUtils.getFormJson("chimwemwe_participant_review");
                 launchJsonWizardForm(form, REQUEST_CODE_REVIEW_FORM, false,
                         "Error launching review form");
             } catch (Exception e) {

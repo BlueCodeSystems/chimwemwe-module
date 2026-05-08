@@ -18,17 +18,10 @@ import com.bluecodeltd.chimwemwe.chw.R;
 import com.bluecodeltd.chimwemwe.chw.adapter.ParticipantReferralsAdapter;
 import com.bluecodeltd.chimwemwe.chw.dao.ChimwemweReferralDao;
 import com.bluecodeltd.chimwemwe.chw.model.ChimwemweReferralModel;
-import com.bluecodeltd.chimwemwe.chw.util.ChimwemweFormUtils;
 import com.bluecodeltd.chimwemwe.chw.util.Threading;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import org.json.JSONObject;
-import org.smartregister.chw.core.utils.CoreJsonFormUtils;
-import org.smartregister.util.FormUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import timber.log.Timber;
 
@@ -125,20 +118,7 @@ public class ParticipantReferralsFragment extends Fragment implements Participan
                 .setMessage("This will permanently delete this referral.")
                 .setNegativeButton("Cancel", null)
                 .setPositiveButton("Delete", (d, w) -> Threading.io(() -> {
-                    try {
-                        referral.setDelete_status("1");
-                        FormUtils formUtils = new FormUtils(requireContext());
-                        JSONObject form = formUtils.getFormJson("chimwemwe_referral");
-                        CoreJsonFormUtils.populateJsonForm(form, new ObjectMapper().convertValue(referral, Map.class));
-                        ChimwemweFormUtils.ensureFieldValue(form, "delete_status", "1");
-                        form.put("entity_id", referral.getBaseEntityId());
-                        ChimwemweFormUtils.saveRegistration(
-                                ChimwemweFormUtils.processRegistration(form, "ec_chimwemwe_referral", null),
-                                true
-                        );
-                    } catch (Exception e) {
-                        Timber.e(e, "Delete referral failed");
-                    }
+                    ChimwemweReferralDao.deleteReferral(referral.getBase_entity_id());
                     Threading.main(this::refreshContent);
                 }))
                 .show();

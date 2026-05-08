@@ -9,7 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bluecodeltd.chimwemwe.chw.R;
-import com.bluecodeltd.chimwemwe.chw.model.MonthlyReviewModel;
+import com.bluecodeltd.chimwemwe.chw.model.chimwemweParticipantReviewModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,20 +17,20 @@ import java.util.List;
 public class ParticipantReviewsAdapter extends RecyclerView.Adapter<ParticipantReviewsAdapter.VH> {
 
     public interface Listener {
-        void onEdit(@NonNull MonthlyReviewModel review);
-        void onDelete(@NonNull MonthlyReviewModel review);
+        void onEdit(@NonNull chimwemweParticipantReviewModel review);
+        void onDelete(@NonNull chimwemweParticipantReviewModel review);
     }
 
     private static final String DASH = "\u2014";
 
     private final Listener listener;
-    private List<MonthlyReviewModel> data = new ArrayList<>();
+    private List<chimwemweParticipantReviewModel> data = new ArrayList<>();
 
     public ParticipantReviewsAdapter(@NonNull Listener listener) {
         this.listener = listener;
     }
 
-    public void setData(List<MonthlyReviewModel> d) {
+    public void setData(List<chimwemweParticipantReviewModel> d) {
         data = d != null ? d : new ArrayList<>();
         notifyDataSetChanged();
     }
@@ -45,10 +45,10 @@ public class ParticipantReviewsAdapter extends RecyclerView.Adapter<ParticipantR
 
     @Override
     public void onBindViewHolder(@NonNull VH h, int position) {
-        MonthlyReviewModel r = data.get(position);
-        h.title.setText(dash(r.getReviewQuarter()));
-        h.subtitle.setText("Reviewer: " + dash(r.getReviewerName()) + "  \u2022  Date: " + dash(r.getReviewDate()));
-        h.detail.setText("Register accurate: " + dash(r.getRegisterAccurate()) + "\n" + dash(r.getReviewerNotes()));
+        chimwemweParticipantReviewModel r = data.get(position);
+        h.title.setText(dash(r.getReview_quarter()));
+        h.subtitle.setText("Reviewer: " + dash(r.getReviewer_name()) + "  \u2022  Date: " + dash(r.getReview_date()));
+        h.detail.setText("Register accurate: " + dash(r.getRegister_accurate()) + "\n" + dash(r.getReviewer_notes()));
         h.btnEdit.setOnClickListener(v -> listener.onEdit(r));
         h.btnDelete.setOnClickListener(v -> listener.onDelete(r));
     }
@@ -79,4 +79,3 @@ public class ParticipantReviewsAdapter extends RecyclerView.Adapter<ParticipantR
         return t.isEmpty() ? DASH : t;
     }
 }
-

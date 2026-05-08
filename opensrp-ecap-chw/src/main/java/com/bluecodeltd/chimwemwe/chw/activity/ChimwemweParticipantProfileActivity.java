@@ -18,7 +18,6 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.bluecodeltd.chimwemwe.chw.R;
 import com.bluecodeltd.chimwemwe.chw.adapter.ViewPager2Adapter;
-import com.bluecodeltd.chimwemwe.chw.dao.ChimwemweReferralDao;
 import com.bluecodeltd.chimwemwe.chw.dao.HotspotGroupDao;
 import com.bluecodeltd.chimwemwe.chw.dao.MonthlyReviewDao;
 import com.bluecodeltd.chimwemwe.chw.dao.ParticipantDao;
@@ -28,8 +27,8 @@ import com.bluecodeltd.chimwemwe.chw.fragment.ParticipantReferralsFragment;
 import com.bluecodeltd.chimwemwe.chw.fragment.ParticipantReviewsFragment;
 import com.bluecodeltd.chimwemwe.chw.model.ChimwemweReferralModel;
 import com.bluecodeltd.chimwemwe.chw.model.HotspotGroupModel;
-import com.bluecodeltd.chimwemwe.chw.model.MonthlyReviewModel;
 import com.bluecodeltd.chimwemwe.chw.model.ParticipantModel;
+import com.bluecodeltd.chimwemwe.chw.model.chimwemweParticipantReviewModel;
 import com.bluecodeltd.chimwemwe.chw.util.ChimwemweFormUtils;
 import com.bluecodeltd.chimwemwe.chw.util.Threading;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -39,7 +38,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.json.JSONObject;
 import org.smartregister.chw.core.utils.CoreJsonFormUtils;
-import org.smartregister.opd.utils.OpdConstants;
 import org.smartregister.util.FormUtils;
 
 import java.util.ArrayList;
@@ -109,8 +107,12 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity
         setupViewPager();
 
         fabAdd.setOnClickListener(v -> {
-            if (currentPage == 1) launchReviewForm(null);
-            else if (currentPage == 2) launchReferralForm(null);
+            if (currentPage == 1) {
+                ParticipantReviewsFragment f = findReviewsFragment();
+                if (f != null) f.launchReviewForm(null);
+            } else if (currentPage == 2) {
+                launchReferralForm(null);
+            }
         });
 
         loadData();
@@ -337,36 +339,9 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity
     }
 
     @Override
-    public void launchReviewForm(@Nullable MonthlyReviewModel existing) {
-        Threading.io(() -> {
-            try {
-                FormUtils formUtils = new FormUtils(this);
-                JSONObject form = formUtils.getFormJson("chimwemwe_monthly_review");
-                if (form == null) return;
-
-                if (participant != null) {
-                    ChimwemweFormUtils.ensureFieldValue(form, "group_id", participant.getGroupId());
-                    ChimwemweFormUtils.ensureFieldValue(form, "participant_id", participant.getParticipantId());
-                }
-
-                if (existing != null) {
-                    try {
-                        CoreJsonFormUtils.populateJsonForm(
-                                form,
-                                new ObjectMapper().convertValue(existing, Map.class)
-                        );
-                    } catch (Exception e) {
-                        Timber.w(e, "populateJsonForm review");
-                    }
-                    String baseEntityId = existing.getBaseEntityId();
-                    if (baseEntityId != null && !baseEntityId.trim().isEmpty()) form.put("entity_id", baseEntityId);
-                }
-
-                launchJsonForm(form, REQ_REVIEW);
-            } catch (Exception e) {
-                Timber.e(e, "launchReviewForm");
-            }
-        });
+    public void launchReviewForm(@Nullable chimwemweParticipantReviewModel existing) {
+        ParticipantReviewsFragment f = findReviewsFragment();
+        if (f != null) f.launchReviewForm(existing);
     }
 
     @Override
@@ -391,7 +366,7 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity
                     } catch (Exception e) {
                         Timber.w(e, "populateJsonForm referral");
                     }
-                    String baseEntityId = existing.getBaseEntityId();
+                    String baseEntityId = existing.getBase_entity_id();
                     if (baseEntityId != null && !baseEntityId.trim().isEmpty()) form.put("entity_id", baseEntityId);
                 }
 
@@ -400,6 +375,15 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity
                 Timber.e(e, "launchReferralForm");
             }
         });
+    }
+
+    @Nullable
+    private ParticipantReviewsFragment findReviewsFragment() {
+        try {
+            return (ParticipantReviewsFragment) getSupportFragmentManager().findFragmentByTag("f1");
+        } catch (Exception ignored) {
+            return null;
+        }
     }
 
     private void launchJsonForm(JSONObject form, int requestCode) {
@@ -426,8 +410,10 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        // Reviews are launched/saved from ParticipantReviewsFragment.
+        if (requestCode == REQ_REVIEW) return;
         if (resultCode != Activity.RESULT_OK || data == null) return;
-        String jsonString = data.getStringExtra(OpdConstants.JSON_FORM_EXTRA.JSON);
+        String jsonString = data.getStringExtra(com.vijay.jsonwizard.constants.JsonFormConstants.JSON_FORM_KEY.JSON);
         if (jsonString == null) return;
 
         Threading.io(() -> {
@@ -454,7 +440,7 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity
                     ChimwemweFormUtils.ensureFieldValue(form, "participant_id",
                             participant != null ? participant.getParticipantId() : "");
                     ChimwemweFormUtils.saveRegistration(
-                            ChimwemweFormUtils.processRegistration(form, "ec_chimwemwe_monthly_review", null),
+                            ChimwemweFormUtils.processRegistration(form, "ec_chimwemwe_review", null),
                             isEdit
                     );
 

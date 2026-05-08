@@ -181,6 +181,9 @@ public class ChwRepositoryFlv {
                 case 49:
                     upgradeToVersion49(db);
                     break;
+                case 50:
+                    upgradeToVersion50(db);
+                    break;
                 default:
                     break;
             }
@@ -1403,6 +1406,15 @@ public class ChwRepositoryFlv {
             com.bluecodeltd.chimwemwe.chw.dao.ChimwemweFacilitiesDao.migrateToV49(db);
         } catch (Exception e) {
             Timber.e(e, "upgradeToVersion49 ChimwemweFacilitiesDao");
+        }
+    }
+
+    private static void upgradeToVersion50(SQLiteDatabase db) {
+        // Backfill participant_id for participants added via AddParticipantActivity (NULL participant_id)
+        try {
+            com.bluecodeltd.chimwemwe.chw.dao.ParticipantDao.migrateToV50(db);
+        } catch (Exception e) {
+            Timber.e(e, "upgradeToVersion50 ParticipantDao");
         }
     }
 

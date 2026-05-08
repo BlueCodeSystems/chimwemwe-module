@@ -79,4 +79,3 @@ public class ParticipantReferralsAdapter extends RecyclerView.Adapter<Participan
         return t.isEmpty() ? DASH : t;
     }
 }
-
