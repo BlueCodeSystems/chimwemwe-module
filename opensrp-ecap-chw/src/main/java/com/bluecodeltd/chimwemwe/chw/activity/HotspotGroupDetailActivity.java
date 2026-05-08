@@ -42,6 +42,7 @@ import com.vijay.jsonwizard.domain.Form;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.smartregister.chw.core.utils.CoreJsonFormUtils;
 import org.smartregister.family.util.Utils;
 import org.smartregister.opd.utils.OpdConstants;
 import org.smartregister.util.FormUtils;
@@ -145,25 +146,17 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
                 .setNegativeButton("Cancel", null)
                 .setPositiveButton("Delete", (d, w) -> Threading.io(() -> {
                     try {
-                        // Mark deleted locally (soft delete)
-                        if (groupDbId > 0) HotspotGroupDao.deleteGroup(groupDbId);
-                        else HotspotGroupDao.deleteGroupByBusinessId(gid);
-
-                        // Save OpenSRP-standard delete event (do not override base_entity_id)
-                        try {
-                            FormUtils formUtils = new FormUtils(this);
-                            JSONObject form = formUtils.getFormJson("chimwemwe_group_register");
-                            if (form != null) {
-                                form.put("entity_id", gid);
-                                ChimwemweFormUtils.ensureFieldValue(form, "group_id", gid);
-                                ChimwemweFormUtils.ensureFieldValue(form, "delete_status", "1");
-                                ChimwemweFormUtils.saveRegistration(
-                                        ChimwemweFormUtils.processRegistration(form, "ec_chimwemwe_group", gid),
-                                        true
-                                );
-                            }
-                        } catch (Exception e) {
-                            Timber.e(e, "Save group delete event failed");
+                        FormUtils formUtils = new FormUtils(this);
+                        JSONObject form = formUtils.getFormJson("chimwemwe_group_register");
+                        if (form != null) {
+                            form.put("entity_id", gid);
+                            java.util.Map<String, String> map = groupToMap(currentGroup);
+                            map.put("delete_status", "1");
+                            CoreJsonFormUtils.populateJsonForm(form, map);
+                            ChimwemweFormUtils.saveRegistration(
+                                    ChimwemweFormUtils.processRegistration(form, "ec_chimwemwe_group", gid),
+                                    true
+                            );
                         }
                     } catch (Exception e) {
                         Timber.e(e, "Delete group failed");
@@ -665,29 +658,18 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
         }
 
         if (requestCode == REQUEST_CODE_REVIEW_FORM) {
-            String jsonString = data.getStringExtra(OpdConstants.JSON_FORM_EXTRA.JSON);
+            String jsonString = data.getStringExtra(com.vijay.jsonwizard.constants.JsonFormConstants.JSON_FORM_KEY.JSON);
             if (jsonString == null) return;
             Threading.io(() -> {
                 try {
                     JSONObject form  = new JSONObject(jsonString);
                     JSONObject step1 = form.optJSONObject("step1");
 
-                    MonthlyReviewModel r = new MonthlyReviewModel();
-                    r.setGroupId(groupIdentifier);
-                    r.setReviewQuarter(fieldValue(step1,    "review_quarter"));
-                    r.setReviewDate(fieldValue(step1,       "review_date"));
-                    r.setReviewerName(fieldValue(step1,     "reviewer_name"));
-                    r.setRegisterAccurate(fieldValue(step1, "register_accurate"));
-                    r.setReviewerNotes(fieldValue(step1,    "reviewer_notes"));
-                    r.setId(MonthlyReviewDao.insertReview(r));
+                    boolean isEdit = !form.optString("entity_id", "").isEmpty();
                     ChimwemweFormUtils.ensureFieldValue(form, "group_id", groupIdentifier);
                     ChimwemweFormUtils.saveRegistration(
-                            ChimwemweFormUtils.processRegistration(
-                                    form,
-                                    "ec_chimwemwe_monthly_review",
-                                    ChimwemweFormUtils.reviewEntityId(r.getId())
-                            ),
-                            false
+                            ChimwemweFormUtils.processRegistration(form, "ec_chimwemwe_review", null),
+                            isEdit
                     );
 
                     Threading.main(() -> {
@@ -852,15 +834,28 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
 
     private void populateGroupEditForm(JSONObject form) {
         if (form == null || currentGroup == null) return;
-        setFieldValue(form, "step1", "group_id", currentGroup.getGroupId());
-        setFieldValue(form, "step1", "group_name", currentGroup.getGroupName());
-        setFieldValue(form, "step1", "hotspot_name", currentGroup.getHotspotName());
-        setFieldValue(form, "step1", "province", currentGroup.getProvince());
-        setFieldValue(form, "step1", "district", currentGroup.getDistrict());
-        setFieldValue(form, "step1", "location_of_session", currentGroup.getLocationOfSession());
-        setFieldValue(form, "step1", "nearest_health_facility", currentGroup.getNearestHealthFacility());
-        setFieldValue(form, "step1", "facilitator_name_1", currentGroup.getFacilitatorName1());
-        setFieldValue(form, "step1", "facilitator_name_2", currentGroup.getFacilitatorName2());
+        try {
+            CoreJsonFormUtils.populateJsonForm(form, groupToMap(currentGroup));
+        } catch (Exception e) {
+            Timber.w(e, "populateGroupEditForm");
+        }
+    }
+
+    private java.util.Map<String, String> groupToMap(HotspotGroupModel g) {
+        java.util.Map<String, String> map = new java.util.HashMap<>();
+        if (g == null) return map;
+        map.put("group_id",                 g.getGroupId());
+        map.put("group_name",               g.getGroupName());
+        map.put("hotspot_name",             g.getHotspotName());
+        map.put("province",                 g.getProvince());
+        map.put("district",                 g.getDistrict());
+        map.put("location_of_session",      g.getLocationOfSession());
+        map.put("location_gps",             g.getLocationGps());
+        map.put("nearest_health_facility",  g.getNearestHealthFacility());
+        map.put("facilitator_name_1",       g.getFacilitatorName1());
+        map.put("facilitator_name_2",       g.getFacilitatorName2());
+        map.put("created_date",             g.getCreatedDate());
+        return map;
     }
 
     private void populateParticipantForm(JSONObject form, ParticipantModel existing, int sn)
@@ -992,7 +987,7 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
         Threading.io(() -> {
             try {
                 FormUtils formUtils = new FormUtils(this);
-                JSONObject form = formUtils.getFormJson("chimwemwe_monthly_review");
+                JSONObject form = formUtils.getFormJson("chimwemwe_participant_review");
                 launchJsonWizardForm(form, REQUEST_CODE_REVIEW_FORM, false,
                         "Error launching review form");
             } catch (Exception e) {

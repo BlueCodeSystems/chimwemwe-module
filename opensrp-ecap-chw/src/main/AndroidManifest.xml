@@ -115,6 +115,11 @@
             android:label="Summary"
             android:theme="@style/ChwTheme.Material" />
         <activity
+            android:name=".activity.ChimwemweHotspotListActivity"
+            android:exported="false"
+            android:label="Hotspots"
+            android:theme="@style/ChwTheme.Material" />
+        <activity
             android:name=".activity.AddParticipantActivity"
             android:exported="false"
             android:label="Add Participant"

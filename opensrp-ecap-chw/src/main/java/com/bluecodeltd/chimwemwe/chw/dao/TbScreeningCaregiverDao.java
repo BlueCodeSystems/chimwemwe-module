@@ -69,6 +69,13 @@ public class TbScreeningCaregiverDao extends AbstractDao {
         return false;
     }
 
+    public static void delete(String baseEntityId) {
+        if (baseEntityId == null || baseEntityId.trim().isEmpty()) return;
+        AbstractDao.updateDB(
+                "UPDATE ec_tb_screening_caregiver SET delete_status='1' WHERE base_entity_id='"
+                        + baseEntityId.replace("'", "''") + "'");
+    }
+
     public static DataMap<TbScreeningCaregiverModel> getMap() {
         return c -> {
             TbScreeningCaregiverModel record = new TbScreeningCaregiverModel();

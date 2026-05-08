@@ -97,6 +97,10 @@ public class ChimwemweFacilitiesDao extends AbstractDao {
         return count;
     }
 
+    /**
+     * Returns [facility_name, hotspot_count] for all active facilities, ordered by name.
+     * hotspot_count is the number of distinct hotspots in ec_chimwemwe_group linked to that facility.
+     */
     public static List<ChimwemweFacilityModel> getFacilities(String search) {
         return getFacilities(search, null);
     }
