@@ -6,7 +6,6 @@ import net.sqlcipher.database.SQLiteDatabase;
 
 import org.smartregister.dao.AbstractDao;
 
-import java.time.LocalDate;
 import java.util.List;
 
 public class ChimwemweReferralDao extends AbstractDao {
@@ -15,12 +14,11 @@ public class ChimwemweReferralDao extends AbstractDao {
 
     private static final String CREATE_TABLE_SQL =
             "CREATE TABLE IF NOT EXISTS " + TABLE + " (" +
-            "  id                    INTEGER PRIMARY KEY AUTOINCREMENT," +
-            "  base_entity_id        TEXT," +
+            "  base_entity_id        TEXT PRIMARY KEY," +
             "  last_interacted_with  INTEGER," +
             "  delete_status         TEXT," +
-            "  participant_id        INTEGER NOT NULL," +
-            "  group_id              TEXT NOT NULL," +
+            "  participant_id        TEXT," +
+            "  group_id              TEXT," +
             "  who_referred          TEXT," +
             "  service_referred_for  TEXT," +
             "  referral_date         TEXT," +
@@ -34,83 +32,55 @@ public class ChimwemweReferralDao extends AbstractDao {
         db.execSQL(CREATE_TABLE_SQL);
     }
 
-    /** OpenSRP standard delete_status column added in DB version 43. */
-    public static void migrateToV43(SQLiteDatabase db) {
+    public static void migrateToV44(SQLiteDatabase db) {
         try { db.execSQL("ALTER TABLE " + TABLE + " ADD COLUMN base_entity_id TEXT"); } catch (Exception ignored) {}
         try { db.execSQL("ALTER TABLE " + TABLE + " ADD COLUMN last_interacted_with INTEGER"); } catch (Exception ignored) {}
         try { db.execSQL("ALTER TABLE " + TABLE + " ADD COLUMN delete_status TEXT"); } catch (Exception ignored) {}
         try {
-            db.execSQL("UPDATE " + TABLE + " SET base_entity_id='chimwemwe-referral-' || id " +
+            db.execSQL("UPDATE " + TABLE + " SET base_entity_id='chimwemwe-referral-' || rowid " +
                     "WHERE (base_entity_id IS NULL OR TRIM(base_entity_id)='')");
         } catch (Exception ignored) {}
     }
 
-    public static long insertReferral(ChimwemweReferralModel m) {
-        String sql = "INSERT INTO " + TABLE +
-                " (participant_id, group_id, who_referred, service_referred_for, referral_date, receiving_org, job_title, service_date, created_at)" +
-                " VALUES (" +
-                m.getParticipantId() + "," +
-                q(m.getGroupId()) + "," +
-                q(m.getWhoReferred()) + "," +
-                q(m.getServiceReferredFor()) + "," +
-                q(m.getReferralDate()) + "," +
-                q(m.getReceivingOrg()) + "," +
-                q(m.getJobTitle()) + "," +
-                q(m.getServiceDate()) + "," +
-                q(LocalDate.now().toString()) + ")";
-        AbstractDao.updateDB(sql);
-        List<Long> ids = AbstractDao.readData(
-                "SELECT id FROM " + TABLE + " ORDER BY id DESC LIMIT 1",
-                cursor -> cursor.getLong(0));
-        long id = (ids != null && !ids.isEmpty()) ? ids.get(0) : -1L;
-        if (id > 0) {
-            AbstractDao.updateDB("UPDATE " + TABLE + " SET base_entity_id=" + q("chimwemwe-referral-" + id) +
-                    " WHERE id=" + id);
-        }
-        return id;
-    }
-
-    public static List<ChimwemweReferralModel> getParticipantReferrals(long participantId) {
-        String sql = "SELECT id, participant_id, group_id, who_referred, service_referred_for," +
-                " referral_date, receiving_org, job_title, service_date, created_at FROM " + TABLE +
-                " WHERE participant_id=" + participantId +
+    public static List<ChimwemweReferralModel> getParticipantReferrals(String participantId) {
+        String sql = "SELECT * FROM ec_chimwemwe_referral" +
+                " WHERE participant_id = '" + participantId + "'" +
                 " AND (delete_status IS NULL OR delete_status <> '1')" +
-                " ORDER BY id DESC";
-        return AbstractDao.readData(sql, cursor -> {
-            ChimwemweReferralModel m = new ChimwemweReferralModel();
-            m.setId(cursor.getLong(0));
-            m.setParticipantId(cursor.getLong(1));
-            m.setGroupId(cursor.getString(2));
-            m.setWhoReferred(cursor.getString(3));
-            m.setServiceReferredFor(cursor.getString(4));
-            m.setReferralDate(cursor.getString(5));
-            m.setReceivingOrg(cursor.getString(6));
-            m.setJobTitle(cursor.getString(7));
-            m.setServiceDate(cursor.getString(8));
-            m.setCreatedAt(cursor.getString(9));
-            return m;
-        });
+                " ORDER BY last_interacted_with DESC";
+        return AbstractDao.readData(sql, getMap());
     }
 
-    public static void updateReferral(ChimwemweReferralModel m) {
-        String sql = "UPDATE " + TABLE + " SET " +
-                "who_referred="         + q(m.getWhoReferred()) + "," +
-                "service_referred_for=" + q(m.getServiceReferredFor()) + "," +
-                "referral_date="        + q(m.getReferralDate()) + "," +
-                "receiving_org="        + q(m.getReceivingOrg()) + "," +
-                "job_title="            + q(m.getJobTitle()) + "," +
-                "service_date="         + q(m.getServiceDate()) +
-                " WHERE id=" + m.getId();
-        AbstractDao.updateDB(sql);
+    public static int countParticipantReferrals(String participantId) {
+        String sql = "SELECT COUNT(*) FROM " + TABLE +
+                " WHERE participant_id = '" + participantId.replace("'", "''") + "'" +
+                " AND (delete_status IS NULL OR delete_status <> '1')";
+        List<Integer> result = AbstractDao.readData(sql, c -> c.getInt(0));
+        return (result != null && !result.isEmpty()) ? result.get(0) : 0;
     }
 
-    public static void deleteReferral(long id) {
-        if (id <= 0) return;
-        AbstractDao.updateDB("UPDATE " + TABLE + " SET delete_status='1' WHERE id=" + id);
+    public static void deleteReferral(String baseEntityId) {
+        if (baseEntityId == null || baseEntityId.trim().isEmpty()) return;
+        AbstractDao.updateDB(
+                "UPDATE ec_chimwemwe_referral SET delete_status='1' WHERE base_entity_id='"
+                        + baseEntityId.replace("'", "''") + "'");
     }
 
-    private static String q(String s) {
-        if (s == null) return "''";
-        return "'" + s.replace("'", "''") + "'";
+    public static DataMap<ChimwemweReferralModel> getMap() {
+        return c -> {
+            ChimwemweReferralModel record = new ChimwemweReferralModel();
+            record.setBase_entity_id(getCursorValue(c, "base_entity_id"));
+            record.setLast_interacted_with(getCursorValue(c, "last_interacted_with"));
+            record.setDelete_status(getCursorValue(c, "delete_status"));
+            record.setParticipant_id(getCursorValue(c, "participant_id"));
+            record.setGroup_id(getCursorValue(c, "group_id"));
+            record.setWho_referred(getCursorValue(c, "who_referred"));
+            record.setService_referred_for(getCursorValue(c, "service_referred_for"));
+            record.setReferral_date(getCursorValue(c, "referral_date"));
+            record.setReceiving_org(getCursorValue(c, "receiving_org"));
+            record.setJob_title(getCursorValue(c, "job_title"));
+            record.setService_date(getCursorValue(c, "service_date"));
+            record.setCreated_at(getCursorValue(c, "created_at"));
+            return record;
+        };
     }
 }

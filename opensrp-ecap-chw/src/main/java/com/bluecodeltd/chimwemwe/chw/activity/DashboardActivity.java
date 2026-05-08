@@ -103,11 +103,8 @@ public class DashboardActivity extends AppCompatActivity implements GenerateCSVC
             i.putExtra(ChimwemweSummaryListActivity.EXTRA_TYPE, ChimwemweSummaryListActivity.TYPE_FACILITIES);
             startActivity(i);
         });
-        findViewById(R.id.row_hotspots).setOnClickListener(v -> {
-            Intent i = new Intent(this, ChimwemweSummaryListActivity.class);
-            i.putExtra(ChimwemweSummaryListActivity.EXTRA_TYPE, ChimwemweSummaryListActivity.TYPE_HOTSPOTS);
-            startActivity(i);
-        });
+        findViewById(R.id.row_hotspots).setOnClickListener(v ->
+                startActivity(new Intent(this, ChimwemweHotspotListActivity.class)));
         findViewById(R.id.row_groups).setOnClickListener(v ->
                 startActivity(new Intent(this, HotspotGroupListActivity.class)));
         findViewById(R.id.row_participants).setOnClickListener(v -> {

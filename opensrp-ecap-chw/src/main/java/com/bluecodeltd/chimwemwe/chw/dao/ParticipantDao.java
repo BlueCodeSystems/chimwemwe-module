@@ -5,6 +5,7 @@ import com.bluecodeltd.chimwemwe.chw.model.ParticipantModel;
 import net.sqlcipher.database.SQLiteDatabase;
 
 import org.smartregister.dao.AbstractDao;
+import org.smartregister.util.JsonFormUtils;
 
 import java.util.List;
 
@@ -93,7 +94,20 @@ public class ParticipantDao extends AbstractDao {
         } catch (Exception ignored) {}
     }
 
+    public static void migrateToV50(SQLiteDatabase db) {
+        // Backfill participant_id for rows that were inserted without one (via AddParticipantActivity).
+        // Use base_entity_id if already set, otherwise generate a stable id from the row id.
+        try {
+            db.execSQL("UPDATE " + TABLE +
+                    " SET participant_id = COALESCE(NULLIF(TRIM(base_entity_id),''), 'chm-participant-' || id)" +
+                    " WHERE (participant_id IS NULL OR TRIM(participant_id) = '')");
+        } catch (Exception ignored) {}
+    }
+
     public static long insertParticipant(ParticipantModel m) {
+        if (m.getParticipantId() == null || m.getParticipantId().trim().isEmpty()) {
+            m.setParticipantId("chm-" + JsonFormUtils.generateRandomUUIDString());
+        }
         String sql = "INSERT INTO " + TABLE +
                 " (participant_id, group_id, sn, caregiver_first_name, caregiver_surname," +
                 "  child_first_name, child_surname, child_dob, child_sex," +

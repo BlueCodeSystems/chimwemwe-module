@@ -1,6 +1,6 @@
 {
   "count": "1",
-  "encounter_type": "Chimwemwe Referral",
+  "encounter_type": "Chimwemwe Participant Review",
   "entity_id": "",
   "metadata": {
     "start": {
@@ -48,7 +48,7 @@
   },
 
   "step1": {
-    "title": "Referral Details",
+    "title": "Monthly Supervisor Review",
     "display_back_button": "true",
     "fields": [
       {
@@ -71,89 +71,80 @@
         "v_required": { "value": true, "err": "" }
       },
       {
-        "key": "referral_note",
+        "key": "review_info_note",
         "openmrs_entity_parent": "",
         "openmrs_entity": "person_attribute",
-        "openmrs_entity_id": "referral_note",
+        "openmrs_entity_id": "review_info_note",
         "type": "toaster_notes",
-        "text": "Complete this section if the participant is being referred for a service. Leave blank if no referral.",
+        "text": "The Chimwemwe Facilitator Supervisor (RCMC/DC) completes this review to confirm that the register has been checked for accuracy, correctness and completeness.",
         "toaster_type": "info"
       },
       {
-        "key": "who_referred",
+        "key": "review_quarter",
         "openmrs_entity_parent": "",
         "openmrs_entity": "person_attribute",
-        "openmrs_entity_id": "who_referred",
+        "openmrs_entity_id": "review_quarter",
         "type": "spinner",
-        "hint": "Who is being referred for services?",
-        "values": ["-- Select --", "Caregiver", "Child", "Both"],
-        "v_required": {
-          "value": "true",
-          "err": "Please select who is being referred"
-        }
-      },
-      {
-        "key": "service_referred_for",
-        "openmrs_entity_parent": "",
-        "openmrs_entity": "person_attribute",
-        "openmrs_entity_id": "service_referred_for",
-        "type": "edit_text",
-        "hint": "Indicate the service(s) being referred for",
-        "edit_type": "name",
-        "v_required": {
-          "value": "true",
-          "err": "Please indicate the service(s) being referred for"
-        }
-      },
-      {
-        "key": "referral_date",
-        "openmrs_entity_parent": "",
-        "openmrs_entity": "person_attribute",
-        "openmrs_entity_id": "referral_date",
-        "type": "date_picker",
-        "hint": "Date of Referral (DD/MM/YY)",
-        "expanded": false,
-        "min_date": "today-3y",
-        "max_date": "today+1y",
-        "v_required": { "value": "true", "err": "Please enter the date of referral" }
-      },
-      {
-        "key": "receiving_org",
-        "openmrs_entity_parent": "",
-        "openmrs_entity": "person_attribute",
-        "openmrs_entity_id": "receiving_org",
-        "type": "edit_text",
-        "hint": "Name of receiving organization",
-        "edit_type": "name",
+        "hint": "Review Quarter",
+        "values": ["-- Select --", "Q1", "Q2", "Q3", "Q4"],
         "v_required": {
           "value": "false",
           "err": ""
         }
       },
       {
-        "key": "job_title",
+        "key": "review_date",
         "openmrs_entity_parent": "",
         "openmrs_entity": "person_attribute",
-        "openmrs_entity_id": "job_title",
+        "openmrs_entity_id": "review_date",
+        "type": "date_picker",
+        "hint": "Date of Review (DD/MM/YY)",
+        "expanded": false,
+        "min_date": "today-1y",
+        "max_date": "today",
+        "v_required": {
+          "value": "true",
+          "err": "Please enter the date of this review"
+        }
+      },
+      {
+        "key": "reviewer_name",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "reviewer_name",
         "type": "edit_text",
-        "hint": "Job title of individual providing services",
+        "hint": "Supervisor Name (RCMC/DC)",
+        "edit_type": "name",
+        "v_required": {
+          "value": "true",
+          "err": "Please enter the supervisor's name"
+        }
+      },
+      {
+        "key": "register_accurate",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "register_accurate",
+        "type": "spinner",
+        "hint": "Is the register accurate and complete?",
+        "values": ["-- Select --", "Yes", "No — corrections required"],
+        "v_required": {
+          "value": "true",
+          "err": "Please indicate whether the register is accurate"
+        }
+      },
+      {
+        "key": "reviewer_notes",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "reviewer_notes",
+        "type": "edit_text",
+        "hint": "Feedback / Corrections Required (if any)",
         "edit_type": "name",
         "v_required": {
           "value": "false",
           "err": ""
         }
-      },
-      {
-        "key": "service_date",
-        "openmrs_entity_parent": "",
-        "openmrs_entity": "person_attribute",
-        "openmrs_entity_id": "service_date",
-        "type": "date_picker",
-        "hint": "Date service was provided (DD/MM/YY)",
-        "expanded": false,
-        "min_date": "today-3y",
-        "max_date": "today+1y",
-        "v_required": { "value": "false", "err": "" }
       }
     ]
   }

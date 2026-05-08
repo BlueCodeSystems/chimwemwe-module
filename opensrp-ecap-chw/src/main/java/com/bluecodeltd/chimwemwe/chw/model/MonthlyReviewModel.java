@@ -2,41 +2,80 @@ package com.bluecodeltd.chimwemwe.chw.model;
 
 public class MonthlyReviewModel {
 
-    private long   id;
-    // Business identifier from ec_chimwemwe_group.group_id
-    private String groupId;
-    private long   participantId;
-    private String reviewQuarter;
-    private String reviewDate;
-    private String reviewerName;
-    private String registerAccurate;
-    private String reviewerNotes;
-    private String createdAt;
+    private String base_entity_id;
+    private String last_interacted_with;
+    private String delete_status;
+    private String group_id;
+    private String participant_id;
+    private String review_quarter;
+    private String review_date;
+    private String reviewer_name;
+    private String register_accurate;
+    private String reviewer_notes;
+    private String created_at;
 
-    public long getId()                   { return id; }
-    public void setId(long id)            { this.id = id; }
+    public String getBase_entity_id() { return base_entity_id; }
+    public void setBase_entity_id(String v) { this.base_entity_id = v; }
 
-    public String getGroupId()              { return groupId; }
-    public void setGroupId(String groupId)  { this.groupId = groupId; }
+    public String getLast_interacted_with() { return last_interacted_with; }
+    public void setLast_interacted_with(String v) { this.last_interacted_with = v; }
 
-    public long getParticipantId()                   { return participantId; }
-    public void setParticipantId(long participantId) { this.participantId = participantId; }
+    public String getDelete_status() { return delete_status; }
+    public void setDelete_status(String v) { this.delete_status = v; }
 
-    public String getReviewQuarter()                      { return reviewQuarter; }
-    public void   setReviewQuarter(String reviewQuarter)  { this.reviewQuarter = reviewQuarter; }
+    public String getGroup_id() { return group_id; }
+    public void setGroup_id(String v) { this.group_id = v; }
 
-    public String getReviewDate()                      { return reviewDate; }
-    public void   setReviewDate(String reviewDate)     { this.reviewDate = reviewDate; }
+    public String getParticipant_id() { return participant_id; }
+    public void setParticipant_id(String v) { this.participant_id = v; }
 
-    public String getReviewerName()                    { return reviewerName; }
-    public void   setReviewerName(String reviewerName) { this.reviewerName = reviewerName; }
+    public String getReview_quarter() { return review_quarter; }
+    public void setReview_quarter(String v) { this.review_quarter = v; }
 
-    public String getRegisterAccurate()                        { return registerAccurate; }
-    public void   setRegisterAccurate(String registerAccurate) { this.registerAccurate = registerAccurate; }
+    public String getReview_date() { return review_date; }
+    public void setReview_date(String v) { this.review_date = v; }
 
-    public String getReviewerNotes()                     { return reviewerNotes; }
-    public void   setReviewerNotes(String reviewerNotes) { this.reviewerNotes = reviewerNotes; }
+    public String getReviewer_name() { return reviewer_name; }
+    public void setReviewer_name(String v) { this.reviewer_name = v; }
 
-    public String getCreatedAt()                   { return createdAt; }
-    public void   setCreatedAt(String createdAt)   { this.createdAt = createdAt; }
+    public String getRegister_accurate() { return register_accurate; }
+    public void setRegister_accurate(String v) { this.register_accurate = v; }
+
+    public String getReviewer_notes() { return reviewer_notes; }
+    public void setReviewer_notes(String v) { this.reviewer_notes = v; }
+
+    public String getCreated_at() { return created_at; }
+    public void setCreated_at(String v) { this.created_at = v; }
+
+    // --- Backward-compatible camelCase helpers ---
+
+    public String getBaseEntityId() { return getBase_entity_id(); }
+    public void setBaseEntityId(String v) { setBase_entity_id(v); }
+
+    public String getDeleteStatus() { return getDelete_status(); }
+    public void setDeleteStatus(String v) { setDelete_status(v); }
+
+    public String getGroupId() { return getGroup_id(); }
+    public void setGroupId(String v) { setGroup_id(v); }
+
+    public String getParticipantId() { return getParticipant_id(); }
+    public void setParticipantId(String v) { setParticipant_id(v); }
+
+    public String getReviewQuarter() { return getReview_quarter(); }
+    public void setReviewQuarter(String v) { setReview_quarter(v); }
+
+    public String getReviewDate() { return getReview_date(); }
+    public void setReviewDate(String v) { setReview_date(v); }
+
+    public String getReviewerName() { return getReviewer_name(); }
+    public void setReviewerName(String v) { setReviewer_name(v); }
+
+    public String getRegisterAccurate() { return getRegister_accurate(); }
+    public void setRegisterAccurate(String v) { setRegister_accurate(v); }
+
+    public String getReviewerNotes() { return getReviewer_notes(); }
+    public void setReviewerNotes(String v) { setReviewer_notes(v); }
+
+    public String getCreatedAt() { return getCreated_at(); }
+    public void setCreatedAt(String v) { setCreated_at(v); }
 }
