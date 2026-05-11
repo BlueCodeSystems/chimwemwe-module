@@ -6,6 +6,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.bluecodeltd.chimwemwe.chw.activity.ChimwemweParticipantProfileActivity;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -39,9 +41,12 @@ public class ParticipantOverviewFragment extends Fragment implements Participant
     @Override
     public void refreshContent() {
         if (rootView == null) return;
-        if (!(getActivity() instanceof com.bluecodeltd.chimwemwe.chw.activity.ChimwemweParticipantProfileActivity)) return;
-        com.bluecodeltd.chimwemwe.chw.activity.ChimwemweParticipantProfileActivity host =
-                (com.bluecodeltd.chimwemwe.chw.activity.ChimwemweParticipantProfileActivity) getActivity();
+        if (!(getActivity() instanceof ChimwemweParticipantProfileActivity)) return;
+        ChimwemweParticipantProfileActivity host =
+                (ChimwemweParticipantProfileActivity) getActivity();
+
+        View btnViewGroup = rootView.findViewById(R.id.btn_view_group);
+        if (btnViewGroup != null) btnViewGroup.setOnClickListener(v -> host.navigateToGroup());
         ParticipantModel participant = host.getParticipant();
         HotspotGroupModel group = host.getGroup();
 

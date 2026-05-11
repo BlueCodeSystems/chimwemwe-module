@@ -97,26 +97,13 @@ public class DashboardActivity extends AppCompatActivity implements GenerateCSVC
                     startActivity(new Intent(this, ChimwemweRegisterActivity.class)));
         }
 
-        // Overview stat rows — tap to view the full list
-        findViewById(R.id.row_facilities).setOnClickListener(v -> {
-            Intent i = new Intent(this, ChimwemweSummaryListActivity.class);
-            i.putExtra(ChimwemweSummaryListActivity.EXTRA_TYPE, ChimwemweSummaryListActivity.TYPE_FACILITIES);
-            startActivity(i);
-        });
-        findViewById(R.id.row_hotspots).setOnClickListener(v ->
-                startActivity(new Intent(this, ChimwemweHotspotListActivity.class)));
+        // Only Chimwemwe Groups should be clickable from the dashboard
+        disableClick(R.id.row_facilities);
+        disableClick(R.id.row_hotspots);
+        disableClick(R.id.row_participants);
+        disableClick(R.id.row_graduates);
         findViewById(R.id.row_groups).setOnClickListener(v ->
                 startActivity(new Intent(this, HotspotGroupListActivity.class)));
-        findViewById(R.id.row_participants).setOnClickListener(v -> {
-            Intent i = new Intent(this, ChimwemweSummaryListActivity.class);
-            i.putExtra(ChimwemweSummaryListActivity.EXTRA_TYPE, ChimwemweSummaryListActivity.TYPE_PARTICIPANTS);
-            startActivity(i);
-        });
-        findViewById(R.id.row_graduates).setOnClickListener(v -> {
-            Intent i = new Intent(this, ChimwemweSummaryListActivity.class);
-            i.putExtra(ChimwemweSummaryListActivity.EXTRA_TYPE, ChimwemweSummaryListActivity.TYPE_GRADUATES);
-            startActivity(i);
-        });
 
         // Shared prefs
         Bundle extras = getIntent().getExtras();
@@ -168,6 +155,14 @@ public class DashboardActivity extends AppCompatActivity implements GenerateCSVC
 
         loadData();
         refreshData();
+    }
+
+    private void disableClick(int viewId) {
+        View view = findViewById(viewId);
+        if (view == null) return;
+        view.setOnClickListener(null);
+        view.setClickable(false);
+        view.setFocusable(false);
     }
 
     private void loadData() {

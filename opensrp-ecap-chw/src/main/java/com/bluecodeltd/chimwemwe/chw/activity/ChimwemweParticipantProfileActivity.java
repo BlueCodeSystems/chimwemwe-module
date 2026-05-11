@@ -289,6 +289,15 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity
                 || "yes".equalsIgnoreCase(String.valueOf(participant.getIsEnrolledOvc()).trim())
                 || "true".equalsIgnoreCase(String.valueOf(participant.getIsEnrolledOvc()).trim());
         if (tvOvcBadge != null) tvOvcBadge.setVisibility(enrolledOvc ? View.VISIBLE : View.GONE);
+
+    }
+
+    public void navigateToGroup() {
+        String gid = participant != null ? participant.getGroupId() : null;
+        if (gid == null || gid.trim().isEmpty()) return;
+        Intent intent = new Intent(this, HotspotGroupDetailActivity.class);
+        intent.putExtra(HotspotGroupDetailActivity.EXTRA_GROUP_ID, gid);
+        startActivity(intent);
     }
 
     private void promptDeleteParticipant() {
