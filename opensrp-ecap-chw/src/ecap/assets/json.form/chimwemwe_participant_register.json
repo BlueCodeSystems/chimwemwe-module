@@ -46,7 +46,6 @@
     },
     "encounter_location": ""
   },
-
   "step1": {
     "title": "Caregiver Details",
     "display_back_button": "true",
@@ -187,7 +186,11 @@
         "openmrs_entity_id": "is_enrolled_ovc",
         "type": "spinner",
         "hint": "Is Child Enrolled in the OVC Comprehensive Program?",
-        "values": ["-- Select --", "Yes", "No"],
+        "values": [
+          "-- Select --",
+          "Yes",
+          "No"
+        ],
         "read_only": "true",
         "v_required": {
           "value": "No",
@@ -221,8 +224,15 @@
           "value": "false",
           "err": ""
         }
+      },
+      {
+        "key": "delete_status",
+        "type": "hidden",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "delete_status",
+        "value": "0"
       }
     ]
   }
 }
-

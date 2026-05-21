@@ -22,6 +22,10 @@ public class ChimwemweRegisterPresenter implements ChimwemweRegisterFragmentCont
     @Override
     public void initializeQueries(String s) {
         String table = "ec_chimwemwe_group";
+        // No WHERE in mainSelect: the framework's filter mechanism (buildSqlFilter in
+        // ChimwemweRegisterFragment) supplies the WHERE clause — including the
+        // delete_status predicate — via the `filters` field, which is set during
+        // setupViews so it applies on initial load too.
         String countSelect = "SELECT COUNT(*) FROM " + table;
         String mainSelect =
                 "SELECT ec_chimwemwe_group.id AS _id, " +
@@ -36,12 +40,16 @@ public class ChimwemweRegisterPresenter implements ChimwemweRegisterFragmentCont
                 "FROM ec_chimwemwe_group " +
                 "LEFT JOIN (" +
                 "SELECT group_id, COUNT(*) AS p_count " +
-                "FROM ec_chimwemwe_participant GROUP BY group_id" +
+                "FROM ec_chimwemwe_participant " +
+                "WHERE (delete_status IS NULL OR delete_status <> '1') " +
+                "GROUP BY group_id" +
                 ") AS participant_counts " +
                 "ON participant_counts.group_id = ec_chimwemwe_group.group_id " +
                 "LEFT JOIN (" +
                 "SELECT group_id, COUNT(DISTINCT session_number) AS s_count " +
-                "FROM ec_chimwemwe_session_attendance GROUP BY group_id" +
+                "FROM ec_chimwemwe_session_attendance " +
+                "WHERE (delete_status IS NULL OR delete_status <> '1') " +
+                "GROUP BY group_id" +
                 ") AS attendance_counts " +
                 "ON attendance_counts.group_id = ec_chimwemwe_group.group_id";
         getView().initializeQueryParams(table, countSelect, mainSelect);

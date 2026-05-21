@@ -19,7 +19,6 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.ViewModelProvider;
@@ -44,6 +43,9 @@ import com.github.javiersantos.appupdater.AppUpdater;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.smartregister.chw.core.custom_views.NavigationMenu;
+import org.smartregister.domain.FetchStatus;
+import org.smartregister.job.SyncServiceJob;
+import org.smartregister.receiver.SyncStatusBroadcastReceiver;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -54,7 +56,8 @@ import java.util.Map;
 
 import timber.log.Timber;
 
-public class DashboardActivity extends AppCompatActivity implements GenerateCSVContract.View {
+public class DashboardActivity extends AppCompatActivity
+        implements GenerateCSVContract.View, SyncStatusBroadcastReceiver.SyncStatusListener {
 
     private com.bluecodeltd.chimwemwe.chw.databinding.ActivityDashboardBinding binding;
     private GenerateCSVContract.Presenter presenter;
@@ -68,6 +71,18 @@ public class DashboardActivity extends AppCompatActivity implements GenerateCSVC
     private String phone = "";
     private static final int FORTY_FIVE_MINUTES = 2_700_000;
     private static final int REQUEST_CODE_IMPORT_CSV = 49011;
+    private static final long AUTO_SYNC_COOLDOWN_MS = 60_000L;
+    /** Time window (ms) within which onSyncStart is considered to belong to our own
+     *  kickServerSync(false) from onResume. Anything outside this window is treated
+     *  as user-initiated (toolbar sync icon, dashboard sync button, etc.). */
+    private static final long AUTO_SYNC_OWNERSHIP_WINDOW_MS = 3_000L;
+    private long lastAutoSyncMs = 0L;
+    /** Set when we fire a non-user auto-sync. onSyncStart checks against this to decide
+     *  whether the sync we're seeing is ours (suppress popup) or user-initiated (show popup). */
+    private volatile long lastAutoSyncKickMs = 0L;
+    /** True when the completion popup should be shown. Set by either btnSync taps or
+     *  onSyncStart for any sync we didn't kick ourselves. */
+    private boolean userInitiatedSync = false;
 
     private final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm");
 
@@ -82,7 +97,11 @@ public class DashboardActivity extends AppCompatActivity implements GenerateCSVC
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         toolbar.getOverflowIcon().setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP);
 
-        binding.btnSync.setOnClickListener(v -> loadData());
+        binding.btnSync.setOnClickListener(v -> {
+            userInitiatedSync = true;
+            kickServerSync(true);
+            loadData();
+        });
 
         NavigationMenu.getInstance(this, null, toolbar);
 
@@ -91,35 +110,23 @@ public class DashboardActivity extends AppCompatActivity implements GenerateCSVC
         appUpdater = new AppUpdater(this);
         UpdateManager.startOnce(this);
 
-        // Chimwemwe Groups register row → navigate to register
-        if (binding.registerRowGroups != null) {
-            binding.registerRowGroups.setOnClickListener(v ->
-                    startActivity(new Intent(this, ChimwemweRegisterActivity.class)));
-        }
+        // Wire each dashboard stat card to its drill-down screen.
+        wireSummaryCard(R.id.row_facilities,   ChimwemweSummaryListActivity.TYPE_FACILITIES);
+        wireSummaryCard(R.id.row_hotspots,     ChimwemweSummaryListActivity.TYPE_HOTSPOTS);
+        wireSummaryCard(R.id.row_participants, ChimwemweSummaryListActivity.TYPE_PARTICIPANTS);
+        wireSummaryCard(R.id.row_graduates,    ChimwemweSummaryListActivity.TYPE_GRADUATES);
 
-        // Overview stat rows — tap to view the full list
-        findViewById(R.id.row_facilities).setOnClickListener(v -> {
-            Intent i = new Intent(this, ChimwemweSummaryListActivity.class);
-            i.putExtra(ChimwemweSummaryListActivity.EXTRA_TYPE, ChimwemweSummaryListActivity.TYPE_FACILITIES);
-            startActivity(i);
-        });
-        findViewById(R.id.row_hotspots).setOnClickListener(v -> {
-            Intent i = new Intent(this, ChimwemweSummaryListActivity.class);
-            i.putExtra(ChimwemweSummaryListActivity.EXTRA_TYPE, ChimwemweSummaryListActivity.TYPE_HOTSPOTS);
-            startActivity(i);
-        });
-        findViewById(R.id.row_groups).setOnClickListener(v ->
-                startActivity(new Intent(this, HotspotGroupListActivity.class)));
-        findViewById(R.id.row_participants).setOnClickListener(v -> {
-            Intent i = new Intent(this, ChimwemweSummaryListActivity.class);
-            i.putExtra(ChimwemweSummaryListActivity.EXTRA_TYPE, ChimwemweSummaryListActivity.TYPE_PARTICIPANTS);
-            startActivity(i);
-        });
-        findViewById(R.id.row_graduates).setOnClickListener(v -> {
-            Intent i = new Intent(this, ChimwemweSummaryListActivity.class);
-            i.putExtra(ChimwemweSummaryListActivity.EXTRA_TYPE, ChimwemweSummaryListActivity.TYPE_GRADUATES);
-            startActivity(i);
-        });
+        // Groups and Sessions both drill into the group list (sessions are tracked per group).
+        View rowGroups = findViewById(R.id.row_groups);
+        if (rowGroups != null) {
+            rowGroups.setOnClickListener(v ->
+                    startActivity(new Intent(this, HotspotGroupListActivity.class)));
+        }
+        View rowSessions = findViewById(R.id.row_sessions);
+        if (rowSessions != null) {
+            rowSessions.setOnClickListener(v ->
+                    startActivity(new Intent(this, HotspotGroupListActivity.class)));
+        }
 
         // Shared prefs
         Bundle extras = getIntent().getExtras();
@@ -173,6 +180,16 @@ public class DashboardActivity extends AppCompatActivity implements GenerateCSVC
         refreshData();
     }
 
+    private void wireSummaryCard(int viewId, String listType) {
+        View view = findViewById(viewId);
+        if (view == null) return;
+        view.setOnClickListener(v -> {
+            Intent intent = new Intent(this, ChimwemweSummaryListActivity.class);
+            intent.putExtra(ChimwemweSummaryListActivity.EXTRA_TYPE, listType);
+            startActivity(intent);
+        });
+    }
+
     private void loadData() {
         if (binding.dashProgressbar != null) {
             binding.dashProgressbar.setVisibility(View.VISIBLE);
@@ -192,13 +209,91 @@ public class DashboardActivity extends AppCompatActivity implements GenerateCSVC
     @Override
     protected void onResume() {
         super.onResume();
+        try {
+            SyncStatusBroadcastReceiver receiver = SyncStatusBroadcastReceiver.getInstance();
+            if (receiver != null) receiver.addSyncStatusListener(this);
+        } catch (Exception e) {
+            Timber.e(e, "addSyncStatusListener");
+        }
+        kickServerSync(false);
         loadData();
+    }
+
+    @Override
+    public void onSyncStart() {
+        // Any sync that starts while the dashboard is visible and was NOT our own
+        // onResume auto-sync is treated as user-initiated. This catches the toolbar/
+        // drawer sync icon (from NavigationMenu in opensrp-ecap-chw-core) which does
+        // not go through our btnSync click handler.
+        long now = System.currentTimeMillis();
+        boolean ours = (lastAutoSyncKickMs != 0L)
+                && (now - lastAutoSyncKickMs <= AUTO_SYNC_OWNERSHIP_WINDOW_MS);
+        if (!ours) userInitiatedSync = true;
+        lastAutoSyncKickMs = 0L;
+    }
+
+    @Override
+    public void onSyncInProgress(FetchStatus fetchStatus) {
+        // No-op: incremental progress is not surfaced on the dashboard.
+    }
+
+    @Override
+    public void onSyncComplete(FetchStatus fetchStatus) {
+        // Always refresh local counts when sync finishes, regardless of who triggered it.
+        loadData();
+
+        // Only show the completion popup when the user explicitly initiated the sync —
+        // background/periodic syncs should not interrupt with a dialog.
+        if (!userInitiatedSync) return;
+        userInitiatedSync = false;
+
+        if (isFinishing() || isDestroyed()) return;
+        String message;
+        if (fetchStatus == FetchStatus.fetched) {
+            message = "Sync complete — your data is up to date.";
+        } else if (fetchStatus == FetchStatus.nothingFetched) {
+            message = "Sync complete — you are already up to date.";
+        } else {
+            String reason = fetchStatus != null && fetchStatus.displayValue() != null
+                    ? fetchStatus.displayValue()
+                    : "Please check your connection and try again.";
+            message = "Sync failed — " + reason;
+        }
+
+        try {
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+        } catch (Exception e) {
+            Timber.e(e, "onSyncComplete toast");
+        }
+    }
+
+    private void kickServerSync(boolean force) {
+        long now = System.currentTimeMillis();
+        if (!force && now - lastAutoSyncMs < AUTO_SYNC_COOLDOWN_MS) {
+            return;
+        }
+        lastAutoSyncMs = now;
+        // Only the silent onResume auto-sync needs ownership marking. The force=true
+        // path from btnSync already sets userInitiatedSync=true at the click site, so
+        // marking it here would falsely suppress its own popup.
+        if (!force) lastAutoSyncKickMs = now;
+        try {
+            SyncServiceJob.scheduleJobImmediately(SyncServiceJob.TAG);
+        } catch (Exception e) {
+            Timber.e(e, "kickServerSync failed");
+        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         handler.removeCallbacks(runnable);
+        try {
+            SyncStatusBroadcastReceiver receiver = SyncStatusBroadcastReceiver.getInstance();
+            if (receiver != null) receiver.removeSyncStatusListener(this);
+        } catch (Exception e) {
+            Timber.e(e, "removeSyncStatusListener");
+        }
     }
 
     // ── Options menu ──────────────────────────────────────────────

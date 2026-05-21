@@ -181,6 +181,9 @@ public class ChwRepositoryFlv {
                 case 49:
                     upgradeToVersion49(db);
                     break;
+                case 50:
+                    upgradeToVersion50(db);
+                    break;
                 default:
                     break;
             }
@@ -1406,6 +1409,15 @@ public class ChwRepositoryFlv {
         }
     }
 
+    private static void upgradeToVersion50(SQLiteDatabase db) {
+        // Backfill participant_id for participants added via AddParticipantActivity (NULL participant_id)
+        try {
+            com.bluecodeltd.chimwemwe.chw.dao.ParticipantDao.migrateToV50(db);
+        } catch (Exception e) {
+            Timber.e(e, "upgradeToVersion50 ParticipantDao");
+        }
+    }
+
     private static void upgradeToVersion43(SQLiteDatabase db) {
         try { com.bluecodeltd.chimwemwe.chw.dao.HotspotGroupDao.migrateToV43(db); } catch (Exception e) {
             Timber.e(e, "upgradeToVersion43 HotspotGroupDao");
@@ -1422,7 +1434,7 @@ public class ChwRepositoryFlv {
         try { com.bluecodeltd.chimwemwe.chw.dao.MonthlyReviewDao.migrateToV43(db); } catch (Exception e) {
             Timber.e(e, "upgradeToVersion43 MonthlyReviewDao");
         }
-        try { com.bluecodeltd.chimwemwe.chw.dao.ChimwemweReferralDao.migrateToV43(db); } catch (Exception e) {
+        try { com.bluecodeltd.chimwemwe.chw.dao.ChimwemweReferralDao.migrateToV44(db); } catch (Exception e) {
             Timber.e(e, "upgradeToVersion43 ChimwemweReferralDao");
         }
     }
