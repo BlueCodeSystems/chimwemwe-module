@@ -38,3 +38,4 @@ Task
 .claude/settings.local.json
 .claude/
 .gradle-user-home/
+logcat_*.txt
