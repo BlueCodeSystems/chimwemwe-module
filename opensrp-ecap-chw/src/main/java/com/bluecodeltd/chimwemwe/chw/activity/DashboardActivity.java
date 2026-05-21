@@ -44,6 +44,9 @@ import com.github.javiersantos.appupdater.AppUpdater;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.smartregister.chw.core.custom_views.NavigationMenu;
+import org.smartregister.domain.FetchStatus;
+import org.smartregister.job.SyncServiceJob;
+import org.smartregister.receiver.SyncStatusBroadcastReceiver;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -54,7 +57,8 @@ import java.util.Map;
 
 import timber.log.Timber;
 
-public class DashboardActivity extends AppCompatActivity implements GenerateCSVContract.View {
+public class DashboardActivity extends AppCompatActivity
+        implements GenerateCSVContract.View, SyncStatusBroadcastReceiver.SyncStatusListener {
 
     private com.bluecodeltd.chimwemwe.chw.databinding.ActivityDashboardBinding binding;
     private GenerateCSVContract.Presenter presenter;
@@ -68,6 +72,11 @@ public class DashboardActivity extends AppCompatActivity implements GenerateCSVC
     private String phone = "";
     private static final int FORTY_FIVE_MINUTES = 2_700_000;
     private static final int REQUEST_CODE_IMPORT_CSV = 49011;
+    private static final long AUTO_SYNC_COOLDOWN_MS = 60_000L;
+    private long lastAutoSyncMs = 0L;
+    // True when the user explicitly tapped the sync button; the completion popup
+    // only shows for user-initiated syncs to avoid pop-ups during background sync.
+    private boolean userInitiatedSync = false;
 
     private final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm");
 
@@ -82,7 +91,11 @@ public class DashboardActivity extends AppCompatActivity implements GenerateCSVC
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         toolbar.getOverflowIcon().setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP);
 
-        binding.btnSync.setOnClickListener(v -> loadData());
+        binding.btnSync.setOnClickListener(v -> {
+            userInitiatedSync = true;
+            kickServerSync(true);
+            loadData();
+        });
 
         NavigationMenu.getInstance(this, null, toolbar);
 
@@ -91,19 +104,23 @@ public class DashboardActivity extends AppCompatActivity implements GenerateCSVC
         appUpdater = new AppUpdater(this);
         UpdateManager.startOnce(this);
 
-        // Chimwemwe Groups register row → navigate to register
-        if (binding.registerRowGroups != null) {
-            binding.registerRowGroups.setOnClickListener(v ->
-                    startActivity(new Intent(this, ChimwemweRegisterActivity.class)));
-        }
+        // Wire each dashboard stat card to its drill-down screen.
+        wireSummaryCard(R.id.row_facilities,   ChimwemweSummaryListActivity.TYPE_FACILITIES);
+        wireSummaryCard(R.id.row_hotspots,     ChimwemweSummaryListActivity.TYPE_HOTSPOTS);
+        wireSummaryCard(R.id.row_participants, ChimwemweSummaryListActivity.TYPE_PARTICIPANTS);
+        wireSummaryCard(R.id.row_graduates,    ChimwemweSummaryListActivity.TYPE_GRADUATES);
 
-        // Only Chimwemwe Groups should be clickable from the dashboard
-        disableClick(R.id.row_facilities);
-        disableClick(R.id.row_hotspots);
-        disableClick(R.id.row_participants);
-        disableClick(R.id.row_graduates);
-        findViewById(R.id.row_groups).setOnClickListener(v ->
-                startActivity(new Intent(this, HotspotGroupListActivity.class)));
+        // Groups and Sessions both drill into the group list (sessions are tracked per group).
+        View rowGroups = findViewById(R.id.row_groups);
+        if (rowGroups != null) {
+            rowGroups.setOnClickListener(v ->
+                    startActivity(new Intent(this, HotspotGroupListActivity.class)));
+        }
+        View rowSessions = findViewById(R.id.row_sessions);
+        if (rowSessions != null) {
+            rowSessions.setOnClickListener(v ->
+                    startActivity(new Intent(this, HotspotGroupListActivity.class)));
+        }
 
         // Shared prefs
         Bundle extras = getIntent().getExtras();
@@ -157,12 +174,14 @@ public class DashboardActivity extends AppCompatActivity implements GenerateCSVC
         refreshData();
     }
 
-    private void disableClick(int viewId) {
+    private void wireSummaryCard(int viewId, String listType) {
         View view = findViewById(viewId);
         if (view == null) return;
-        view.setOnClickListener(null);
-        view.setClickable(false);
-        view.setFocusable(false);
+        view.setOnClickListener(v -> {
+            Intent intent = new Intent(this, ChimwemweSummaryListActivity.class);
+            intent.putExtra(ChimwemweSummaryListActivity.EXTRA_TYPE, listType);
+            startActivity(intent);
+        });
     }
 
     private void loadData() {
@@ -184,13 +203,87 @@ public class DashboardActivity extends AppCompatActivity implements GenerateCSVC
     @Override
     protected void onResume() {
         super.onResume();
+        try {
+            SyncStatusBroadcastReceiver receiver = SyncStatusBroadcastReceiver.getInstance();
+            if (receiver != null) receiver.addSyncStatusListener(this);
+        } catch (Exception e) {
+            Timber.e(e, "addSyncStatusListener");
+        }
+        kickServerSync(false);
         loadData();
+    }
+
+    @Override
+    public void onSyncStart() {
+        // No-op: the dashboard does not show a progress spinner during background sync.
+    }
+
+    @Override
+    public void onSyncInProgress(FetchStatus fetchStatus) {
+        // No-op: incremental progress is not surfaced on the dashboard.
+    }
+
+    @Override
+    public void onSyncComplete(FetchStatus fetchStatus) {
+        // Always refresh local counts when sync finishes, regardless of who triggered it.
+        loadData();
+
+        // Only show the completion popup when the user explicitly initiated the sync —
+        // background/periodic syncs should not interrupt with a dialog.
+        if (!userInitiatedSync) return;
+        userInitiatedSync = false;
+
+        if (isFinishing() || isDestroyed()) return;
+
+        boolean success = fetchStatus == FetchStatus.fetched
+                || fetchStatus == FetchStatus.nothingFetched;
+        String title = success ? "Sync complete" : "Sync failed";
+        String message;
+        if (fetchStatus == FetchStatus.fetched) {
+            message = "Your data is up to date.";
+        } else if (fetchStatus == FetchStatus.nothingFetched) {
+            message = "You are already up to date — nothing new from the server.";
+        } else {
+            String reason = fetchStatus != null && fetchStatus.displayValue() != null
+                    ? fetchStatus.displayValue()
+                    : "Please check your connection and try again.";
+            message = "Sync did not complete. " + reason;
+        }
+
+        try {
+            new AlertDialog.Builder(this)
+                    .setTitle(title)
+                    .setMessage(message)
+                    .setPositiveButton(android.R.string.ok, null)
+                    .show();
+        } catch (Exception e) {
+            Timber.e(e, "onSyncComplete dialog");
+        }
+    }
+
+    private void kickServerSync(boolean force) {
+        long now = System.currentTimeMillis();
+        if (!force && now - lastAutoSyncMs < AUTO_SYNC_COOLDOWN_MS) {
+            return;
+        }
+        lastAutoSyncMs = now;
+        try {
+            SyncServiceJob.scheduleJobImmediately(SyncServiceJob.TAG);
+        } catch (Exception e) {
+            Timber.e(e, "kickServerSync failed");
+        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         handler.removeCallbacks(runnable);
+        try {
+            SyncStatusBroadcastReceiver receiver = SyncStatusBroadcastReceiver.getInstance();
+            if (receiver != null) receiver.removeSyncStatusListener(this);
+        } catch (Exception e) {
+            Timber.e(e, "removeSyncStatusListener");
+        }
     }
 
     // ── Options menu ──────────────────────────────────────────────
