@@ -354,7 +354,14 @@ public class ChimwemweSummaryListActivity extends AppCompatActivity {
             h.tvSessions.setText(m.getSessionsCompleted() + " / 14 sessions");
             h.root.setOnClickListener(v -> {
                 Intent intent = new Intent(ChimwemweSummaryListActivity.this, ChimwemweParticipantProfileActivity.class);
-                intent.putExtra("participant_id", m.getId());
+                // Pass both the DB row id AND the business participant_id code.
+                // OpenSRP's ClientProcessor sometimes rewrites the row PK to a
+                // non-numeric value, which causes the cursor to read m.getId() as 0
+                // and the profile activity to bounce back to this register. The
+                // profile falls back to getParticipantByCode() when the row id
+                // doesn't resolve.
+                intent.putExtra(ChimwemweParticipantProfileActivity.EXTRA_PARTICIPANT_ID, m.getId());
+                intent.putExtra(ChimwemweParticipantProfileActivity.EXTRA_PARTICIPANT_CODE, m.getParticipantId());
                 startActivity(intent);
             });
         }

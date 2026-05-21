@@ -90,7 +90,11 @@
             android:id="@+id/pb_sessions_profile"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
-            android:layout_height="5dp"
+            android:layout_height="10dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="6dp"
             android:max="14"
             android:progress="0"
             android:progressDrawable="@drawable/progress_sessions_header" />
