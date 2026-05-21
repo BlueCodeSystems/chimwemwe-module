@@ -274,9 +274,11 @@ public class HotspotGroupListActivity extends AppCompatActivity {
                         m.setSession13Date(fieldValue(step3, "session_13_date"));
                         m.setSession14Date(fieldValue(step3, "session_14_date"));
                     }
-                    long dbId = HotspotGroupDao.insertGroup(m);
-                    m.setId(dbId);
-
+                    // Single write path: persist via the form/Event pipeline. ClientProcessor
+                    // materializes the row in ec_chimwemwe_group from the classification rules,
+                    // and the same Event is what gets synced to the server.
+                    // (The previous direct HotspotGroupDao.insertGroup call caused duplicate
+                    // rows because the same form submission was written twice.)
                     ChimwemweFormUtils.ensureFieldValue(form, "group_id", m.getGroupId());
                     ChimwemweFormUtils.saveRegistration(
                             ChimwemweFormUtils.processRegistration(form, "ec_chimwemwe_group", m.getGroupId()),
@@ -344,7 +346,7 @@ public class HotspotGroupListActivity extends AppCompatActivity {
 
     private static final int COLOR_NEW_BAR   = Color.parseColor("#94A3B8");
     private static final int COLOR_ACT_BAR   = Color.parseColor("#0284C7");
-    private static final int COLOR_DONE_BAR  = Color.parseColor("#166534");
+    private static final int COLOR_DONE_BAR  = Color.parseColor("#0284C7");
     private static final int COLOR_NEW_ICON  = Color.parseColor("#F1F5F9");
     private static final int COLOR_ACT_ICON  = Color.parseColor("#E0F2FE");
     private static final int COLOR_DONE_ICON = Color.parseColor("#DCFCE7");
