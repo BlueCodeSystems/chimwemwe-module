@@ -46,7 +46,6 @@
     },
     "encounter_location": ""
   },
-
   "step1": {
     "title": "Group & Venue Details",
     "display_back_button": "true",
@@ -180,6 +179,14 @@
           "value": "false",
           "err": ""
         }
+      },
+      {
+        "key": "delete_status",
+        "type": "hidden",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "delete_status",
+        "value": "0"
       }
     ]
   }

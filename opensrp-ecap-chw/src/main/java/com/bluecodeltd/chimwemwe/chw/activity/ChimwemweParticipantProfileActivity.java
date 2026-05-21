@@ -310,7 +310,14 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity
                 .setPositiveButton("Delete", (d, w) -> Threading.io(() -> {
                     boolean ok = false;
                     try {
+                        // 1. Cascading local soft-delete (immediate UX + cleans up
+                        //    attendance / review / referral child rows).
                         ParticipantDao.deleteParticipant(participantId);
+                        // 2. Emit a syncable Event so other devices see the delete
+                        //    on next pull. The form now carries a delete_status field
+                        //    that maps to Client.attributes.delete_status and through
+                        //    ec_client_fields.json onto the table column.
+                        emitParticipantDeleteEvent(participant);
                         ok = true;
                     } catch (Exception e) {
                         Timber.e(e, "Delete participant failed");
@@ -468,6 +475,33 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity
                 Timber.e(e, "onActivityResult profile");
             }
         });
+    }
+
+    /**
+     * Builds a Chimwemwe Participant Registration form populated with the
+     * participant's current values plus delete_status=1, and submits it through
+     * ChimwemweFormUtils so an Event is recorded locally and queued for the next
+     * /rest/event/add push. ec_client_fields.json maps Client.attributes.delete_status
+     * onto the ec_chimwemwe_participant.delete_status column on other devices on pull.
+     */
+    private void emitParticipantDeleteEvent(ParticipantModel p) {
+        if (p == null) return;
+        String entityId = p.getParticipantId();
+        if (entityId == null || entityId.trim().isEmpty()) return;
+        try {
+            FormUtils formUtils = new FormUtils(this);
+            JSONObject form = formUtils.getFormJson("chimwemwe_participant_register");
+            if (form == null) return;
+            form.put("entity_id", entityId);
+            java.util.Map<String, String> map = participantToMap(p);
+            map.put("delete_status", "1");
+            CoreJsonFormUtils.populateJsonForm(form, map);
+            ChimwemweFormUtils.saveRegistration(
+                    ChimwemweFormUtils.processRegistration(form, "ec_chimwemwe_participant", entityId),
+                    true);
+        } catch (Exception e) {
+            Timber.w(e, "emitParticipantDeleteEvent failed; local delete persists but sync may not");
+        }
     }
 
     private java.util.Map<String, String> participantToMap(ParticipantModel p) {

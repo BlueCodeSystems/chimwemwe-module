@@ -149,7 +149,14 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
                     try {
                         long dbId = currentGroup != null ? currentGroup.getId() : -1L;
                         if (dbId > 0) {
+                            // 1. Cascading local soft-delete (immediate UX + cleans up
+                            //    child tables that the form/Event path does not touch).
                             HotspotGroupDao.deleteGroup(dbId);
+                            // 2. Emit a syncable Event so the server (and other devices,
+                            //    on next pull) see the delete. The form now carries a
+                            //    delete_status field that maps to Client.attributes.delete_status,
+                            //    which ec_client_fields.json materialises into the table column.
+                            emitGroupDeleteEvent(currentGroup, gid);
                             ok = true;
                         }
                     } catch (Exception e) {
@@ -167,6 +174,31 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
                     });
                 }))
                 .show();
+    }
+
+    /**
+     * Builds a Chimwemwe Group Registration form populated with the group's current
+     * values plus delete_status=1, and submits it through ChimwemweFormUtils so an
+     * Event is recorded locally and queued for the next /rest/event/add push. The
+     * server-side ec_client_fields.json mapping materialises Client.attributes.delete_status
+     * into the ec_chimwemwe_group.delete_status column on other devices on next pull.
+     */
+    private void emitGroupDeleteEvent(HotspotGroupModel group, String entityId) {
+        if (group == null || entityId == null || entityId.trim().isEmpty()) return;
+        try {
+            FormUtils formUtils = new FormUtils(this);
+            JSONObject form = formUtils.getFormJson("chimwemwe_group_register");
+            if (form == null) return;
+            form.put("entity_id", entityId);
+            java.util.Map<String, String> map = groupToMap(group);
+            map.put("delete_status", "1");
+            CoreJsonFormUtils.populateJsonForm(form, map);
+            ChimwemweFormUtils.saveRegistration(
+                    ChimwemweFormUtils.processRegistration(form, "ec_chimwemwe_group", entityId),
+                    true);
+        } catch (Exception e) {
+            Timber.w(e, "emitGroupDeleteEvent failed; local delete persists but sync may not");
+        }
     }
 
     @Override
