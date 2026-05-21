@@ -40,8 +40,8 @@ public class ChimwemweRegisterProvider implements RecyclerViewProvider<Chimwemwe
     private static final int COLOR_ACT_TEXT  = Color.parseColor("#0284C7");
     private static final int COLOR_ACT_BADGE = Color.parseColor("#E0F2FE");
 
-    // COMPLETE — all 14 sessions recorded (green)
-    private static final int COLOR_DONE_BAR   = Color.parseColor("#166534");
+    // COMPLETE — all 14 sessions recorded (use the same blue as the progress bar)
+    private static final int COLOR_DONE_BAR   = Color.parseColor("#0284C7");
     private static final int COLOR_DONE_ICON  = Color.parseColor("#DCFCE7");
     private static final int COLOR_DONE_TEXT  = Color.parseColor("#166534");
     private static final int COLOR_DONE_BADGE = Color.parseColor("#DCFCE7");

@@ -78,6 +78,14 @@ public class ChimwemweRegisterFragment extends BaseSafeRegisterFragment
     @Override
     public void setupViews(View view) {
         try {
+            // Seed `filters` with the base delete_status predicate BEFORE the framework's
+            // initial countExecute/filterandSortExecute run inside super.setupViews(view).
+            // Without this, the very first query has no WHERE clause and would include
+            // soft-deleted rows. buildSqlFilter("") returns just the WHERE predicate;
+            // once the user types in the search bar, filter() will replace this value.
+            if (filters == null || filters.isEmpty()) {
+                this.filters = buildSqlFilter("");
+            }
             super.setupViews(view);
 
             Toolbar toolbar = view.findViewById(org.smartregister.R.id.register_toolbar);
@@ -235,12 +243,19 @@ public class ChimwemweRegisterFragment extends BaseSafeRegisterFragment
             int count = 0;
             try {
                 String joinClause =
-                        " LEFT JOIN (SELECT group_id, COUNT(*) AS p_count FROM ec_chimwemwe_participant GROUP BY group_id) AS participant_counts" +
+                        " LEFT JOIN (SELECT group_id, COUNT(*) AS p_count FROM ec_chimwemwe_participant" +
+                        " WHERE (delete_status IS NULL OR delete_status <> '1') GROUP BY group_id) AS participant_counts" +
                         " ON participant_counts.group_id = ec_chimwemwe_group.group_id" +
-                        " LEFT JOIN (SELECT group_id, COUNT(DISTINCT session_number) AS s_count FROM ec_chimwemwe_session_attendance GROUP BY group_id) AS attendance_counts" +
+                        " LEFT JOIN (SELECT group_id, COUNT(DISTINCT session_number) AS s_count FROM ec_chimwemwe_session_attendance" +
+                        " WHERE (delete_status IS NULL OR delete_status <> '1') GROUP BY group_id) AS attendance_counts" +
                         " ON attendance_counts.group_id = ec_chimwemwe_group.group_id";
-                String filterClause = (filters == null || filters.isEmpty()) ? "" : " " + filters;
-                String query = "SELECT COUNT(*) FROM " + TABLE + joinClause + filterClause;
+                // When the user has typed in the search bar, `filters` is already a full
+                // WHERE clause (built by buildSqlFilter) that includes the delete_status
+                // predicate. On initial load, `filters` is empty — we must add our own.
+                String whereClause = (filters == null || filters.isEmpty())
+                        ? " WHERE (ec_chimwemwe_group.delete_status IS NULL OR ec_chimwemwe_group.delete_status <> '1')"
+                        : " " + filters;
+                String query = "SELECT COUNT(*) FROM " + TABLE + joinClause + whereClause;
                 Cursor cursor = context().commonrepository(TABLE)
                         .rawCustomQueryForAdapter(query);
                 if (cursor != null) {
@@ -296,6 +311,10 @@ public class ChimwemweRegisterFragment extends BaseSafeRegisterFragment
     @Override
     protected void onResumption() {
         super.onResumption();
+        // Re-run the cursor query (not just notify) so rows soft-deleted from child
+        // screens (group/participant detail) disappear when we return to the register.
+        try { countExecute(); } catch (Exception e) { Timber.e(e, "onResumption: countExecute"); }
+        try { filterandSortInInitializeQueries(); } catch (Exception e) { Timber.e(e, "onResumption: filterandSort"); }
         if (clientAdapter != null) {
             try { clientAdapter.notifyDataSetChanged(); } catch (Exception ignored) {}
         }

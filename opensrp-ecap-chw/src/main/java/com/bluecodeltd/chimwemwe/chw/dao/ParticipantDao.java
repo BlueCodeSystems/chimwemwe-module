@@ -324,8 +324,9 @@ public class ParticipantDao extends AbstractDao {
 
     public static int countCompletedParticipants() {
         try {
-            String sql = "SELECT COUNT(*) FROM " + TABLE + " p WHERE (" +
-                    sessionsDoneSelect().replace(" AS sessions_done", "") + ") >= 14";
+            String sql = "SELECT COUNT(*) FROM " + TABLE + " p" +
+                    " WHERE (p.delete_status IS NULL OR p.delete_status <> '1')" +
+                    " AND (" + sessionsDoneSelect().replace(" AS sessions_done", "") + ") >= 14";
             List<Integer> res = AbstractDao.readData(sql, cursor -> cursor.getInt(0));
             return (res != null && !res.isEmpty()) ? res.get(0) : 0;
         } catch (Exception e) {
