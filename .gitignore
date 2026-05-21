@@ -33,6 +33,8 @@ opensrp-chw/lmh/
 hs_err_pid*
 opensrp-ecap-chw/ecap/*
 Task
+!opensrp-ecap-chw/src/main/java/com/bluecodeltd/chimwemwe/chw/task/
+!opensrp-ecap-chw/src/main/java/com/bluecodeltd/chimwemwe/chw/task/**
 .claude/settings.local.json
 .claude/
 .gradle-user-home/
