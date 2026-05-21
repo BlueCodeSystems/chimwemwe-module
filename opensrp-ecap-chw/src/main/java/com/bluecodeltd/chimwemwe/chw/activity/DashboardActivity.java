@@ -19,7 +19,6 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.ViewModelProvider;
@@ -73,9 +72,16 @@ public class DashboardActivity extends AppCompatActivity
     private static final int FORTY_FIVE_MINUTES = 2_700_000;
     private static final int REQUEST_CODE_IMPORT_CSV = 49011;
     private static final long AUTO_SYNC_COOLDOWN_MS = 60_000L;
+    /** Time window (ms) within which onSyncStart is considered to belong to our own
+     *  kickServerSync(false) from onResume. Anything outside this window is treated
+     *  as user-initiated (toolbar sync icon, dashboard sync button, etc.). */
+    private static final long AUTO_SYNC_OWNERSHIP_WINDOW_MS = 3_000L;
     private long lastAutoSyncMs = 0L;
-    // True when the user explicitly tapped the sync button; the completion popup
-    // only shows for user-initiated syncs to avoid pop-ups during background sync.
+    /** Set when we fire a non-user auto-sync. onSyncStart checks against this to decide
+     *  whether the sync we're seeing is ours (suppress popup) or user-initiated (show popup). */
+    private volatile long lastAutoSyncKickMs = 0L;
+    /** True when the completion popup should be shown. Set by either btnSync taps or
+     *  onSyncStart for any sync we didn't kick ourselves. */
     private boolean userInitiatedSync = false;
 
     private final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm");
@@ -215,7 +221,15 @@ public class DashboardActivity extends AppCompatActivity
 
     @Override
     public void onSyncStart() {
-        // No-op: the dashboard does not show a progress spinner during background sync.
+        // Any sync that starts while the dashboard is visible and was NOT our own
+        // onResume auto-sync is treated as user-initiated. This catches the toolbar/
+        // drawer sync icon (from NavigationMenu in opensrp-ecap-chw-core) which does
+        // not go through our btnSync click handler.
+        long now = System.currentTimeMillis();
+        boolean ours = (lastAutoSyncKickMs != 0L)
+                && (now - lastAutoSyncKickMs <= AUTO_SYNC_OWNERSHIP_WINDOW_MS);
+        if (!ours) userInitiatedSync = true;
+        lastAutoSyncKickMs = 0L;
     }
 
     @Override
@@ -234,30 +248,22 @@ public class DashboardActivity extends AppCompatActivity
         userInitiatedSync = false;
 
         if (isFinishing() || isDestroyed()) return;
-
-        boolean success = fetchStatus == FetchStatus.fetched
-                || fetchStatus == FetchStatus.nothingFetched;
-        String title = success ? "Sync complete" : "Sync failed";
         String message;
         if (fetchStatus == FetchStatus.fetched) {
-            message = "Your data is up to date.";
+            message = "Sync complete — your data is up to date.";
         } else if (fetchStatus == FetchStatus.nothingFetched) {
-            message = "You are already up to date — nothing new from the server.";
+            message = "Sync complete — you are already up to date.";
         } else {
             String reason = fetchStatus != null && fetchStatus.displayValue() != null
                     ? fetchStatus.displayValue()
                     : "Please check your connection and try again.";
-            message = "Sync did not complete. " + reason;
+            message = "Sync failed — " + reason;
         }
 
         try {
-            new AlertDialog.Builder(this)
-                    .setTitle(title)
-                    .setMessage(message)
-                    .setPositiveButton(android.R.string.ok, null)
-                    .show();
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show();
         } catch (Exception e) {
-            Timber.e(e, "onSyncComplete dialog");
+            Timber.e(e, "onSyncComplete toast");
         }
     }
 
@@ -267,6 +273,10 @@ public class DashboardActivity extends AppCompatActivity
             return;
         }
         lastAutoSyncMs = now;
+        // Only the silent onResume auto-sync needs ownership marking. The force=true
+        // path from btnSync already sets userInitiatedSync=true at the click site, so
+        // marking it here would falsely suppress its own popup.
+        if (!force) lastAutoSyncKickMs = now;
         try {
             SyncServiceJob.scheduleJobImmediately(SyncServiceJob.TAG);
         } catch (Exception e) {
