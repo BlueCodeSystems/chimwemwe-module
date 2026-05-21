@@ -43,7 +43,7 @@ public class ChimwemweSummaryListActivity extends AppCompatActivity {
 
     private static final int COLOR_NEW_BAR   = Color.parseColor("#94A3B8");
     private static final int COLOR_ACT_BAR   = Color.parseColor("#0284C7");
-    private static final int COLOR_DONE_BAR  = Color.parseColor("#166534");
+    private static final int COLOR_DONE_BAR  = Color.parseColor("#0284C7");
     private static final int COLOR_NEW_ICON  = Color.parseColor("#F1F5F9");
     private static final int COLOR_ACT_ICON  = Color.parseColor("#E0F2FE");
     private static final int COLOR_DONE_ICON = Color.parseColor("#DCFCE7");

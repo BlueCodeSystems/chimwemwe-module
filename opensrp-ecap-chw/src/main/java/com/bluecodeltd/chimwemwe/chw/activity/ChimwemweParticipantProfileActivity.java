@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -307,26 +308,23 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity
                 .setMessage("This will remove the participant and clear any attendance, reviews and referrals linked to them.")
                 .setNegativeButton("Cancel", null)
                 .setPositiveButton("Delete", (d, w) -> Threading.io(() -> {
+                    boolean ok = false;
                     try {
-                        String pidCode = participant != null ? participant.getParticipantId() : null;
-                        String gid = participant != null ? participant.getGroupId() : null;
-
-                        FormUtils formUtils = new FormUtils(this);
-                        JSONObject form = formUtils.getFormJson("chimwemwe_participant_register");
-                        if (form != null && pidCode != null && !pidCode.trim().isEmpty()) {
-                            form.put("entity_id", pidCode);
-                            java.util.Map<String, String> map = participantToMap(participant);
-                            map.put("delete_status", "1");
-                            CoreJsonFormUtils.populateJsonForm(form, map);
-                            ChimwemweFormUtils.saveRegistration(
-                                    ChimwemweFormUtils.processRegistration(form, "ec_chimwemwe_participant", pidCode),
-                                    true
-                            );
-                        }
+                        ParticipantDao.deleteParticipant(participantId);
+                        ok = true;
                     } catch (Exception e) {
                         Timber.e(e, "Delete participant failed");
                     }
-                    Threading.main(this::finish);
+                    final boolean success = ok;
+                    Threading.main(() -> {
+                        Toast.makeText(this,
+                                success ? "Participant deleted" : "Could not delete participant",
+                                Toast.LENGTH_SHORT).show();
+                        if (success) {
+                            setResult(RESULT_OK);
+                            finish();
+                        }
+                    });
                 }))
                 .show();
     }

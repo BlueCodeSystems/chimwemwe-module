@@ -145,25 +145,25 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
                 .setMessage("This will delete the group and all its session attendance and review records.")
                 .setNegativeButton("Cancel", null)
                 .setPositiveButton("Delete", (d, w) -> Threading.io(() -> {
+                    boolean ok = false;
                     try {
-                        FormUtils formUtils = new FormUtils(this);
-                        JSONObject form = formUtils.getFormJson("chimwemwe_group_register");
-                        if (form != null) {
-                            form.put("entity_id", gid);
-                            java.util.Map<String, String> map = groupToMap(currentGroup);
-                            map.put("delete_status", "1");
-                            CoreJsonFormUtils.populateJsonForm(form, map);
-                            ChimwemweFormUtils.saveRegistration(
-                                    ChimwemweFormUtils.processRegistration(form, "ec_chimwemwe_group", gid),
-                                    true
-                            );
+                        long dbId = currentGroup != null ? currentGroup.getId() : -1L;
+                        if (dbId > 0) {
+                            HotspotGroupDao.deleteGroup(dbId);
+                            ok = true;
                         }
                     } catch (Exception e) {
                         Timber.e(e, "Delete group failed");
                     }
+                    final boolean success = ok;
                     Threading.main(() -> {
-                        Toast.makeText(this, "Group deleted", Toast.LENGTH_SHORT).show();
-                        finish();
+                        Toast.makeText(this,
+                                success ? "Group deleted" : "Could not delete group",
+                                Toast.LENGTH_SHORT).show();
+                        if (success) {
+                            setResult(RESULT_OK);
+                            finish();
+                        }
                     });
                 }))
                 .show();
