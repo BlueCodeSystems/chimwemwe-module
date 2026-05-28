@@ -165,8 +165,12 @@
                     android:textStyle="bold"
                     android:letterSpacing="0.05" />
 
+                <!-- NOT SAVED pill — visible when the row's group_id is blank.
+                     Same condition that triggers the "Save the group first"
+                     toast on the detail screen when the user tries to add a
+                     session, surfaced on the register row instead. -->
                 <TextView
-                    android:id="@+id/tv_unsynced_badge"
+                    android:id="@+id/tv_not_saved_badge"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
@@ -175,7 +179,7 @@
                     android:paddingTop="4dp"
                     android:paddingBottom="4dp"
                     android:background="@drawable/bg_chip_danger"
-                    android:text="UNSYNCED"
+                    android:text="NOT SAVED"
                     android:textColor="#FFFFFF"
                     android:textSize="9sp"
                     android:textStyle="bold"

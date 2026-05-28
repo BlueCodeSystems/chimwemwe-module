@@ -117,13 +117,8 @@ public class HotspotGroupListActivity extends AppCompatActivity {
                 groups = HotspotGroupDao.getAllGroups();
             }
             final List<HotspotGroupModel> result = groups != null ? groups : new ArrayList<>();
-            // Resolve which groups still have unsynced events on this device so the
-            // adapter can flag them as "UNSYNCED" in the list. One batch query — no
-            // per-row work.
-            final java.util.Set<String> unsynced = HotspotGroupDao.getUnsyncedGroupIds();
             Threading.main(() -> {
                 allGroups = result;
-                adapter.setUnsyncedIds(unsynced);
                 String q = searchBar.getText().toString();
                 if (!q.isEmpty()) {
                     applyFilter(q);
@@ -361,17 +356,11 @@ public class HotspotGroupListActivity extends AppCompatActivity {
 
     class GroupAdapter extends RecyclerView.Adapter<ChimwemweGroupViewHolder> {
         private List<HotspotGroupModel> data;
-        private java.util.Set<String> unsyncedIds = java.util.Collections.emptySet();
 
         GroupAdapter(List<HotspotGroupModel> data) { this.data = data; }
 
         void setData(List<HotspotGroupModel> d) {
             this.data = d != null ? d : new ArrayList<>();
-            notifyDataSetChanged();
-        }
-
-        void setUnsyncedIds(java.util.Set<String> ids) {
-            this.unsyncedIds = ids != null ? ids : java.util.Collections.<String>emptySet();
             notifyDataSetChanged();
         }
 
@@ -418,10 +407,12 @@ public class HotspotGroupListActivity extends AppCompatActivity {
                 h.tvGroupStatus.setTextColor(textColor);
                 h.tvGroupStatus.setBackgroundTintList(ColorStateList.valueOf(iconColor));
             }
-            if (h.tvUnsyncedBadge != null) {
-                boolean unsynced = m.getGroupId() != null
-                        && unsyncedIds.contains(m.getGroupId().trim());
-                h.tvUnsyncedBadge.setVisibility(unsynced ? View.VISIBLE : View.GONE);
+            // "NOT SAVED" pill — visible when the row's business code is missing,
+            // i.e. the same condition that triggers the "Save the group first"
+            // toast on the detail screen when the user tries to add a session.
+            if (h.tvNotSavedBadge != null) {
+                boolean notSaved = m.getGroupId() == null || m.getGroupId().trim().isEmpty();
+                h.tvNotSavedBadge.setVisibility(notSaved ? View.VISIBLE : View.GONE);
             }
 
             h.itemView.setOnClickListener(v -> openDetail(m.getId()));
