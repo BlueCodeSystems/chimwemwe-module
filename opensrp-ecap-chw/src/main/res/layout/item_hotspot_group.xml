@@ -166,6 +166,23 @@
                     android:letterSpacing="0.05" />
 
                 <TextView
+                    android:id="@+id/tv_unsynced_badge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:paddingStart="9dp"
+                    android:paddingEnd="9dp"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp"
+                    android:background="@drawable/bg_chip_danger"
+                    android:text="UNSYNCED"
+                    android:textColor="#FFFFFF"
+                    android:textSize="9sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.05"
+                    android:visibility="gone" />
+
+                <TextView
                     android:id="@+id/tv_participant_count"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

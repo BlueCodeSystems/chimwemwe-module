@@ -116,6 +116,18 @@ public class HouseholdServiceReportDao extends AbstractDao {
         }
     }
 
+    /**
+     * Soft-deletes a single service report row so the Services tab on the
+     * Chimwemwe participant profile can remove an entry without losing the
+     * record on the server (sync still ships the row carrying delete_status=1).
+     */
+    public static void deleteHouseholdService(String baseEntityId) {
+        if (baseEntityId == null || baseEntityId.trim().isEmpty()) return;
+        AbstractDao.updateDB(
+                "UPDATE ec_household_service_report SET delete_status='1' WHERE base_entity_id='"
+                        + baseEntityId.replace("'", "''") + "'");
+    }
+
     public static AbstractDao.DataMap<HouseholdServiceReportModel> getServiceModelMap() {
         return c -> {
 

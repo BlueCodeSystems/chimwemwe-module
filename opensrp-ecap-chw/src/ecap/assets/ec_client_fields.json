@@ -15913,7 +15913,8 @@
         { "column_name": "p19_child_attendance", "type": "Client", "json_mapping": { "field": "attributes.p19_child_attendance" } },
         { "column_name": "p20_cg_attendance", "type": "Client", "json_mapping": { "field": "attributes.p20_cg_attendance" } },
         { "column_name": "p20_child_attendance", "type": "Client", "json_mapping": { "field": "attributes.p20_child_attendance" } },
-        { "column_name": "session_gps", "type": "Client", "json_mapping": { "field": "attributes.session_gps" } }
+        { "column_name": "session_gps", "type": "Client", "json_mapping": { "field": "attributes.session_gps" } },
+        { "column_name": "caregiver_signature", "type": "Client", "json_mapping": { "field": "attributes.caregiver_signature" } }
       ]
     },
     {

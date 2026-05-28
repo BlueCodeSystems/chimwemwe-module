@@ -184,6 +184,9 @@ public class ChwRepositoryFlv {
                 case 50:
                     upgradeToVersion50(db);
                     break;
+                case 51:
+                    upgradeToVersion51(db);
+                    break;
                 default:
                     break;
             }
@@ -1415,6 +1418,15 @@ public class ChwRepositoryFlv {
             com.bluecodeltd.chimwemwe.chw.dao.ParticipantDao.migrateToV50(db);
         } catch (Exception e) {
             Timber.e(e, "upgradeToVersion50 ParticipantDao");
+        }
+    }
+
+    private static void upgradeToVersion51(SQLiteDatabase db) {
+        // Primary caregiver signature column on the session attendance table.
+        try {
+            com.bluecodeltd.chimwemwe.chw.dao.SessionAttendanceDao.migrateToV51(db);
+        } catch (Exception e) {
+            Timber.e(e, "upgradeToVersion51 SessionAttendanceDao");
         }
     }
 

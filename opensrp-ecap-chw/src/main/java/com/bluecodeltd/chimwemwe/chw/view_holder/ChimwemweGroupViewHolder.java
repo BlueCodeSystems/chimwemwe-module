@@ -19,6 +19,7 @@ public class ChimwemweGroupViewHolder extends RecyclerView.ViewHolder {
     public final TextView    tvGroupId;
     public final TextView    tvHotspotName;
     public final TextView    tvGroupStatus;
+    public final TextView    tvUnsyncedBadge;
     public final TextView    tvSessionsRecorded;
     public final ProgressBar pbSessions;
     public final TextView    tvParticipantCount;
@@ -32,6 +33,7 @@ public class ChimwemweGroupViewHolder extends RecyclerView.ViewHolder {
         tvGroupId          = itemView.findViewById(R.id.tv_group_id);
         tvHotspotName      = itemView.findViewById(R.id.tv_hotspot_name);
         tvGroupStatus      = itemView.findViewById(R.id.tv_group_status);
+        tvUnsyncedBadge    = itemView.findViewById(R.id.tv_unsynced_badge);
         tvSessionsRecorded = itemView.findViewById(R.id.tv_sessions_recorded);
         pbSessions         = itemView.findViewById(R.id.pb_sessions);
         tvParticipantCount = itemView.findViewById(R.id.tv_participant_count);

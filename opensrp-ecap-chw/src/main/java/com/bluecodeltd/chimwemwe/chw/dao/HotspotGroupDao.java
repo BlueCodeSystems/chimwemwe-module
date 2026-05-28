@@ -347,6 +347,33 @@ public class HotspotGroupDao extends AbstractDao {
         return (counts != null && !counts.isEmpty()) ? counts.get(0) : 0;
     }
 
+    /**
+     * Returns the set of business group_ids that have at least one Event in the
+     * OpenSRP `event` table whose syncStatus is "Unsynced" — i.e. the group has
+     * data on this device that has not yet been pushed to the server.
+     */
+    public static java.util.Set<String> getUnsyncedGroupIds() {
+        java.util.Set<String> ids = new java.util.HashSet<>();
+        try {
+            // Match against the group's business id (group_id), which is what
+            // processRegistration uses as the Event/Client baseEntityId for groups.
+            String sql = "SELECT DISTINCT g.group_id " +
+                    "FROM " + TABLE + " g " +
+                    "JOIN event e ON e.baseEntityId = g.group_id " +
+                    "WHERE e.syncStatus = 'Unsynced' " +
+                    "AND (g.delete_status IS NULL OR g.delete_status <> '1')";
+            List<String> rows = AbstractDao.readData(sql, cursor -> cursor.getString(0));
+            if (rows != null) {
+                for (String id : rows) {
+                    if (id != null && !id.trim().isEmpty()) ids.add(id.trim());
+                }
+            }
+        } catch (Exception ignored) {
+            // event table may not be reachable in some test contexts; treat as none unsynced.
+        }
+        return ids;
+    }
+
     /** Returns rows of [name, count] for distinct non-empty nearest_health_facility values. */
     public static List<String[]> getDistinctFacilitiesWithCount() {
         String sql = "SELECT nearest_health_facility, COUNT(*) AS cnt" +

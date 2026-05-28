@@ -27,6 +27,8 @@ public class SessionAttendanceDao extends AbstractDao {
                     "  session_number         INTEGER NOT NULL," +
                     "  session_date           TEXT," +
                     "  session_type           TEXT," +
+                    "  session_gps            TEXT," +
+                    "  caregiver_signature    TEXT," +
                     slotColumnsSql() +
                     ")";
 
@@ -105,6 +107,11 @@ public class SessionAttendanceDao extends AbstractDao {
         try { db.execSQL("ALTER TABLE " + TABLE + " ADD COLUMN participant_id TEXT"); } catch (Exception ignored) {}
     }
 
+    /** Primary caregiver signature (base64 PNG) captured at the time the session is recorded (DB v51). */
+    public static void migrateToV51(SQLiteDatabase db) {
+        try { db.execSQL("ALTER TABLE " + TABLE + " ADD COLUMN caregiver_signature TEXT"); } catch (Exception ignored) {}
+    }
+
     public static boolean hasSession(String groupId, int sessionNumber) {
         List<Integer> res = AbstractDao.readData(
                 "SELECT COUNT(*) FROM " + TABLE +
@@ -131,6 +138,15 @@ public class SessionAttendanceDao extends AbstractDao {
     public static String getSessionGps(String groupId, int sessionNumber) {
         List<String> res = AbstractDao.readData(
                 "SELECT session_gps FROM " + TABLE +
+                        " WHERE group_id=" + q(groupId) + " AND session_number=" + sessionNumber +
+                        " ORDER BY last_interacted_with DESC LIMIT 1",
+                cursor -> cursor.getString(0));
+        return (res != null && !res.isEmpty()) ? res.get(0) : null;
+    }
+
+    public static String getSessionSignature(String groupId, int sessionNumber) {
+        List<String> res = AbstractDao.readData(
+                "SELECT caregiver_signature FROM " + TABLE +
                         " WHERE group_id=" + q(groupId) + " AND session_number=" + sessionNumber +
                         " ORDER BY last_interacted_with DESC LIMIT 1",
                 cursor -> cursor.getString(0));
