@@ -28,7 +28,6 @@ import com.bluecodeltd.chimwemwe.chw.model.HotspotGroupModel;
 import com.bluecodeltd.chimwemwe.chw.util.ChimwemweFormUtils;
 import com.bluecodeltd.chimwemwe.chw.util.Threading;
 import com.bluecodeltd.chimwemwe.chw.view_holder.ChimwemweGroupViewHolder;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.vijay.jsonwizard.constants.JsonFormConstants;
 
 import org.json.JSONArray;
@@ -94,8 +93,20 @@ public class HotspotGroupListActivity extends AppCompatActivity {
             @Override public void afterTextChanged(Editable s) {}
         });
 
-        FloatingActionButton fab = findViewById(R.id.fab_add_group);
-        fab.setOnClickListener(v -> startRegistration());
+        // BottomNavigationView mirrors the drawer-route OpenSRP register
+        // pattern: a docked bar at the bottom of the screen with one
+        // "Add Group" action. Dashboard and drawer routes both land here.
+        com.google.android.material.bottomnavigation.BottomNavigationView bottomNav =
+                findViewById(R.id.bottom_nav_groups);
+        if (bottomNav != null) {
+            bottomNav.setOnItemSelectedListener(item -> {
+                if (item.getItemId() == R.id.action_add_group) {
+                    startRegistration();
+                    return true;
+                }
+                return false;
+            });
+        }
 
         loadGroups();
     }
