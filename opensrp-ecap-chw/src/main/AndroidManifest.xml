@@ -124,11 +124,15 @@
             android:exported="false"
             android:label="Add Participant"
             android:theme="@style/ChwTheme.NoActionBar" />
+        <!-- ChwTheme.Material (MaterialComponents) because the signature
+             dialog contains a MaterialButton with app:icon / app:cornerRadius
+             / app:backgroundTint — those styles need a Material theme to
+             inflate. Same change pattern as ChimwemweParticipantProfileActivity. -->
         <activity
             android:name=".activity.RecordAttendanceActivity"
             android:exported="false"
             android:label="Record Attendance"
-            android:theme="@style/ChwTheme.NoActionBar" />
+            android:theme="@style/ChwTheme.Material" />
         <activity
             android:name=".activity.ChimwemweRegisterActivity"
             android:exported="false"
