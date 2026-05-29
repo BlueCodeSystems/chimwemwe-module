@@ -132,6 +132,14 @@
         "openmrs_entity": "person_attribute",
         "openmrs_entity_id": "caregiver_signature",
         "openmrs_data_type": "text"
+      },
+      {
+        "key": "session_gps",
+        "type": "hidden",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "session_gps",
+        "openmrs_data_type": "text"
       }
     ]
   },

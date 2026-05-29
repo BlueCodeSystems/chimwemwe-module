@@ -45,11 +45,18 @@ public class RecordAttendanceActivity extends AppCompatActivity {
 
     private static final String[] ATTENDANCE_OPTIONS = {"Absent", "Group", "Home Visit"};
 
+    private static final int REQ_LOCATION = 4001;
+
     private String groupId;
     private int    sessionNumber;
 
     private TextView    etDate;
     private String      capturedSignature = "";
+    private String      capturedGps       = "";
+    // Pending callback, set when the user taps "Get location" before the
+    // permission has been granted. Fired in onRequestPermissionsResult once
+    // the user grants ACCESS_FINE_LOCATION.
+    private Runnable    pendingLocationCallback;
     private AttendanceAdapter adapter;
 
     @Override
@@ -140,13 +147,21 @@ public class RecordAttendanceActivity extends AppCompatActivity {
     /**
      * Opens the signature pad dialog. Tapping Save on the dialog captures the
      * signature and immediately runs {@link #persistAttendance(String)} so the
-     * caseworker doesn't have to tap Save twice.
+     * caseworker doesn't have to tap Save twice. The dialog also carries a
+     * "Get location" row — same role the type:gps widget plays on the
+     * household service form — so a fresh GPS reading is stamped on each
+     * session attendance row.
      */
     private void promptCaregiverSignatureThenSave(final String date) {
         View dialogView = LayoutInflater.from(this)
                 .inflate(R.layout.dialog_caregiver_signature, null);
         final com.github.gcacace.signaturepad.views.SignaturePad pad =
                 dialogView.findViewById(R.id.dialog_signature_pad);
+        final TextView tvLocation =
+                dialogView.findViewById(R.id.dialog_location_text);
+        // Reset between opens so a previous session's reading doesn't show
+        // as the current capture.
+        capturedGps = "";
 
         final androidx.appcompat.app.AlertDialog dialog =
                 new androidx.appcompat.app.AlertDialog.Builder(this)
@@ -159,6 +174,8 @@ public class RecordAttendanceActivity extends AppCompatActivity {
                 .setOnClickListener(v -> pad.clear());
         dialogView.findViewById(R.id.dialog_signature_cancel)
                 .setOnClickListener(v -> dialog.dismiss());
+        dialogView.findViewById(R.id.dialog_location_capture)
+                .setOnClickListener(v -> captureLocation(tvLocation));
         dialogView.findViewById(R.id.dialog_signature_save)
                 .setOnClickListener(v -> {
                     if (pad.isEmpty()) {
@@ -179,6 +196,70 @@ public class RecordAttendanceActivity extends AppCompatActivity {
                 });
 
         dialog.show();
+    }
+
+    /**
+     * GPS capture for the session attendance — mirrors what the type:gps
+     * widget on the household service form does. User-initiated: only fires
+     * when the worker taps "Get location" in the signature dialog. Reads
+     * last-known fix from GPS first, NETWORK_PROVIDER as fallback. Writes the
+     * result back into {@link #capturedGps} and updates the readout TextView.
+     */
+    private void captureLocation(final TextView readout) {
+        if (androidx.core.content.ContextCompat.checkSelfPermission(this,
+                android.Manifest.permission.ACCESS_FINE_LOCATION)
+                != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            pendingLocationCallback = () -> captureLocation(readout);
+            androidx.core.app.ActivityCompat.requestPermissions(this,
+                    new String[]{
+                            android.Manifest.permission.ACCESS_FINE_LOCATION,
+                            android.Manifest.permission.ACCESS_COARSE_LOCATION
+                    },
+                    REQ_LOCATION);
+            return;
+        }
+
+        readout.setText("Acquiring location…");
+        android.location.LocationManager lm =
+                (android.location.LocationManager) getSystemService(LOCATION_SERVICE);
+        android.location.Location loc = null;
+        try {
+            loc = lm.getLastKnownLocation(android.location.LocationManager.GPS_PROVIDER);
+            if (loc == null) {
+                loc = lm.getLastKnownLocation(android.location.LocationManager.NETWORK_PROVIDER);
+            }
+        } catch (SecurityException ignored) {
+            // Permission was revoked between the check above and this call.
+        }
+
+        if (loc != null) {
+            // Form the same simple "lat,lng" string the type:gps widget
+            // produces. Display matches the widget's multi-line readout:
+            // Latitude / Longitude / Accuracy on separate lines.
+            capturedGps = loc.getLatitude() + "," + loc.getLongitude();
+            readout.setText(String.format(java.util.Locale.US,
+                    "Latitude: %.5f\nLongitude: %.5f\nAccuracy: %dm",
+                    loc.getLatitude(), loc.getLongitude(),
+                    Math.round(loc.getAccuracy())));
+        } else {
+            readout.setText("Could not get a location — try again outdoors.");
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQ_LOCATION) {
+            boolean granted = grantResults.length > 0
+                    && grantResults[0] == android.content.pm.PackageManager.PERMISSION_GRANTED;
+            Runnable cb = pendingLocationCallback;
+            pendingLocationCallback = null;
+            if (granted && cb != null) cb.run();
+            else if (!granted) Toast.makeText(this,
+                    "Location permission denied — session will save without GPS.",
+                    Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void persistAttendance(String date) {
@@ -236,6 +317,9 @@ public class RecordAttendanceActivity extends AppCompatActivity {
             }
             ChimwemweFormUtils.ensureFieldValue(sessionForm, "session_type", sessionType);
             ChimwemweFormUtils.ensureFieldValue(sessionForm, "caregiver_signature", capturedSignature);
+            // session_gps captured via the dialog's "Get location" button.
+            // Empty string is fine — the column accepts NULL/blank.
+            ChimwemweFormUtils.ensureFieldValue(sessionForm, "session_gps", capturedGps);
 
             for (int i = 0; i < rows.size() && i < 20; i++) {
                 AttendanceRowItem row = rows.get(i);
