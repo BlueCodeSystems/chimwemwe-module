@@ -20,7 +20,7 @@ import com.bluecodeltd.chimwemwe.chw.activity.DashboardActivity;
 import com.bluecodeltd.chimwemwe.chw.activity.FamilyProfileActivity;
 import com.bluecodeltd.chimwemwe.chw.activity.FamilyRegisterActivity;
 import com.bluecodeltd.chimwemwe.chw.activity.FpRegisterActivity;
-import com.bluecodeltd.chimwemwe.chw.activity.ChimwemweRegisterActivity;
+import com.bluecodeltd.chimwemwe.chw.activity.HotspotGroupListActivity;
 import com.bluecodeltd.chimwemwe.chw.activity.HivTestingServiceActivity;
 import com.bluecodeltd.chimwemwe.chw.activity.HouseholdIndexActivity;
 import com.bluecodeltd.chimwemwe.chw.activity.IdentificationRegisterActivity;
@@ -467,7 +467,10 @@ public class ChwApplication extends CoreChwApplication implements SyncStatusBroa
         }
         registeredActivities.put(CoreConstants.REGISTERED_ACTIVITIES.FP_REGISTER_ACTIVITY, FpRegisterActivity.class);
         registeredActivities.put(CoreConstants.REGISTERED_ACTIVITIES.UPDATES_REGISTER_ACTIVITY, UpdatesRegisterActivity.class);
-        registeredActivities.put(CoreConstants.REGISTERED_ACTIVITIES.CHIMWEMWE_REGISTER_ACTIVITY, ChimwemweRegisterActivity.class);
+        // Drawer "Chimwemwe Groups" -> the polished card-based list (same one
+        // the dashboard's Groups/Sessions cards open) so users land on a single
+        // unified screen regardless of route.
+        registeredActivities.put(CoreConstants.REGISTERED_ACTIVITIES.CHIMWEMWE_REGISTER_ACTIVITY, HotspotGroupListActivity.class);
         return registeredActivities;
     }
 

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
@@ -19,12 +20,45 @@
         android:layout_height="220dp"
         android:background="@drawable/bg_login_field" />
 
+    <!-- GPS capture block — visually mirrors the type:gps widget on the
+         household service form: vertical field-style block with a small
+         label, a filled primary-colored "Record GPS" button, and a readout
+         beneath it that fills in once the worker captures a fix. -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Session location"
+        android:textColor="@color/chimwemwe_text_primary"
+        android:textSize="13sp"
+        android:textStyle="bold" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/dialog_location_capture"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:text="Record GPS"
+        android:textAllCaps="false"
+        android:textColor="#FFFFFF"
+        app:backgroundTint="@color/chimwemwe_primary"
+        app:cornerRadius="4dp" />
+
+    <TextView
+        android:id="@+id/dialog_location_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:text="Not captured yet"
+        android:textColor="@color/chimwemwe_text_secondary"
+        android:textSize="12sp" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="end"
-        android:layout_marginTop="12dp">
+        android:layout_marginTop="4dp">
 
         <Button
             android:id="@+id/dialog_signature_clear"
