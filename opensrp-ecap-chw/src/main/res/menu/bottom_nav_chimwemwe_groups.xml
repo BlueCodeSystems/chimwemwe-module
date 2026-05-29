@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Bottom navigation menu for HotspotGroupListActivity. Mirrors the
+  drawer-route OpenSRP BaseRegisterActivity pattern (one "Add Group"
+  bottom nav item with the person+plus icon) without pulling in the
+  unrelated VCA / FSW / HTS items.
+-->
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_add_group"
+        android:enabled="true"
+        android:icon="@drawable/ic_baseline_person_add_24"
+        android:title="Add Group"
+        app:showAsAction="always" />
+
+</menu>

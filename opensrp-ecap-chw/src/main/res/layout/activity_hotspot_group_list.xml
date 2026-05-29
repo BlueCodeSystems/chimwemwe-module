@@ -50,11 +50,17 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <FrameLayout
-        android:id="@+id/frameLayout2"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:orientation="vertical"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <FrameLayout
+            android:id="@+id/frameLayout2"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycler_groups"
@@ -64,7 +70,7 @@
             android:paddingStart="16dp"
             android:paddingTop="12dp"
             android:paddingEnd="16dp"
-            android:paddingBottom="88dp" />
+            android:paddingBottom="16dp" />
 
         <LinearLayout
             android:id="@+id/empty_state"
@@ -95,22 +101,28 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:gravity="center"
-                android:text="Tap + to create your first hotspot group"
+                android:text="Tap Add Group to create your first hotspot group"
                 android:textColor="@color/chimwemwe_text_secondary"
                 android:textSize="14sp" />
 
         </LinearLayout>
 
-    </FrameLayout>
+        </FrameLayout>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab_add_group"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="20dp"
-        android:src="@drawable/ic_baseline_person_add_24"
-        app:backgroundTint="@color/chimwemwe_primary"
-        app:tint="#FFFFFF" />
+        <!-- BottomNavigationView mirrors the look of the drawer-route's
+             BaseRegisterActivity: full-width docked bar at the bottom of
+             the screen with a single "Add Group" action (icon + label).
+             Sits in its own row so list rows are never covered. -->
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/bottom_nav_groups"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#FFFFFF"
+            app:itemIconTint="@color/chimwemwe_primary"
+            app:itemTextColor="@color/chimwemwe_primary"
+            app:labelVisibilityMode="labeled"
+            app:menu="@menu/bottom_nav_chimwemwe_groups" />
+
+    </LinearLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
