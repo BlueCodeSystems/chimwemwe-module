@@ -225,11 +225,17 @@ public class RecordAttendanceActivity extends AppCompatActivity {
         android.location.Location loc = null;
         try {
             loc = lm.getLastKnownLocation(android.location.LocationManager.GPS_PROVIDER);
-            if (loc == null) {
+        } catch (SecurityException | IllegalArgumentException ignored) {
+            // SecurityException: permission revoked between the check and call.
+            // IllegalArgumentException: provider not present on this device.
+        }
+        if (loc == null) {
+            try {
                 loc = lm.getLastKnownLocation(android.location.LocationManager.NETWORK_PROVIDER);
+            } catch (SecurityException | IllegalArgumentException ignored) {
+                // Same defensive catch — some emulators / stripped builds
+                // omit the network provider.
             }
-        } catch (SecurityException ignored) {
-            // Permission was revoked between the check above and this call.
         }
 
         if (loc != null) {
