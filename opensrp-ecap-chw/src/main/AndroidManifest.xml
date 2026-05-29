@@ -386,9 +386,12 @@
             android:name=".activity.TbScreeningActivity"
             android:theme="@style/ChwTheme.NoActionBar" />
 
+        <!-- Uses ChwTheme.Material (MaterialComponents) because the screen
+             hosts ExtendedFloatingActionButton, which throws during inflate
+             on a plain AppCompat theme. Colors match ChwTheme.NoActionBar. -->
         <activity
             android:name=".activity.ChimwemweParticipantProfileActivity"
-            android:theme="@style/ChwTheme.NoActionBar" />
+            android:theme="@style/ChwTheme.Material" />
 
         <meta-data
             android:name="io.fabric.ApiKey"

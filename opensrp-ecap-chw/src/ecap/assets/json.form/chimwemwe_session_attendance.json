@@ -46,7 +46,6 @@
     },
     "encounter_location": ""
   },
-
   "step1": {
     "title": "Session Information",
     "display_back_button": "true",
@@ -74,9 +73,20 @@
         "hint": "Session Number",
         "values": [
           "-- Select --",
-          "Session 1", "Session 2", "Session 3", "Session 4", "Session 5",
-          "Session 6", "Session 7", "Session 8", "Session 9", "Session 10",
-          "Session 11", "Session 12", "Session 13", "Session 14"
+          "Session 1",
+          "Session 2",
+          "Session 3",
+          "Session 4",
+          "Session 5",
+          "Session 6",
+          "Session 7",
+          "Session 8",
+          "Session 9",
+          "Session 10",
+          "Session 11",
+          "Session 12",
+          "Session 13",
+          "Session 14"
         ],
         "v_required": {
           "value": "true",
@@ -105,17 +115,28 @@
         "openmrs_entity_id": "session_type",
         "type": "spinner",
         "hint": "Type of Session",
-        "values": ["-- Select --", "Group Session", "Home Visit"],
+        "values": [
+          "-- Select --",
+          "Group Session",
+          "Home Visit"
+        ],
         "v_required": {
           "value": "true",
           "err": "Please select the type of session"
         }
+      },
+      {
+        "key": "caregiver_signature",
+        "type": "hidden",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "caregiver_signature",
+        "openmrs_data_type": "text"
       }
     ]
   },
-
   "step2": {
-    "title": "Attendance — Participants 1 to 10",
+    "title": "Attendance â€” Participants 1 to 10",
     "display_back_button": "true",
     "fields": [
       {
@@ -150,9 +171,17 @@
         "openmrs_entity": "person_attribute",
         "openmrs_entity_id": "p1_cg_attendance",
         "type": "spinner",
-        "hint": "Participant 1 — Caregiver Attendance",
-        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
-        "v_required": { "value": "false", "err": "" }
+        "hint": "Participant 1 â€” Caregiver Attendance",
+        "values": [
+          "-- Select --",
+          "Group",
+          "Home Visit",
+          "Absent"
+        ],
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
       },
       {
         "key": "p1_child_attendance",
@@ -160,9 +189,17 @@
         "openmrs_entity": "person_attribute",
         "openmrs_entity_id": "p1_child_attendance",
         "type": "spinner",
-        "hint": "Participant 1 — Child Attendance",
-        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
-        "v_required": { "value": "false", "err": "" }
+        "hint": "Participant 1 â€” Child Attendance",
+        "values": [
+          "-- Select --",
+          "Group",
+          "Home Visit",
+          "Absent"
+        ],
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
       },
       {
         "key": "p2_label",
@@ -187,9 +224,17 @@
         "openmrs_entity": "person_attribute",
         "openmrs_entity_id": "p2_cg_attendance",
         "type": "spinner",
-        "hint": "Participant 2 — Caregiver Attendance",
-        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
-        "v_required": { "value": "false", "err": "" }
+        "hint": "Participant 2 â€” Caregiver Attendance",
+        "values": [
+          "-- Select --",
+          "Group",
+          "Home Visit",
+          "Absent"
+        ],
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
       },
       {
         "key": "p2_child_attendance",
@@ -197,9 +242,17 @@
         "openmrs_entity": "person_attribute",
         "openmrs_entity_id": "p2_child_attendance",
         "type": "spinner",
-        "hint": "Participant 2 — Child Attendance",
-        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
-        "v_required": { "value": "false", "err": "" }
+        "hint": "Participant 2 â€” Child Attendance",
+        "values": [
+          "-- Select --",
+          "Group",
+          "Home Visit",
+          "Absent"
+        ],
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
       },
       {
         "key": "p3_label",
@@ -224,9 +277,17 @@
         "openmrs_entity": "person_attribute",
         "openmrs_entity_id": "p3_cg_attendance",
         "type": "spinner",
-        "hint": "Participant 3 — Caregiver Attendance",
-        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
-        "v_required": { "value": "false", "err": "" }
+        "hint": "Participant 3 â€” Caregiver Attendance",
+        "values": [
+          "-- Select --",
+          "Group",
+          "Home Visit",
+          "Absent"
+        ],
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
       },
       {
         "key": "p3_child_attendance",
@@ -234,9 +295,17 @@
         "openmrs_entity": "person_attribute",
         "openmrs_entity_id": "p3_child_attendance",
         "type": "spinner",
-        "hint": "Participant 3 — Child Attendance",
-        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
-        "v_required": { "value": "false", "err": "" }
+        "hint": "Participant 3 â€” Child Attendance",
+        "values": [
+          "-- Select --",
+          "Group",
+          "Home Visit",
+          "Absent"
+        ],
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
       },
       {
         "key": "p4_label",
@@ -261,9 +330,17 @@
         "openmrs_entity": "person_attribute",
         "openmrs_entity_id": "p4_cg_attendance",
         "type": "spinner",
-        "hint": "Participant 4 — Caregiver Attendance",
-        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
-        "v_required": { "value": "false", "err": "" }
+        "hint": "Participant 4 â€” Caregiver Attendance",
+        "values": [
+          "-- Select --",
+          "Group",
+          "Home Visit",
+          "Absent"
+        ],
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
       },
       {
         "key": "p4_child_attendance",
@@ -271,9 +348,17 @@
         "openmrs_entity": "person_attribute",
         "openmrs_entity_id": "p4_child_attendance",
         "type": "spinner",
-        "hint": "Participant 4 — Child Attendance",
-        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
-        "v_required": { "value": "false", "err": "" }
+        "hint": "Participant 4 â€” Child Attendance",
+        "values": [
+          "-- Select --",
+          "Group",
+          "Home Visit",
+          "Absent"
+        ],
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
       },
       {
         "key": "p5_label",
@@ -298,9 +383,17 @@
         "openmrs_entity": "person_attribute",
         "openmrs_entity_id": "p5_cg_attendance",
         "type": "spinner",
-        "hint": "Participant 5 — Caregiver Attendance",
-        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
-        "v_required": { "value": "false", "err": "" }
+        "hint": "Participant 5 â€” Caregiver Attendance",
+        "values": [
+          "-- Select --",
+          "Group",
+          "Home Visit",
+          "Absent"
+        ],
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
       },
       {
         "key": "p5_child_attendance",
@@ -308,9 +401,17 @@
         "openmrs_entity": "person_attribute",
         "openmrs_entity_id": "p5_child_attendance",
         "type": "spinner",
-        "hint": "Participant 5 — Child Attendance",
-        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
-        "v_required": { "value": "false", "err": "" }
+        "hint": "Participant 5 â€” Child Attendance",
+        "values": [
+          "-- Select --",
+          "Group",
+          "Home Visit",
+          "Absent"
+        ],
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
       },
       {
         "key": "p6_label",
@@ -335,9 +436,17 @@
         "openmrs_entity": "person_attribute",
         "openmrs_entity_id": "p6_cg_attendance",
         "type": "spinner",
-        "hint": "Participant 6 — Caregiver Attendance",
-        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
-        "v_required": { "value": "false", "err": "" }
+        "hint": "Participant 6 â€” Caregiver Attendance",
+        "values": [
+          "-- Select --",
+          "Group",
+          "Home Visit",
+          "Absent"
+        ],
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
       },
       {
         "key": "p6_child_attendance",
@@ -345,9 +454,17 @@
         "openmrs_entity": "person_attribute",
         "openmrs_entity_id": "p6_child_attendance",
         "type": "spinner",
-        "hint": "Participant 6 — Child Attendance",
-        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
-        "v_required": { "value": "false", "err": "" }
+        "hint": "Participant 6 â€” Child Attendance",
+        "values": [
+          "-- Select --",
+          "Group",
+          "Home Visit",
+          "Absent"
+        ],
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
       },
       {
         "key": "p7_label",
@@ -372,9 +489,17 @@
         "openmrs_entity": "person_attribute",
         "openmrs_entity_id": "p7_cg_attendance",
         "type": "spinner",
-        "hint": "Participant 7 — Caregiver Attendance",
-        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
-        "v_required": { "value": "false", "err": "" }
+        "hint": "Participant 7 â€” Caregiver Attendance",
+        "values": [
+          "-- Select --",
+          "Group",
+          "Home Visit",
+          "Absent"
+        ],
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
       },
       {
         "key": "p7_child_attendance",
@@ -382,9 +507,17 @@
         "openmrs_entity": "person_attribute",
         "openmrs_entity_id": "p7_child_attendance",
         "type": "spinner",
-        "hint": "Participant 7 — Child Attendance",
-        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
-        "v_required": { "value": "false", "err": "" }
+        "hint": "Participant 7 â€” Child Attendance",
+        "values": [
+          "-- Select --",
+          "Group",
+          "Home Visit",
+          "Absent"
+        ],
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
       },
       {
         "key": "p8_label",
@@ -409,9 +542,17 @@
         "openmrs_entity": "person_attribute",
         "openmrs_entity_id": "p8_cg_attendance",
         "type": "spinner",
-        "hint": "Participant 8 — Caregiver Attendance",
-        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
-        "v_required": { "value": "false", "err": "" }
+        "hint": "Participant 8 â€” Caregiver Attendance",
+        "values": [
+          "-- Select --",
+          "Group",
+          "Home Visit",
+          "Absent"
+        ],
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
       },
       {
         "key": "p8_child_attendance",
@@ -419,9 +560,17 @@
         "openmrs_entity": "person_attribute",
         "openmrs_entity_id": "p8_child_attendance",
         "type": "spinner",
-        "hint": "Participant 8 — Child Attendance",
-        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
-        "v_required": { "value": "false", "err": "" }
+        "hint": "Participant 8 â€” Child Attendance",
+        "values": [
+          "-- Select --",
+          "Group",
+          "Home Visit",
+          "Absent"
+        ],
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
       },
       {
         "key": "p9_label",
@@ -446,9 +595,17 @@
         "openmrs_entity": "person_attribute",
         "openmrs_entity_id": "p9_cg_attendance",
         "type": "spinner",
-        "hint": "Participant 9 — Caregiver Attendance",
-        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
-        "v_required": { "value": "false", "err": "" }
+        "hint": "Participant 9 â€” Caregiver Attendance",
+        "values": [
+          "-- Select --",
+          "Group",
+          "Home Visit",
+          "Absent"
+        ],
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
       },
       {
         "key": "p9_child_attendance",
@@ -456,9 +613,17 @@
         "openmrs_entity": "person_attribute",
         "openmrs_entity_id": "p9_child_attendance",
         "type": "spinner",
-        "hint": "Participant 9 — Child Attendance",
-        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
-        "v_required": { "value": "false", "err": "" }
+        "hint": "Participant 9 â€” Child Attendance",
+        "values": [
+          "-- Select --",
+          "Group",
+          "Home Visit",
+          "Absent"
+        ],
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
       },
       {
         "key": "p10_label",
@@ -483,9 +648,17 @@
         "openmrs_entity": "person_attribute",
         "openmrs_entity_id": "p10_cg_attendance",
         "type": "spinner",
-        "hint": "Participant 10 — Caregiver Attendance",
-        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
-        "v_required": { "value": "false", "err": "" }
+        "hint": "Participant 10 â€” Caregiver Attendance",
+        "values": [
+          "-- Select --",
+          "Group",
+          "Home Visit",
+          "Absent"
+        ],
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
       },
       {
         "key": "p10_child_attendance",
@@ -493,15 +666,22 @@
         "openmrs_entity": "person_attribute",
         "openmrs_entity_id": "p10_child_attendance",
         "type": "spinner",
-        "hint": "Participant 10 — Child Attendance",
-        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
-        "v_required": { "value": "false", "err": "" }
+        "hint": "Participant 10 â€” Child Attendance",
+        "values": [
+          "-- Select --",
+          "Group",
+          "Home Visit",
+          "Absent"
+        ],
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
       }
     ]
   },
-
   "step3": {
-    "title": "Attendance — Participants 11 to 20",
+    "title": "Attendance â€” Participants 11 to 20",
     "display_back_button": "true",
     "fields": [
       {
@@ -527,9 +707,17 @@
         "openmrs_entity": "person_attribute",
         "openmrs_entity_id": "p11_cg_attendance",
         "type": "spinner",
-        "hint": "Participant 11 — Caregiver Attendance",
-        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
-        "v_required": { "value": "false", "err": "" }
+        "hint": "Participant 11 â€” Caregiver Attendance",
+        "values": [
+          "-- Select --",
+          "Group",
+          "Home Visit",
+          "Absent"
+        ],
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
       },
       {
         "key": "p11_child_attendance",
@@ -537,9 +725,17 @@
         "openmrs_entity": "person_attribute",
         "openmrs_entity_id": "p11_child_attendance",
         "type": "spinner",
-        "hint": "Participant 11 — Child Attendance",
-        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
-        "v_required": { "value": "false", "err": "" }
+        "hint": "Participant 11 â€” Child Attendance",
+        "values": [
+          "-- Select --",
+          "Group",
+          "Home Visit",
+          "Absent"
+        ],
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
       },
       {
         "key": "p12_label",
@@ -564,9 +760,17 @@
         "openmrs_entity": "person_attribute",
         "openmrs_entity_id": "p12_cg_attendance",
         "type": "spinner",
-        "hint": "Participant 12 — Caregiver Attendance",
-        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
-        "v_required": { "value": "false", "err": "" }
+        "hint": "Participant 12 â€” Caregiver Attendance",
+        "values": [
+          "-- Select --",
+          "Group",
+          "Home Visit",
+          "Absent"
+        ],
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
       },
       {
         "key": "p12_child_attendance",
@@ -574,9 +778,17 @@
         "openmrs_entity": "person_attribute",
         "openmrs_entity_id": "p12_child_attendance",
         "type": "spinner",
-        "hint": "Participant 12 — Child Attendance",
-        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
-        "v_required": { "value": "false", "err": "" }
+        "hint": "Participant 12 â€” Child Attendance",
+        "values": [
+          "-- Select --",
+          "Group",
+          "Home Visit",
+          "Absent"
+        ],
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
       },
       {
         "key": "p13_label",
@@ -601,9 +813,17 @@
         "openmrs_entity": "person_attribute",
         "openmrs_entity_id": "p13_cg_attendance",
         "type": "spinner",
-        "hint": "Participant 13 — Caregiver Attendance",
-        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
-        "v_required": { "value": "false", "err": "" }
+        "hint": "Participant 13 â€” Caregiver Attendance",
+        "values": [
+          "-- Select --",
+          "Group",
+          "Home Visit",
+          "Absent"
+        ],
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
       },
       {
         "key": "p13_child_attendance",
@@ -611,9 +831,17 @@
         "openmrs_entity": "person_attribute",
         "openmrs_entity_id": "p13_child_attendance",
         "type": "spinner",
-        "hint": "Participant 13 — Child Attendance",
-        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
-        "v_required": { "value": "false", "err": "" }
+        "hint": "Participant 13 â€” Child Attendance",
+        "values": [
+          "-- Select --",
+          "Group",
+          "Home Visit",
+          "Absent"
+        ],
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
       },
       {
         "key": "p14_label",
@@ -638,9 +866,17 @@
         "openmrs_entity": "person_attribute",
         "openmrs_entity_id": "p14_cg_attendance",
         "type": "spinner",
-        "hint": "Participant 14 — Caregiver Attendance",
-        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
-        "v_required": { "value": "false", "err": "" }
+        "hint": "Participant 14 â€” Caregiver Attendance",
+        "values": [
+          "-- Select --",
+          "Group",
+          "Home Visit",
+          "Absent"
+        ],
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
       },
       {
         "key": "p14_child_attendance",
@@ -648,9 +884,17 @@
         "openmrs_entity": "person_attribute",
         "openmrs_entity_id": "p14_child_attendance",
         "type": "spinner",
-        "hint": "Participant 14 — Child Attendance",
-        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
-        "v_required": { "value": "false", "err": "" }
+        "hint": "Participant 14 â€” Child Attendance",
+        "values": [
+          "-- Select --",
+          "Group",
+          "Home Visit",
+          "Absent"
+        ],
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
       },
       {
         "key": "p15_label",
@@ -675,9 +919,17 @@
         "openmrs_entity": "person_attribute",
         "openmrs_entity_id": "p15_cg_attendance",
         "type": "spinner",
-        "hint": "Participant 15 — Caregiver Attendance",
-        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
-        "v_required": { "value": "false", "err": "" }
+        "hint": "Participant 15 â€” Caregiver Attendance",
+        "values": [
+          "-- Select --",
+          "Group",
+          "Home Visit",
+          "Absent"
+        ],
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
       },
       {
         "key": "p15_child_attendance",
@@ -685,9 +937,17 @@
         "openmrs_entity": "person_attribute",
         "openmrs_entity_id": "p15_child_attendance",
         "type": "spinner",
-        "hint": "Participant 15 — Child Attendance",
-        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
-        "v_required": { "value": "false", "err": "" }
+        "hint": "Participant 15 â€” Child Attendance",
+        "values": [
+          "-- Select --",
+          "Group",
+          "Home Visit",
+          "Absent"
+        ],
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
       },
       {
         "key": "p16_label",
@@ -712,9 +972,17 @@
         "openmrs_entity": "person_attribute",
         "openmrs_entity_id": "p16_cg_attendance",
         "type": "spinner",
-        "hint": "Participant 16 — Caregiver Attendance",
-        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
-        "v_required": { "value": "false", "err": "" }
+        "hint": "Participant 16 â€” Caregiver Attendance",
+        "values": [
+          "-- Select --",
+          "Group",
+          "Home Visit",
+          "Absent"
+        ],
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
       },
       {
         "key": "p16_child_attendance",
@@ -722,9 +990,17 @@
         "openmrs_entity": "person_attribute",
         "openmrs_entity_id": "p16_child_attendance",
         "type": "spinner",
-        "hint": "Participant 16 — Child Attendance",
-        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
-        "v_required": { "value": "false", "err": "" }
+        "hint": "Participant 16 â€” Child Attendance",
+        "values": [
+          "-- Select --",
+          "Group",
+          "Home Visit",
+          "Absent"
+        ],
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
       },
       {
         "key": "p17_label",
@@ -749,9 +1025,17 @@
         "openmrs_entity": "person_attribute",
         "openmrs_entity_id": "p17_cg_attendance",
         "type": "spinner",
-        "hint": "Participant 17 — Caregiver Attendance",
-        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
-        "v_required": { "value": "false", "err": "" }
+        "hint": "Participant 17 â€” Caregiver Attendance",
+        "values": [
+          "-- Select --",
+          "Group",
+          "Home Visit",
+          "Absent"
+        ],
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
       },
       {
         "key": "p17_child_attendance",
@@ -759,9 +1043,17 @@
         "openmrs_entity": "person_attribute",
         "openmrs_entity_id": "p17_child_attendance",
         "type": "spinner",
-        "hint": "Participant 17 — Child Attendance",
-        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
-        "v_required": { "value": "false", "err": "" }
+        "hint": "Participant 17 â€” Child Attendance",
+        "values": [
+          "-- Select --",
+          "Group",
+          "Home Visit",
+          "Absent"
+        ],
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
       },
       {
         "key": "p18_label",
@@ -786,9 +1078,17 @@
         "openmrs_entity": "person_attribute",
         "openmrs_entity_id": "p18_cg_attendance",
         "type": "spinner",
-        "hint": "Participant 18 — Caregiver Attendance",
-        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
-        "v_required": { "value": "false", "err": "" }
+        "hint": "Participant 18 â€” Caregiver Attendance",
+        "values": [
+          "-- Select --",
+          "Group",
+          "Home Visit",
+          "Absent"
+        ],
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
       },
       {
         "key": "p18_child_attendance",
@@ -796,9 +1096,17 @@
         "openmrs_entity": "person_attribute",
         "openmrs_entity_id": "p18_child_attendance",
         "type": "spinner",
-        "hint": "Participant 18 — Child Attendance",
-        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
-        "v_required": { "value": "false", "err": "" }
+        "hint": "Participant 18 â€” Child Attendance",
+        "values": [
+          "-- Select --",
+          "Group",
+          "Home Visit",
+          "Absent"
+        ],
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
       },
       {
         "key": "p19_label",
@@ -823,9 +1131,17 @@
         "openmrs_entity": "person_attribute",
         "openmrs_entity_id": "p19_cg_attendance",
         "type": "spinner",
-        "hint": "Participant 19 — Caregiver Attendance",
-        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
-        "v_required": { "value": "false", "err": "" }
+        "hint": "Participant 19 â€” Caregiver Attendance",
+        "values": [
+          "-- Select --",
+          "Group",
+          "Home Visit",
+          "Absent"
+        ],
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
       },
       {
         "key": "p19_child_attendance",
@@ -833,9 +1149,17 @@
         "openmrs_entity": "person_attribute",
         "openmrs_entity_id": "p19_child_attendance",
         "type": "spinner",
-        "hint": "Participant 19 — Child Attendance",
-        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
-        "v_required": { "value": "false", "err": "" }
+        "hint": "Participant 19 â€” Child Attendance",
+        "values": [
+          "-- Select --",
+          "Group",
+          "Home Visit",
+          "Absent"
+        ],
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
       },
       {
         "key": "p20_label",
@@ -860,9 +1184,17 @@
         "openmrs_entity": "person_attribute",
         "openmrs_entity_id": "p20_cg_attendance",
         "type": "spinner",
-        "hint": "Participant 20 — Caregiver Attendance",
-        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
-        "v_required": { "value": "false", "err": "" }
+        "hint": "Participant 20 â€” Caregiver Attendance",
+        "values": [
+          "-- Select --",
+          "Group",
+          "Home Visit",
+          "Absent"
+        ],
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
       },
       {
         "key": "p20_child_attendance",
@@ -870,9 +1202,17 @@
         "openmrs_entity": "person_attribute",
         "openmrs_entity_id": "p20_child_attendance",
         "type": "spinner",
-        "hint": "Participant 20 — Child Attendance",
-        "values": ["-- Select --", "Group", "Home Visit", "Absent"],
-        "v_required": { "value": "false", "err": "" }
+        "hint": "Participant 20 â€” Child Attendance",
+        "values": [
+          "-- Select --",
+          "Group",
+          "Home Visit",
+          "Absent"
+        ],
+        "v_required": {
+          "value": "false",
+          "err": ""
+        }
       }
     ]
   }

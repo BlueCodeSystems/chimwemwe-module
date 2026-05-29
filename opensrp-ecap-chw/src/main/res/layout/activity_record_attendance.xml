@@ -36,15 +36,15 @@
         app:cardElevation="2dp"
         app:cardBackgroundColor="#FFFFFF">
 
-        <!-- Single child wrapping both rows -->
+        <!-- Single child wrapping all rows -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
-            android:paddingTop="14dp"
-            android:paddingBottom="14dp">
+            android:paddingTop="16dp"
+            android:paddingBottom="18dp">
 
             <!-- Session label + date row -->
             <LinearLayout
@@ -108,64 +108,11 @@
 
             </LinearLayout>
 
-            <!-- GPS row -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:visibility="gone"
-                android:gravity="center_vertical"
-                android:layout_marginTop="10dp">
+            <!-- GPS and signature are no longer shown directly on this card.
+                 GPS is captured on the household service form instead, and the
+                 primary caregiver's signature is captured via a modal dialog
+                 that the "Save Attendance" button opens before saving. -->
 
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:visibility="gone"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="GPS Location"
-                        android:textSize="10sp"
-                        android:textColor="@color/chimwemwe_text_secondary"
-                        android:layout_marginBottom="4dp" />
-
-                    <TextView
-                        android:id="@+id/tv_gps_coords"
-                        android:layout_width="match_parent"
-                        android:layout_height="38dp"
-                        android:hint="Not captured"
-                        android:textSize="12sp"
-                        android:textColor="@color/chimwemwe_text_primary"
-                        android:textColorHint="#A8B2BB"
-                        android:background="@drawable/bg_login_field"
-                        android:paddingStart="10dp"
-                        android:paddingEnd="10dp"
-                        android:gravity="center_vertical"
-                        android:ellipsize="end"
-                        android:maxLines="1"
-                        android:singleLine="true" />
-
-                </LinearLayout>
-
-                <Button
-                    android:id="@+id/btn_get_gps"
-                    android:layout_width="wrap_content"
-                    android:layout_height="38dp"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginTop="18dp"
-                    android:text="Locate"
-                    android:textAllCaps="false"
-                    android:textSize="13sp"
-                    android:textColor="#FFFFFF"
-                    android:textStyle="bold"
-                    android:background="@drawable/bg_login_btn_chimwemwe"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp" />
-
-            </LinearLayout>
 
         </LinearLayout>
 

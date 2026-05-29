@@ -8,7 +8,7 @@
         android:id="@+id/tv_empty"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="No referrals recorded yet"
+        android:text="No services recorded yet"
         android:textColor="@color/chimwemwe_text_secondary"
         android:textSize="13sp"
         android:gravity="center"
@@ -28,4 +28,3 @@
         android:clipToPadding="false" />
 
 </LinearLayout>
-

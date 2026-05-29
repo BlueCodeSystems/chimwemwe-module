@@ -347,6 +347,7 @@ public class HotspotGroupDao extends AbstractDao {
         return (counts != null && !counts.isEmpty()) ? counts.get(0) : 0;
     }
 
+
     /** Returns rows of [name, count] for distinct non-empty nearest_health_facility values. */
     public static List<String[]> getDistinctFacilitiesWithCount() {
         String sql = "SELECT nearest_health_facility, COUNT(*) AS cnt" +
