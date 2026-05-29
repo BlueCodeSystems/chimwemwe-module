@@ -1,13 +1,6 @@
 package com.bluecodeltd.chimwemwe.chw.activity;
 
-import android.Manifest;
-import android.content.Context;
-import android.content.pm.PackageManager;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.Bundle;
-import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,7 +14,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -52,14 +44,12 @@ public class RecordAttendanceActivity extends AppCompatActivity {
     public static final String EXTRA_SESSION_NUMBER = "session_number";
 
     private static final String[] ATTENDANCE_OPTIONS = {"Absent", "Group", "Home Visit"};
-    private static final int REQ_LOCATION = 7001;
 
     private String groupId;
     private int    sessionNumber;
 
     private TextView    etDate;
-    private TextView    tvGpsCoords;
-    private String      capturedGps = "";
+    private String      capturedSignature = "";
     private AttendanceAdapter adapter;
 
     @Override
@@ -79,10 +69,6 @@ public class RecordAttendanceActivity extends AppCompatActivity {
         tvSession.setText("Session " + sessionNumber);
 
         etDate      = findViewById(R.id.et_session_date);
-        tvGpsCoords = findViewById(R.id.tv_gps_coords);
-
-        Button btnGps = findViewById(R.id.btn_get_gps);
-        btnGps.setOnClickListener(v -> captureGps());
 
         RecyclerView recycler = findViewById(R.id.recycler_attendance);
         recycler.setLayoutManager(new LinearLayoutManager(this));
@@ -128,102 +114,89 @@ public class RecordAttendanceActivity extends AppCompatActivity {
             String existingDate = SessionAttendanceDao.getSessionDate(groupId, sessionNumber);
             String defaultDate = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(new Date());
 
-            String existingGps = SessionAttendanceDao.getSessionGps(groupId, sessionNumber);
-
             Threading.main(() -> {
                 etDate.setText(existingDate != null && !existingDate.trim().isEmpty() ? existingDate : defaultDate);
-                if (existingGps != null && !existingGps.trim().isEmpty()) {
-                    capturedGps = existingGps.trim();
-                    tvGpsCoords.setText(capturedGps);
-                }
                 adapter.setData(rows);
             });
         });
     }
 
-    // ── GPS ──────────────────────────────────────────────────
+    // ── Save flow: signature is captured inside the save flow itself ──
 
-    private void captureGps() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQ_LOCATION);
-            return;
-        }
-        tvGpsCoords.setText("Locating…");
-
-        LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        if (lm == null) {
-            tvGpsCoords.setText("");
-            Toast.makeText(this, "Location service not available.", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        // Try last-known location for an instant result
-        Location last = null;
-        if (lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            last = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        }
-        if (last == null && lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
-            last = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-        }
-        if (last != null) {
-            applyGpsResult(last);
-            return;
-        }
-
-        // No cached fix — request a single fresh update
-        String provider = lm.isProviderEnabled(LocationManager.GPS_PROVIDER)
-                ? LocationManager.GPS_PROVIDER
-                : (lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
-                        ? LocationManager.NETWORK_PROVIDER : null);
-
-        if (provider == null) {
-            tvGpsCoords.setText("");
-            Toast.makeText(this, "GPS is not enabled. Please turn on location services.", Toast.LENGTH_LONG).show();
-            return;
-        }
-
-        lm.requestSingleUpdate(provider, new LocationListener() {
-            @Override
-            public void onLocationChanged(@NonNull Location location) {
-                applyGpsResult(location);
-            }
-            @Override public void onProviderDisabled(@NonNull String p) {}
-            @Override public void onProviderEnabled(@NonNull String p) {}
-        }, Looper.getMainLooper());
-    }
-
-    private void applyGpsResult(Location location) {
-        capturedGps = String.format(java.util.Locale.US,
-                "%.6f, %.6f", location.getLatitude(), location.getLongitude());
-        tvGpsCoords.setText(capturedGps);
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQ_LOCATION && grantResults.length > 0
-                && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            captureGps();
-        } else {
-            Toast.makeText(this, "Location permission is required to capture GPS.", Toast.LENGTH_SHORT).show();
-        }
-    }
-
+    /**
+     * Entry point bound to the "Save Attendance" button. Validates the date,
+     * then opens the caregiver-signature dialog. The actual write to the DB
+     * happens inside the dialog's Save callback (see {@link #promptCaregiverSignatureThenSave}).
+     */
     private void saveAll() {
         String date = etDate.getText().toString().trim();
         if (date.isEmpty()) {
             Toast.makeText(this, "Please enter the session date", Toast.LENGTH_SHORT).show();
             return;
         }
+        promptCaregiverSignatureThenSave(date);
+    }
+
+    /**
+     * Opens the signature pad dialog. Tapping Save on the dialog captures the
+     * signature and immediately runs {@link #persistAttendance(String)} so the
+     * caseworker doesn't have to tap Save twice.
+     */
+    private void promptCaregiverSignatureThenSave(final String date) {
+        View dialogView = LayoutInflater.from(this)
+                .inflate(R.layout.dialog_caregiver_signature, null);
+        final com.github.gcacace.signaturepad.views.SignaturePad pad =
+                dialogView.findViewById(R.id.dialog_signature_pad);
+
+        final androidx.appcompat.app.AlertDialog dialog =
+                new androidx.appcompat.app.AlertDialog.Builder(this)
+                        .setTitle("Primary caregiver signature")
+                        .setView(dialogView)
+                        .setCancelable(false)
+                        .create();
+
+        dialogView.findViewById(R.id.dialog_signature_clear)
+                .setOnClickListener(v -> pad.clear());
+        dialogView.findViewById(R.id.dialog_signature_cancel)
+                .setOnClickListener(v -> dialog.dismiss());
+        dialogView.findViewById(R.id.dialog_signature_save)
+                .setOnClickListener(v -> {
+                    if (pad.isEmpty()) {
+                        Toast.makeText(this, "Please sign before saving.", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    try {
+                        android.graphics.Bitmap bmp = pad.getSignatureBitmap();
+                        java.io.ByteArrayOutputStream bos = new java.io.ByteArrayOutputStream();
+                        bmp.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, bos);
+                        capturedSignature = android.util.Base64.encodeToString(
+                                bos.toByteArray(), android.util.Base64.DEFAULT);
+                        dialog.dismiss();
+                        persistAttendance(date);
+                    } catch (Exception e) {
+                        Toast.makeText(this, "Could not capture signature. Please retry.", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+        dialog.show();
+    }
+
+    private void persistAttendance(String date) {
+        // Modal indeterminate spinner over the attendance screen while the IO block runs.
+        // Blocks accidental re-taps and tells the user the form is being saved after they
+        // tapped Save on the signature dialog.
+        final android.app.ProgressDialog saving = new android.app.ProgressDialog(this);
+        saving.setMessage("Saving attendance…");
+        saving.setIndeterminate(true);
+        saving.setCancelable(false);
+        saving.show();
 
         List<AttendanceRowItem> rows = adapter.getRows();
         Threading.io(() -> {
             boolean isEditMode = SessionAttendanceDao.hasSession(groupId, sessionNumber);
             saveFormEvent(date, rows, isEditMode);
             Threading.main(() -> {
+                if (saving.isShowing() && !isFinishing() && !isDestroyed()) saving.dismiss();
                 Toast.makeText(this, "Attendance saved", Toast.LENGTH_SHORT).show();
                 finish();
             });
@@ -262,7 +235,7 @@ public class RecordAttendanceActivity extends AppCompatActivity {
                 }
             }
             ChimwemweFormUtils.ensureFieldValue(sessionForm, "session_type", sessionType);
-            ChimwemweFormUtils.ensureFieldValue(sessionForm, "session_gps", capturedGps);
+            ChimwemweFormUtils.ensureFieldValue(sessionForm, "caregiver_signature", capturedSignature);
 
             for (int i = 0; i < rows.size() && i < 20; i++) {
                 AttendanceRowItem row = rows.get(i);

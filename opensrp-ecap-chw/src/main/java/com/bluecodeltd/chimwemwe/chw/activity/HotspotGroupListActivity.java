@@ -407,6 +407,13 @@ public class HotspotGroupListActivity extends AppCompatActivity {
                 h.tvGroupStatus.setTextColor(textColor);
                 h.tvGroupStatus.setBackgroundTintList(ColorStateList.valueOf(iconColor));
             }
+            // "NOT SAVED" pill — visible when the row's business code is missing,
+            // i.e. the same condition that triggers the "Save the group first"
+            // toast on the detail screen when the user tries to add a session.
+            if (h.tvNotSavedBadge != null) {
+                boolean notSaved = m.getGroupId() == null || m.getGroupId().trim().isEmpty();
+                h.tvNotSavedBadge.setVisibility(notSaved ? View.VISIBLE : View.GONE);
+            }
 
             h.itemView.setOnClickListener(v -> openDetail(m.getId()));
         }

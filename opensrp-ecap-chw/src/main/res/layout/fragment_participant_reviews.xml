@@ -16,11 +16,16 @@
         android:paddingBottom="16dp"
         android:visibility="gone" />
 
+    <!-- paddingBottom + clipToPadding=false reserve space for the floating
+         ExtendedFAB so the last row can scroll up above it and stay visible.
+         88dp ~= FAB height (56) + bottom margin (20) + breathing room. -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:nestedScrollingEnabled="false" />
+        android:nestedScrollingEnabled="false"
+        android:paddingBottom="88dp"
+        android:clipToPadding="false" />
 
 </LinearLayout>
 

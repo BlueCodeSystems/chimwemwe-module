@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="12dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Ask the primary caregiver to sign in the box below."
+        android:textSize="12sp"
+        android:textColor="@color/chimwemwe_text_secondary"
+        android:layout_marginBottom="8dp" />
+
+    <com.github.gcacace.signaturepad.views.SignaturePad
+        android:id="@+id/dialog_signature_pad"
+        android:layout_width="match_parent"
+        android:layout_height="220dp"
+        android:background="@drawable/bg_login_field" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="end"
+        android:layout_marginTop="12dp">
+
+        <Button
+            android:id="@+id/dialog_signature_clear"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Clear"
+            android:textAllCaps="false"
+            style="?attr/borderlessButtonStyle" />
+
+        <Button
+            android:id="@+id/dialog_signature_cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cancel"
+            android:textAllCaps="false"
+            style="?attr/borderlessButtonStyle" />
+
+        <Button
+            android:id="@+id/dialog_signature_save"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Save"
+            android:textAllCaps="false"
+            android:textStyle="bold"
+            android:textColor="@color/chimwemwe_primary"
+            style="?attr/borderlessButtonStyle" />
+
+    </LinearLayout>
+
+</LinearLayout>
