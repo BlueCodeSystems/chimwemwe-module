@@ -30,7 +30,8 @@ public class SessionAttendanceParticipantDao extends AbstractDao {
                     "  participant_id       TEXT NOT NULL," +
                     "  session_date         TEXT," +
                     "  caregiver_attendance TEXT DEFAULT ''," +
-                    "  child_attendance     TEXT DEFAULT ''" +
+                    "  child_attendance     TEXT DEFAULT ''," +
+                    "  caregiver_signature   TEXT DEFAULT ''" +
                     ")";
 
     public static void createTable(SQLiteDatabase db) {
@@ -63,7 +64,7 @@ public class SessionAttendanceParticipantDao extends AbstractDao {
                 String sql =
                         "INSERT OR IGNORE INTO " + TABLE +
                                 " (base_entity_id, last_interacted_with, delete_status, group_id, session_number," +
-                                "  participant_id, session_date, caregiver_attendance, child_attendance) " +
+                                "  participant_id, session_date, caregiver_attendance, child_attendance, caregiver_signature) " +
                                 "SELECT " +
                                 "  ('chimwemwe-session-attendance-' || IFNULL(group_id,'') || '-' || IFNULL(session_number,'') || '-' || IFNULL(" + pidCol + ",''))," +
                                 "  last_interacted_with," +
@@ -86,6 +87,7 @@ public class SessionAttendanceParticipantDao extends AbstractDao {
     /** Add standard OpenSRP is_closed column for compatibility (DB v48). */
     public static void migrateToV48(SQLiteDatabase db) {
         try { db.execSQL("ALTER TABLE " + TABLE + " ADD COLUMN is_closed INTEGER DEFAULT 0"); } catch (Exception ignored) {}
+        try { db.execSQL("ALTER TABLE " + TABLE + " ADD COLUMN caregiver_signature TEXT DEFAULT ''"); } catch (Exception ignored) {}
     }
 
     /**
@@ -97,7 +99,7 @@ public class SessionAttendanceParticipantDao extends AbstractDao {
     public static Map<String, AttendanceModel> getSessionAttendanceMap(String groupId, int sessionNumber) {
         Map<String, AttendanceModel> out = new HashMap<>();
         try {
-            String sql = "SELECT participant_id, session_date, caregiver_attendance, child_attendance FROM " + TABLE +
+            String sql = "SELECT participant_id, session_date, caregiver_attendance, child_attendance, caregiver_signature FROM " + TABLE +
                     " WHERE group_id=" + q(groupId) + " AND session_number=" + sessionNumber +
                     " AND (delete_status IS NULL OR delete_status <> '1')";
             List<Map<String, AttendanceModel>> rows = AbstractDao.readData(sql, cursor -> {
@@ -113,6 +115,7 @@ public class SessionAttendanceParticipantDao extends AbstractDao {
                 a.setSessionDate(cursor.getString(1));
                 a.setCaregiverAttendance(cursor.getString(2) != null ? cursor.getString(2) : "");
                 a.setChildAttendance(cursor.getString(3) != null ? cursor.getString(3) : "");
+                a.setCaregiverSignature(cursor.getString(4) != null ? cursor.getString(4) : "");
                 map.put(pid, a);
                 return map;
             });
@@ -161,9 +164,9 @@ public class SessionAttendanceParticipantDao extends AbstractDao {
 
         String insert = "INSERT OR IGNORE INTO " + TABLE +
                 " (base_entity_id, last_interacted_with, delete_status, is_closed, group_id, session_number," +
-                "  participant_id, session_date, caregiver_attendance, child_attendance) " +
+                "  participant_id, session_date, caregiver_attendance, child_attendance, caregiver_signature) " +
                 "VALUES (" + q(baseEntityId) + "," + now + ",NULL,0," + q(gid) + "," + sessionNumber + "," +
-                q(pid) + "," + q(date) + "," + q(cg) + "," + q(ch) + ")";
+                q(pid) + "," + q(date) + "," + q(cg) + "," + q(ch) + ",''" + ")";
         AbstractDao.updateDB(insert);
 
         String update = "UPDATE " + TABLE + " SET " +
@@ -174,6 +177,13 @@ public class SessionAttendanceParticipantDao extends AbstractDao {
                 "child_attendance=" + q(ch) +
                 " WHERE base_entity_id=" + q(baseEntityId);
         AbstractDao.updateDB(update);
+    }
+
+    public static void updateSignature(String groupId, int sessionNumber, String participantCode, String signature) {
+        if (groupId == null || participantCode == null || participantCode.trim().isEmpty()) return;
+        String baseEntityId = "chimwemwe-session-attendance-" + groupId.trim() + "-" + sessionNumber + "-" + participantCode.trim();
+        AbstractDao.updateDB("UPDATE " + TABLE + " SET caregiver_signature=" + q(signature) +
+                " WHERE base_entity_id=" + q(baseEntityId));
     }
 
     private static String q(String s) {

@@ -188,7 +188,6 @@ public class ChimwemweSummaryListActivity extends AppCompatActivity {
         });
     }
 
-    // ── Filter ────────────────────────────────────────────────
 
     private void applyFilter(String query) {
         String q = query.trim().toLowerCase(Locale.getDefault());
@@ -390,3 +389,4 @@ public class ChimwemweSummaryListActivity extends AppCompatActivity {
 
     private static String trim(String s) { return s != null ? s.trim() : ""; }
 }
+

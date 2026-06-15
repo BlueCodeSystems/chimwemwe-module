@@ -2,7 +2,6 @@ package com.bluecodeltd.chimwemwe.chw.activity;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -15,7 +14,6 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -62,6 +60,8 @@ public class HotspotGroupListActivity extends AppCompatActivity {
 
     // Held between facility-picker result and form launch
     private String pendingFacilityName;
+    private String pendingFacilityDistrict;
+    private String pendingFacilityProvince;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -164,6 +164,10 @@ public class HotspotGroupListActivity extends AppCompatActivity {
         recycler.setVisibility(empty ? View.GONE : View.VISIBLE);
     }
 
+    private String safeTrim(String value) {
+        return value == null ? "" : value.trim();
+    }
+
     // ── Standard registration flow ───────────────────────────
 
     /** Step 1: open facility picker (same as ChimwemweRegisterActivity.startRegistration). */
@@ -174,7 +178,7 @@ public class HotspotGroupListActivity extends AppCompatActivity {
     }
 
     /** Step 2: facility chosen — load form and pre-fill then launch wizard. */
-    private void launchNewGroupForm(String facilityName) {
+    private void launchNewGroupForm(String facilityName, String facilityDistrict, String facilityProvince) {
         Threading.io(() -> {
             try {
                 FormUtils formUtils = new FormUtils(this);
@@ -185,8 +189,10 @@ public class HotspotGroupListActivity extends AppCompatActivity {
                 String groupId = String.valueOf(new Random().nextInt(900_000_000));
                 setFieldValue(form, "step1", "group_id", groupId);
 
-                // Pre-fill facility
-                setFieldValue(form, "step1", "nearest_health_facility", facilityName);
+                // Pre-fill facility and keep district/province in sync with the selected facility.
+                setFieldValue(form, "step1", "nearest_health_facility", safeTrim(facilityName));
+                setFieldValue(form, "step1", "district", safeTrim(facilityDistrict));
+                setFieldValue(form, "step1", "province", safeTrim(facilityProvince));
 
                 // Pre-fill caseworker name
                 try {
@@ -196,17 +202,6 @@ public class HotspotGroupListActivity extends AppCompatActivity {
                     String name = prefs.getANMPreferredName(anm);
                     if (name == null || name.isEmpty()) name = anm;
                     setFieldValue(form, "step1", "facilitator_name_1", name);
-                } catch (Exception ignored) {}
-
-                // Pre-fill province/district from shared prefs if available
-                try {
-                    SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
-                    String district = sp.getString("district", null);
-                    String province = sp.getString("province", null);
-                    if (district != null && !district.isEmpty())
-                        setFieldValue(form, "step1", "district", district);
-                    if (province != null && !province.isEmpty())
-                        setFieldValue(form, "step1", "province", province);
                 } catch (Exception ignored) {}
 
                 final JSONObject finalForm = form;
@@ -240,7 +235,7 @@ public class HotspotGroupListActivity extends AppCompatActivity {
         if (requestCode == REQUEST_CODE_SELECT_FACILITY) {
             if (resultCode == Activity.RESULT_OK && data != null) {
                 pendingFacilityName = data.getStringExtra(ChimwemweFacilitiesActivity.RESULT_FACILITY_NAME);
-                launchNewGroupForm(pendingFacilityName != null ? pendingFacilityName : "");
+                launchNewGroupForm(pendingFacilityName, "", "");
             }
             return;
         }

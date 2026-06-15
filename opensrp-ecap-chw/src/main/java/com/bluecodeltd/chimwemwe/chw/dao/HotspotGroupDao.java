@@ -413,6 +413,33 @@ public class HotspotGroupDao extends AbstractDao {
         AbstractDao.updateDB("UPDATE " + TABLE + " SET delete_status='1' WHERE id=" + id);
     }
 
+    /**
+     * One-time bulk cleanup: soft-deletes every group (and its participants, attendance,
+     * reviews and referrals) EXCEPT those whose group_name matches {@code keepGroupName}
+     * (case-insensitive, trimmed). Reuses {@link #deleteGroupByBusinessId(String)} so the
+     * exact same cascading soft-delete the in-app Delete buttons perform is applied.
+     *
+     * NOTE: this is a local soft-delete only — it does not emit sync Events, so the removals
+     * are not pushed to the server. Returns the number of groups soft-deleted.
+     */
+    public static int purgeGroupsExceptByName(String keepGroupName) {
+        String keep = keepGroupName != null ? keepGroupName.trim() : "";
+        List<HotspotGroupModel> groups = getAllGroups();
+        if (groups == null) return 0;
+        int deleted = 0;
+        for (HotspotGroupModel g : groups) {
+            if (g == null) continue;
+            String name = g.getGroupName() != null ? g.getGroupName().trim() : "";
+            if (!keep.isEmpty() && name.equalsIgnoreCase(keep)) continue; // keep Kizombef
+            String gid = (g.getGroupId() != null && !g.getGroupId().trim().isEmpty())
+                    ? g.getGroupId().trim()
+                    : String.valueOf(g.getId());
+            deleteGroupByBusinessId(gid);
+            deleted++;
+        }
+        return deleted;
+    }
+
     public static void deleteGroupByBusinessId(String groupId) {
         if (groupId == null || groupId.trim().isEmpty()) return;
         String gid = groupId.trim();
