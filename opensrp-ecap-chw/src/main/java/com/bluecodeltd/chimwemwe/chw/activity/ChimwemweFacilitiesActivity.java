@@ -46,6 +46,8 @@ public class ChimwemweFacilitiesActivity extends AppCompatActivity {
 
     public static final String EXTRA_SELECT_MODE = "select_mode";
     public static final String RESULT_FACILITY_NAME = "facility_name";
+    public static final String RESULT_FACILITY_DISTRICT = "facility_district";
+    public static final String RESULT_FACILITY_PROVINCE = "facility_province";
 
     private static final String FACILITIES_URL =
             "https://chimwemwe-app-default-rtdb.firebaseio.com/facilities.json";
@@ -119,6 +121,8 @@ public class ChimwemweFacilitiesActivity extends AppCompatActivity {
     private void onFacilitySelected(ChimwemweFacilityModel facility) {
         Intent result = new Intent();
         result.putExtra(RESULT_FACILITY_NAME, facility.getFacilityName());
+        result.putExtra(RESULT_FACILITY_DISTRICT, facility.getDistrict());
+        result.putExtra(RESULT_FACILITY_PROVINCE, facility.getProvince());
         setResult(RESULT_OK, result);
         finish();
     }

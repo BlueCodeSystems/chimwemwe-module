@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -36,6 +37,7 @@ import org.smartregister.util.FormUtils;
 import com.vijay.jsonwizard.domain.Form;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Random;
 
@@ -204,6 +206,8 @@ public class HotspotGroupListActivity extends AppCompatActivity {
                     setFieldValue(form, "step1", "facilitator_name_1", name);
                 } catch (Exception ignored) {}
 
+                populateFacilitatorDropdown(form, safeTrim(facilityDistrict));
+
                 final JSONObject finalForm = form;
                 Threading.main(() -> {
                     try {
@@ -235,7 +239,9 @@ public class HotspotGroupListActivity extends AppCompatActivity {
         if (requestCode == REQUEST_CODE_SELECT_FACILITY) {
             if (resultCode == Activity.RESULT_OK && data != null) {
                 pendingFacilityName = data.getStringExtra(ChimwemweFacilitiesActivity.RESULT_FACILITY_NAME);
-                launchNewGroupForm(pendingFacilityName, "", "");
+                pendingFacilityDistrict = data.getStringExtra(ChimwemweFacilitiesActivity.RESULT_FACILITY_DISTRICT);
+                pendingFacilityProvince = data.getStringExtra(ChimwemweFacilitiesActivity.RESULT_FACILITY_PROVINCE);
+                launchNewGroupForm(pendingFacilityName, pendingFacilityDistrict, pendingFacilityProvince);
             }
             return;
         }
@@ -304,6 +310,77 @@ public class HotspotGroupListActivity extends AppCompatActivity {
                             Toast.makeText(this, "Error saving group", Toast.LENGTH_SHORT).show());
                 }
             });
+        }
+    }
+
+    private void populateFacilitatorDropdown(JSONObject form, String district) {
+        if (form == null) return;
+        try {
+            LinkedHashSet<String> options = new LinkedHashSet<>();
+            options.add("-- Select --");
+
+            String loggedIn = PreferenceManager.getDefaultSharedPreferences(this)
+                    .getString("caseworker_name", "");
+            String defaultFacilitator = null;
+            if (loggedIn != null && !loggedIn.trim().isEmpty()) {
+                defaultFacilitator = loggedIn.trim();
+                options.add(defaultFacilitator);
+            }
+
+            List<HotspotGroupModel> groups = HotspotGroupDao.getAllGroups();
+            boolean matchedDistrictOption = false;
+            if (groups != null) {
+                for (HotspotGroupModel g : groups) {
+                    if (g == null) continue;
+                    if (district != null && !district.trim().isEmpty()) {
+                        String groupDistrict = g.getDistrict();
+                        if (groupDistrict == null || !groupDistrict.trim().equalsIgnoreCase(district.trim())) {
+                            continue;
+                        }
+                        matchedDistrictOption = true;
+                    }
+                    if (g.getFacilitatorName1() != null && !g.getFacilitatorName1().trim().isEmpty()) {
+                        options.add(g.getFacilitatorName1().trim());
+                    }
+                    if (g.getFacilitatorName2() != null && !g.getFacilitatorName2().trim().isEmpty()) {
+                        options.add(g.getFacilitatorName2().trim());
+                    }
+                }
+            }
+
+            if (!matchedDistrictOption && defaultFacilitator != null && !defaultFacilitator.isEmpty()) {
+                options.clear();
+                options.add("-- Select --");
+                options.add(defaultFacilitator);
+            }
+
+            JSONArray steps = form.names();
+            if (steps == null) return;
+            for (int i = 0; i < steps.length(); i++) {
+                String stepName = steps.optString(i);
+                JSONObject step = form.optJSONObject(stepName);
+                if (step == null) continue;
+                JSONArray fields = step.optJSONArray("fields");
+                if (fields == null) continue;
+                for (int j = 0; j < fields.length(); j++) {
+                    JSONObject field = fields.optJSONObject(j);
+                    if (field == null || !"facilitator_name_2".equals(field.optString("key"))) continue;
+                    JSONArray values = new JSONArray();
+                    for (String option : options) values.put(option);
+                    field.put("type", "spinner");
+                    field.put("values", values);
+                    if (defaultFacilitator != null && !defaultFacilitator.isEmpty()
+                            && !options.contains("-- Select --")) {
+                        field.put("value", defaultFacilitator);
+                    } else if (defaultFacilitator != null && !defaultFacilitator.isEmpty()
+                            && options.size() == 2) {
+                        field.put("value", defaultFacilitator);
+                    }
+                    return;
+                }
+            }
+        } catch (Exception e) {
+            Timber.w(e, "populateFacilitatorDropdown");
         }
     }
 

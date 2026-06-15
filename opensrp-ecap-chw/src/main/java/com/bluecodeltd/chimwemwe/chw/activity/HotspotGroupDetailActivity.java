@@ -898,10 +898,13 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
 
             String loggedIn = PreferenceManager.getDefaultSharedPreferences(this)
                     .getString("caseworker_name", "");
+            String defaultFacilitator = null;
             if (loggedIn != null && !loggedIn.trim().isEmpty()) {
-                options.add(loggedIn.trim());
+                defaultFacilitator = loggedIn.trim();
+                options.add(defaultFacilitator);
             }
 
+            boolean matchedDistrictOption = false;
             if (district != null && !district.trim().isEmpty()) {
                 List<HotspotGroupModel> groups = HotspotGroupDao.getAllGroups();
                 if (groups != null) {
@@ -911,6 +914,7 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
                                 && !g.getDistrict().trim().equalsIgnoreCase(district.trim())) {
                             continue;
                         }
+                        matchedDistrictOption = true;
                         if (g.getFacilitatorName1() != null && !g.getFacilitatorName1().trim().isEmpty()) {
                             options.add(g.getFacilitatorName1().trim());
                         }
@@ -919,6 +923,12 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
                         }
                     }
                 }
+            }
+
+            if (!matchedDistrictOption && defaultFacilitator != null && !defaultFacilitator.isEmpty()) {
+                options.clear();
+                options.add("-- Select --");
+                options.add(defaultFacilitator);
             }
 
             JSONArray steps = form.names();
@@ -942,6 +952,8 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
                     String selected = currentGroup != null ? currentGroup.getFacilitatorName2() : null;
                     if (selected != null && !selected.trim().isEmpty()) {
                         field.put("value", selected.trim());
+                    } else if (defaultFacilitator != null && !defaultFacilitator.isEmpty()) {
+                        field.put("value", defaultFacilitator);
                     }
                     return;
                 }
