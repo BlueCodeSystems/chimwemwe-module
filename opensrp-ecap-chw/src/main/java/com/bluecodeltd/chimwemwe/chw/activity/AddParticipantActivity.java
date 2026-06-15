@@ -27,10 +27,12 @@ public class AddParticipantActivity extends AppCompatActivity {
 
     public static final String EXTRA_GROUP_ID      = "group_id";
     public static final String EXTRA_PARTICIPANT_ID = "participant_id";
+    public static final String EXTRA_PARTICIPANT_CODE = "participant_code";
     public static final String EXTRA_SN             = "sn";
 
     private String groupId;
     private long participantId = -1;
+    private String participantCode;
     private int  sn;
 
     private EditText etCaregiverFirst, etCaregiverSurname, etCaregiverId;
@@ -49,6 +51,7 @@ public class AddParticipantActivity extends AppCompatActivity {
 
         groupId       = getIntent().getStringExtra(EXTRA_GROUP_ID);
         participantId = getIntent().getLongExtra(EXTRA_PARTICIPANT_ID, -1);
+        participantCode = getIntent().getStringExtra(EXTRA_PARTICIPANT_CODE);
         sn            = getIntent().getIntExtra(EXTRA_SN, 1);
 
         etCaregiverFirst   = findViewById(R.id.et_caregiver_first_name);
@@ -73,7 +76,7 @@ public class AddParticipantActivity extends AppCompatActivity {
         ovcAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerOvc.setAdapter(ovcAdapter);
 
-        if (participantId != -1) {
+        if (participantId != -1 || (participantCode != null && !participantCode.trim().isEmpty())) {
             if (getSupportActionBar() != null) getSupportActionBar().setTitle("Edit Participant");
             loadExisting();
         } else {
@@ -87,9 +90,15 @@ public class AddParticipantActivity extends AppCompatActivity {
 
     private void loadExisting() {
         Threading.io(() -> {
-            ParticipantModel m = ParticipantDao.getParticipant(participantId);
-            if (m == null) return;
+            ParticipantModel loaded = ParticipantDao.getParticipant(participantId);
+            if (loaded == null && participantCode != null && !participantCode.trim().isEmpty()) {
+                loaded = ParticipantDao.getParticipantByCode(participantCode.trim());
+            }
+            if (loaded == null) return;
+            final ParticipantModel m = loaded;
             Threading.main(() -> {
+                AddParticipantActivity.this.participantId = m.getId();
+                AddParticipantActivity.this.participantCode = m.getParticipantId();
                 etCaregiverFirst.setText(m.getCaregiverFirstName());
                 etCaregiverSurname.setText(m.getCaregiverSurname());
                 etCaregiverId.setText(m.getCaregiverId());
@@ -163,10 +172,17 @@ public class AddParticipantActivity extends AppCompatActivity {
         m.setIsEnrolledOvc(ovc.startsWith("--") ? null : ovc);
 
         Threading.io(() -> {
-            if (participantId == -1) {
+            if (participantId == -1 && (participantCode == null || participantCode.trim().isEmpty())) {
                 ParticipantDao.insertParticipant(m);
             } else {
-                ParticipantDao.updateParticipant(m);
+                if (m.getParticipantId() == null || m.getParticipantId().trim().isEmpty()) {
+                    m.setParticipantId(participantCode);
+                }
+                if (participantId != -1) {
+                    ParticipantDao.updateParticipantById(m);
+                } else {
+                    ParticipantDao.updateParticipant(m);
+                }
             }
             Threading.main(() -> {
                 Toast.makeText(this, "Saved", Toast.LENGTH_SHORT).show();

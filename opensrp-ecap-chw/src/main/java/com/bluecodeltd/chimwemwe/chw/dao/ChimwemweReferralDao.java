@@ -50,6 +50,16 @@ public class ChimwemweReferralDao extends AbstractDao {
         return AbstractDao.readData(sql, getMap());
     }
 
+    public static List<ChimwemweReferralModel> getGroupReferrals(String groupId) {
+        if (groupId == null || groupId.trim().isEmpty()) return new java.util.ArrayList<>();
+        String sql = "SELECT * FROM ec_chimwemwe_referral" +
+                " WHERE group_id = '" + groupId.replace("'", "''") + "'" +
+                " AND (delete_status IS NULL OR delete_status <> '1')" +
+                " ORDER BY last_interacted_with DESC";
+        List<ChimwemweReferralModel> values = AbstractDao.readData(sql, getMap());
+        return values != null ? values : new java.util.ArrayList<>();
+    }
+
     public static int countParticipantReferrals(String participantId) {
         String sql = "SELECT COUNT(*) FROM " + TABLE +
                 " WHERE participant_id = '" + participantId.replace("'", "''") + "'" +

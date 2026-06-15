@@ -46,6 +46,8 @@ public class ChimwemweFacilitiesActivity extends AppCompatActivity {
 
     public static final String EXTRA_SELECT_MODE = "select_mode";
     public static final String RESULT_FACILITY_NAME = "facility_name";
+    public static final String RESULT_FACILITY_DISTRICT = "facility_district";
+    public static final String RESULT_FACILITY_PROVINCE = "facility_province";
 
     private static final String FACILITIES_URL =
             "https://chimwemwe-app-default-rtdb.firebaseio.com/facilities.json";
@@ -64,17 +66,14 @@ public class ChimwemweFacilitiesActivity extends AppCompatActivity {
         selectMode = getIntent().getBooleanExtra(EXTRA_SELECT_MODE, false);
 
         SharedPreferences sp = androidx.preference.PreferenceManager.getDefaultSharedPreferences(this);
-        userDistrict = selectMode ? sp.getString("district", "") : null;
+        userDistrict = selectMode ? null : null;
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             if (selectMode) {
-                String title = (userDistrict != null && !userDistrict.isEmpty())
-                        ? "Facilities – " + userDistrict
-                        : "Select Facility";
-                getSupportActionBar().setTitle(title);
+                getSupportActionBar().setTitle("Select Facility");
             }
         }
         toolbar.setNavigationOnClickListener(v -> finish());
@@ -119,6 +118,8 @@ public class ChimwemweFacilitiesActivity extends AppCompatActivity {
     private void onFacilitySelected(ChimwemweFacilityModel facility) {
         Intent result = new Intent();
         result.putExtra(RESULT_FACILITY_NAME, facility.getFacilityName());
+        result.putExtra(RESULT_FACILITY_DISTRICT, facility.getDistrict());
+        result.putExtra(RESULT_FACILITY_PROVINCE, facility.getProvince());
         setResult(RESULT_OK, result);
         finish();
     }
@@ -248,7 +249,7 @@ public class ChimwemweFacilitiesActivity extends AppCompatActivity {
     /** Select mode: show cached facilities for user's district, then refresh from Firebase if online. */
     private void loadLocalThenSync() {
         Threading.io(() -> {
-            List<ChimwemweFacilityModel> list = ChimwemweFacilitiesDao.getFacilities("", userDistrict);
+            List<ChimwemweFacilityModel> list = ChimwemweFacilitiesDao.getFacilities("", null);
             Threading.main(() -> {
                 adapter.setData(list);
                 if (isOnline()) {

@@ -144,6 +144,15 @@ public class DashboardActivity extends AppCompatActivity
         TextView dashName = findViewById(R.id.dash_caseworker_name);
         if (dashName != null) {
             dashName.setText(caseworkerName.isEmpty() ? "Chimwemwe" : caseworkerName);
+            dashName.setOnClickListener(v -> startActivity(new Intent(this, FacilitatorProfileActivity.class)));
+        }
+        TextView dashFacility = findViewById(R.id.dash_facility_name);
+        if (dashFacility != null) {
+            dashFacility.setOnClickListener(v -> startActivity(new Intent(this, FacilitatorProfileActivity.class)));
+        }
+        View userProfilePill = findViewById(R.id.btn_user_profile);
+        if (userProfilePill != null) {
+            userProfilePill.setOnClickListener(v -> startActivity(new Intent(this, FacilitatorProfileActivity.class)));
         }
 
         // Token refresh on first launch

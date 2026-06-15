@@ -20,6 +20,7 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.bluecodeltd.chimwemwe.chw.R;
 import com.bluecodeltd.chimwemwe.chw.adapter.ViewPager2Adapter;
 import com.bluecodeltd.chimwemwe.chw.dao.HotspotGroupDao;
+import com.bluecodeltd.chimwemwe.chw.dao.ChimwemweReferralDao;
 import com.bluecodeltd.chimwemwe.chw.dao.MonthlyReviewDao;
 import com.bluecodeltd.chimwemwe.chw.dao.ParticipantDao;
 import com.bluecodeltd.chimwemwe.chw.fragment.ParticipantOverviewFragment;
@@ -92,6 +93,8 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity
     private ExtendedFloatingActionButton fabAdd;
 
     private int currentPage = 0;
+    @Nullable
+    private String referralEditBaseEntityId;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -105,6 +108,7 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity
 
         participantId = getIntent().getLongExtra(EXTRA_PARTICIPANT_ID, -1);
         participantCode = getIntent().getStringExtra(EXTRA_PARTICIPANT_CODE);
+        referralEditBaseEntityId = getIntent().getStringExtra("open_referral_edit");
 
         tvCaregiverName = findViewById(R.id.tv_caregiver_name);
         tvChildName = findViewById(R.id.tv_child_name);
@@ -270,9 +274,12 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity
 
     private void loadData() {
         Threading.io(() -> {
-            ParticipantModel resolved = participantId > 0 ? ParticipantDao.getParticipant(participantId) : null;
-            if (resolved == null && participantCode != null && !participantCode.trim().isEmpty()) {
+            ParticipantModel resolved = null;
+            if (participantCode != null && !participantCode.trim().isEmpty()) {
                 resolved = ParticipantDao.getParticipantByCode(participantCode);
+            }
+            if (resolved == null && participantId > 0) {
+                resolved = ParticipantDao.getParticipant(participantId);
             }
             final long resolvedRowId = resolved != null ? resolved.getId() : participantId;
             final ParticipantModel p = resolved;
@@ -296,8 +303,23 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity
                 bindHeader();
                 updateTabTitles();
                 notifySectionFragments();
+                if (referralEditBaseEntityId != null && !referralEditBaseEntityId.trim().isEmpty()) {
+                    ChimwemweReferralModel referral = findReferralByBaseEntityId(referralEditBaseEntityId);
+                    referralEditBaseEntityId = null;
+                    if (referral != null) launchReferralForm(referral);
+                }
             });
         });
+    }
+
+    @Nullable
+    private ChimwemweReferralModel findReferralByBaseEntityId(String baseEntityId) {
+        String code = participant != null ? participant.getParticipantId() : participantCode;
+        if (code == null || code.trim().isEmpty() || baseEntityId == null || baseEntityId.trim().isEmpty()) return null;
+        for (ChimwemweReferralModel referral : ChimwemweReferralDao.getParticipantReferrals(code)) {
+            if (baseEntityId.equals(referral.getBase_entity_id())) return referral;
+        }
+        return null;
     }
 
     private void notifySectionFragments() {
@@ -335,7 +357,8 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity
     }
 
     private void promptDeleteParticipant() {
-        if (participantId <= 0) return;
+        if (participant == null && (participantCode == null || participantCode.trim().isEmpty()) && participantId <= 0) return;
+        final String code = participant != null ? participant.getParticipantId() : participantCode;
         new AlertDialog.Builder(this)
                 .setTitle("Delete participant?")
                 .setMessage("This will remove the participant and clear any attendance, reviews and referrals linked to them.")
@@ -345,12 +368,21 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity
                     try {
                         // 1. Cascading local soft-delete (immediate UX + cleans up
                         //    attendance / review / referral child rows).
-                        ParticipantDao.deleteParticipant(participantId);
+                        ParticipantModel target = participant;
+                        if (target == null && code != null && !code.trim().isEmpty()) {
+                            target = ParticipantDao.getParticipantByCode(code);
+                        }
+                        if (target == null && participantId > 0) {
+                            target = ParticipantDao.getParticipant(participantId);
+                        }
+                        if (target != null) {
+                            ParticipantDao.deleteParticipant(target.getParticipantId());
+                        }
                         // 2. Emit a syncable Event so other devices see the delete
                         //    on next pull. The form now carries a delete_status field
                         //    that maps to Client.attributes.delete_status and through
                         //    ec_client_fields.json onto the table column.
-                        emitParticipantDeleteEvent(participant);
+                        emitParticipantDeleteEvent(target);
                         ok = true;
                     } catch (Exception e) {
                         Timber.e(e, "Delete participant failed");
@@ -377,6 +409,7 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity
                 JSONObject form = formUtils.getFormJson("chimwemwe_participant_register");
                 if (form == null) return;
                 form.put("entity_id", participant.getParticipantId());
+                form.put("base_entity_id", participant.getParticipantId());
                 CoreJsonFormUtils.populateJsonForm(form, participantToMap(participant));
                 launchJsonForm(form, REQ_PARTICIPANT);
             } catch (Exception e) {
@@ -520,7 +553,9 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity
                     String participantCode = form.optString("entity_id", participant.getParticipantId());
                     if (participantCode == null || participantCode.trim().isEmpty()) {
                         participantCode = "chm-participant-" + participantId;
+                        form.put("entity_id", participantCode);
                     }
+                    form.put("base_entity_id", participantCode);
                     ChimwemweFormUtils.ensureFieldValue(form, "group_id", participant.getGroupId());
                     ChimwemweFormUtils.ensureFieldValue(form, "sn", String.valueOf(participant.getSn()));
                     ChimwemweFormUtils.ensureFieldValue(form, "participant_id", participantCode);

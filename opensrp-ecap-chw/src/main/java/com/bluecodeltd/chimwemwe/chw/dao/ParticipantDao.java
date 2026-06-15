@@ -160,6 +160,30 @@ public class ParticipantDao extends AbstractDao {
                 "receiving_org="        + q(m.getReceivingOrg()) + "," +
                 "job_title="            + q(m.getJobTitle()) + "," +
                 "service_date="         + q(m.getServiceDate()) +
+                " WHERE participant_id=" + q(m.getParticipantId());
+        AbstractDao.updateDB(sql);
+    }
+
+    public static void updateParticipantById(ParticipantModel m) {
+        String sql = "UPDATE " + TABLE + " SET " +
+                "participant_id="     + q(m.getParticipantId()) + "," +
+                "group_id="           + q(m.getGroupId()) + "," +
+                "sn="                 + m.getSn() + "," +
+                "caregiver_first_name=" + q(m.getCaregiverFirstName()) + "," +
+                "caregiver_surname="    + q(m.getCaregiverSurname()) + "," +
+                "child_first_name="     + q(m.getChildFirstName()) + "," +
+                "child_surname="        + q(m.getChildSurname()) + "," +
+                "child_dob="            + q(m.getChildDob()) + "," +
+                "child_sex="            + q(m.getChildSex()) + "," +
+                "is_enrolled_ovc="      + q(m.getIsEnrolledOvc()) + "," +
+                "caregiver_id="         + q(m.getCaregiverId()) + "," +
+                "vca_id="               + q(m.getVcaId()) + "," +
+                "who_referred="         + q(m.getWhoReferred()) + "," +
+                "service_referred_for=" + q(m.getServiceReferredFor()) + "," +
+                "referral_date="        + q(m.getReferralDate()) + "," +
+                "receiving_org="        + q(m.getReceivingOrg()) + "," +
+                "job_title="            + q(m.getJobTitle()) + "," +
+                "service_date="         + q(m.getServiceDate()) +
                 " WHERE id=" + m.getId();
         AbstractDao.updateDB(sql);
     }
@@ -344,27 +368,76 @@ public class ParticipantDao extends AbstractDao {
     }
 
     public static void deleteParticipant(long id) {
+        // The row PK `id` is unreliable: OpenSRP's CONFLICT_REPLACE overwrites it with the
+        // non-numeric base_entity_id, so getId() reads back as 0. Resolve the stable business
+        // code and delete by that; only fall back to the raw id when no code can be found.
         ParticipantModel p = null;
         try {
             p = getParticipant(id);
         } catch (Exception ignored) {}
 
+        String code = p != null ? p.getParticipantId() : null;
+        if (code != null && !code.trim().isEmpty()) {
+            deleteParticipant(code.trim());
+        } else {
+            AbstractDao.updateDB("UPDATE " + TABLE + " SET delete_status='1' WHERE id=" + id);
+        }
+    }
+
+    public static void deleteParticipant(String participantCode) {
+        if (participantCode == null || participantCode.trim().isEmpty()) return;
+        String code = participantCode.trim();
+
+        // Resolve the group so session attendance can be cleared. Match everything on
+        // participant_id (the stable business code) — never on the row PK `id`, which OpenSRP
+        // corrupts to a non-numeric base_entity_id (getId() returns 0).
+        ParticipantModel p = getParticipantByCode(code);
         String groupId = p != null ? p.getGroupId() : null;
-        String participantCode = p != null ? p.getParticipantId() : null;
-        if (groupId != null && !groupId.trim().isEmpty()
-                && participantCode != null && !participantCode.trim().isEmpty()) {
-            SessionAttendanceDao.removeParticipantFromGroupSessions(groupId.trim(), participantCode);
+        if (groupId != null && !groupId.trim().isEmpty()) {
+            SessionAttendanceDao.removeParticipantFromGroupSessions(groupId.trim(), code);
         }
 
-        // Cascade soft-delete to attendance child tables. Match on participant_id (the business
-        // code) since the row PK `id` is corrupted to a non-numeric string by OpenSRP.
-        if (participantCode != null && !participantCode.trim().isEmpty()) {
-            AbstractDao.updateDB("UPDATE ec_chimwemwe_session_attendance_participant SET delete_status='1' WHERE participant_id=" + q(participantCode));
-            AbstractDao.updateDB("UPDATE ec_chimwemwe_attendance SET delete_status='1' WHERE participant_id=" + q(participantCode));
+        // Cascade soft-delete to attendance / review / referral child tables.
+        AbstractDao.updateDB("UPDATE ec_chimwemwe_session_attendance_participant SET delete_status='1' WHERE participant_id=" + q(code));
+        AbstractDao.updateDB("UPDATE ec_chimwemwe_attendance SET delete_status='1' WHERE participant_id=" + q(code));
+        AbstractDao.updateDB("UPDATE ec_chimwemwe_review   SET delete_status='1' WHERE participant_id=" + q(code));
+        AbstractDao.updateDB("UPDATE ec_chimwemwe_referral SET delete_status='1' WHERE participant_id=" + q(code));
+
+        AbstractDao.updateDB("UPDATE " + TABLE + " SET delete_status='1' WHERE participant_id=" + q(code));
+    }
+
+    /** Soft-delete every participant whose parent group name does not match keepGroupName. */
+    public static int purgeParticipantsExceptByGroupName(String keepGroupName) {
+        String keep = keepGroupName != null ? keepGroupName.trim() : "";
+        String sql = "SELECT p.participant_id FROM " + TABLE + " p " +
+                "LEFT JOIN ec_chimwemwe_group g ON g.group_id = p.group_id " +
+                "WHERE (p.delete_status IS NULL OR p.delete_status <> '1')";
+        if (!keep.isEmpty()) {
+            sql += " AND (g.group_name IS NULL OR TRIM(g.group_name) <> " + q(keep) + ")";
         }
-        AbstractDao.updateDB("UPDATE ec_chimwemwe_review     SET delete_status='1' WHERE participant_id=" + id);
-        AbstractDao.updateDB("UPDATE ec_chimwemwe_referral   SET delete_status='1' WHERE participant_id=" + id);
-        AbstractDao.updateDB("UPDATE " + TABLE + " SET delete_status='1' WHERE id=" + id);
+        List<String> codes = AbstractDao.readData(sql, cursor -> cursor.getString(0));
+        int deleted = 0;
+        if (codes == null) return 0;
+        for (String code : codes) {
+            if (code == null || code.trim().isEmpty()) continue;
+            deleteParticipant(code.trim());
+            deleted++;
+        }
+        return deleted;
+    }
+
+    /** Soft-delete all participants across all groups. */
+    public static int purgeAllParticipants() {
+        int updated = 0;
+        try {
+            AbstractDao.updateDB("UPDATE " + TABLE + " SET delete_status='1' WHERE (delete_status IS NULL OR delete_status <> '1')");
+            AbstractDao.updateDB("UPDATE ec_chimwemwe_session_attendance_participant SET delete_status='1' WHERE (delete_status IS NULL OR delete_status <> '1')");
+            AbstractDao.updateDB("UPDATE ec_chimwemwe_attendance SET delete_status='1' WHERE (delete_status IS NULL OR delete_status <> '1')");
+            AbstractDao.updateDB("UPDATE ec_chimwemwe_review SET delete_status='1' WHERE (delete_status IS NULL OR delete_status <> '1')");
+            AbstractDao.updateDB("UPDATE ec_chimwemwe_referral SET delete_status='1' WHERE (delete_status IS NULL OR delete_status <> '1')");
+            updated = countAllParticipants();
+        } catch (Exception ignored) {}
+        return updated;
     }
 
     private static String q(String s) {
