@@ -235,9 +235,7 @@ public class HotspotGroupListActivity extends AppCompatActivity {
         if (requestCode == REQUEST_CODE_SELECT_FACILITY) {
             if (resultCode == Activity.RESULT_OK && data != null) {
                 pendingFacilityName = data.getStringExtra(ChimwemweFacilitiesActivity.RESULT_FACILITY_NAME);
-                pendingFacilityDistrict = data.getStringExtra(ChimwemweFacilitiesActivity.RESULT_FACILITY_DISTRICT);
-                pendingFacilityProvince = data.getStringExtra(ChimwemweFacilitiesActivity.RESULT_FACILITY_PROVINCE);
-                launchNewGroupForm(pendingFacilityName, pendingFacilityDistrict, pendingFacilityProvince);
+                launchNewGroupForm(pendingFacilityName, "", "");
             }
             return;
         }

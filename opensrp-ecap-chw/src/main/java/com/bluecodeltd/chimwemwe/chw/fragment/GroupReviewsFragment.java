@@ -24,6 +24,7 @@ import java.util.List;
 public class GroupReviewsFragment extends Fragment {
 
     private static final String ARG_GROUP_ID = "group_id";
+    private static final int REQ_EDIT_REVIEW = 3004;
 
     public static GroupReviewsFragment newInstance(@Nullable String groupId) {
         GroupReviewsFragment fragment = new GroupReviewsFragment();
@@ -84,6 +85,14 @@ public class GroupReviewsFragment extends Fragment {
         intent.putExtra(ReviewEditActivity.EXTRA_GROUP_ID, groupId);
         intent.putExtra(ReviewEditActivity.EXTRA_REVIEW_BASE_ENTITY_ID,
                 existing != null ? existing.getBase_entity_id() : null);
-        startActivity(intent);
+        startActivityForResult(intent, REQ_EDIT_REVIEW);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQ_EDIT_REVIEW && resultCode == android.app.Activity.RESULT_OK) {
+            refresh();
+        }
     }
 }

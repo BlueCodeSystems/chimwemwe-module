@@ -26,6 +26,7 @@ import java.util.List;
 public class GroupReferralsFragment extends Fragment {
 
     private static final String ARG_GROUP_ID = "group_id";
+    private static final int REQ_EDIT_REFERRAL = 3003;
 
     public static GroupReferralsFragment newInstance(@Nullable String groupId) {
         GroupReferralsFragment fragment = new GroupReferralsFragment();
@@ -69,7 +70,7 @@ public class GroupReferralsFragment extends Fragment {
                         android.content.Intent intent = new android.content.Intent(getActivity(), ReferralEditActivity.class);
                         intent.putExtra(ReferralEditActivity.EXTRA_PARTICIPANT_CODE, participant.getParticipantId());
                         intent.putExtra(ReferralEditActivity.EXTRA_REFERRAL_BASE_ENTITY_ID, item.getBase_entity_id());
-                        startActivity(intent);
+                        startActivityForResult(intent, REQ_EDIT_REFERRAL);
                     }
 
                     @Override
@@ -87,5 +88,13 @@ public class GroupReferralsFragment extends Fragment {
         empty.setVisibility(items.isEmpty() ? View.VISIBLE : View.GONE);
         recycler.setVisibility(items.isEmpty() ? View.GONE : View.VISIBLE);
         adapter.setData(items);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable android.content.Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQ_EDIT_REFERRAL && resultCode == android.app.Activity.RESULT_OK) {
+            refresh();
+        }
     }
 }
