@@ -21,6 +21,7 @@ public class AttendanceModel {
     private String sessionDate;   // DD/MM/YY
     private String caregiverAttendance;
     private String childAttendance;
+    private String caregiverSignature;
 
     public long getId() { return id; }
     public void setId(long id) { this.id = id; }
@@ -42,4 +43,7 @@ public class AttendanceModel {
 
     public String getChildAttendance() { return childAttendance; }
     public void setChildAttendance(String v) { this.childAttendance = v; }
+
+    public String getCaregiverSignature() { return caregiverSignature; }
+    public void setCaregiverSignature(String caregiverSignature) { this.caregiverSignature = caregiverSignature; }
 }

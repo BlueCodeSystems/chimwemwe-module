@@ -110,6 +110,26 @@
             android:label="Group Details"
             android:theme="@style/ChwTheme.Material" />
         <activity
+            android:name=".activity.GroupReviewsReferralsActivity"
+            android:exported="false"
+            android:label="Reviews and Referrals"
+            android:theme="@style/ChwTheme.NoActionBar" />
+        <activity
+            android:name=".activity.ReviewEditActivity"
+            android:exported="false"
+            android:label="Edit Review"
+            android:theme="@style/ChwTheme.NoActionBar" />
+        <activity
+            android:name=".activity.FacilitatorProfileActivity"
+            android:exported="false"
+            android:label="Facilitator Profile"
+            android:theme="@style/ChwTheme.NoActionBar" />
+        <activity
+            android:name=".activity.ReferralEditActivity"
+            android:exported="false"
+            android:label="Edit Referral"
+            android:theme="@style/ChwTheme.NoActionBar" />
+        <activity
             android:name=".activity.ChimwemweSummaryListActivity"
             android:exported="false"
             android:label="Summary"

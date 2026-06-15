@@ -104,6 +104,22 @@
                         android:paddingTop="3dp"
                         android:paddingBottom="3dp"
                         android:background="@drawable/bg_pill_translucent"
+                        android:id="@+id/btn_user_profile"
+                        android:text="User Profile"
+                        android:textColor="#FFFFFF"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="6dp"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="10dp"
+                        android:paddingTop="3dp"
+                        android:paddingBottom="3dp"
+                        android:background="@drawable/bg_pill_translucent"
+                        android:id="@+id/btn_ecapii_pill"
                         android:text="ECAP II"
                         android:textColor="#FFFFFF"
                         android:textSize="11sp"

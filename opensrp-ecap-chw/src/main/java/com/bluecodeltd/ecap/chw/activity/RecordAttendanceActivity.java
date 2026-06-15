@@ -51,7 +51,6 @@ public class RecordAttendanceActivity extends AppCompatActivity {
     private int    sessionNumber;
 
     private TextView    etDate;
-    private String      capturedSignature = "";
     private String      capturedGps       = "";
     // Pending callback, set when the user taps "Get location" before the
     // permission has been granted. Fired in onRequestPermissionsResult once
@@ -64,7 +63,7 @@ public class RecordAttendanceActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_record_attendance);
 
-        groupId       = getIntent().getStringExtra(EXTRA_GROUP_ID);
+        groupId = getIntent().getStringExtra(EXTRA_GROUP_ID);
         sessionNumber = getIntent().getIntExtra(EXTRA_SESSION_NUMBER, 1);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -75,7 +74,7 @@ public class RecordAttendanceActivity extends AppCompatActivity {
         TextView tvSession = findViewById(R.id.tv_session_label);
         tvSession.setText("Session " + sessionNumber);
 
-        etDate      = findViewById(R.id.et_session_date);
+        etDate = findViewById(R.id.et_session_date);
 
         RecyclerView recycler = findViewById(R.id.recycler_attendance);
         recycler.setLayoutManager(new LinearLayoutManager(this));
@@ -99,28 +98,26 @@ public class RecordAttendanceActivity extends AppCompatActivity {
         loadData();
     }
 
+    @Override
+    public boolean onSupportNavigateUp() {
+        finish();
+        return true;
+    }
+
     private void loadData() {
         Threading.io(() -> {
             List<ParticipantModel> participants = ParticipantDao.getParticipants(groupId);
-            // Read from the normalized per-participant lines table. Map is keyed by the
-            // participant business code (participant_id) — the row PK is unusable because
-            // OpenSRP overwrites it with a non-numeric base_entity_id.
             Map<String, AttendanceModel> existingMap =
                     SessionAttendanceParticipantDao.getSessionAttendanceMap(groupId, sessionNumber);
-
-            // Build combined list — keyed by the participant business code (participant_id).
             List<AttendanceRowItem> rows = new ArrayList<>();
             for (ParticipantModel p : participants) {
                 AttendanceModel att = existingMap.get(p.getParticipantId());
                 String cgAtt = att != null ? att.getCaregiverAttendance() : "";
-                String chAtt = att != null ? att.getChildAttendance()     : "";
+                String chAtt = att != null ? att.getChildAttendance() : "";
                 rows.add(new AttendanceRowItem(p, cgAtt, chAtt));
             }
-
-            // Pre-fill date from first existing record
             String existingDate = SessionAttendanceDao.getSessionDate(groupId, sessionNumber);
             String defaultDate = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(new Date());
-
             Threading.main(() -> {
                 etDate.setText(existingDate != null && !existingDate.trim().isEmpty() ? existingDate : defaultDate);
                 adapter.setData(rows);
@@ -128,44 +125,55 @@ public class RecordAttendanceActivity extends AppCompatActivity {
         });
     }
 
-    // ── Save flow: signature is captured inside the save flow itself ──
-
-    /**
-     * Entry point bound to the "Save Attendance" button. Validates the date,
-     * then opens the caregiver-signature dialog. The actual write to the DB
-     * happens inside the dialog's Save callback (see {@link #promptCaregiverSignatureThenSave}).
-     */
     private void saveAll() {
         String date = etDate.getText().toString().trim();
         if (date.isEmpty()) {
             Toast.makeText(this, "Please enter the session date", Toast.LENGTH_SHORT).show();
             return;
         }
-        promptCaregiverSignatureThenSave(date);
+        promptCaregiverSignaturesThenSave(date);
+    }
+    private void promptCaregiverSignaturesThenSave(final String date) {
+        List<AttendanceRowItem> rows = adapter.getRows();
+        if (rows == null || rows.isEmpty()) {
+            persistAttendance(date, new HashMap<>());
+            return;
+        }
+        promptSignatureForRow(date, rows, 0, new HashMap<>());
     }
 
-    /**
-     * Opens the signature pad dialog. Tapping Save on the dialog captures the
-     * signature and immediately runs {@link #persistAttendance(String)} so the
-     * caseworker doesn't have to tap Save twice. The dialog also carries a
-     * "Get location" row — same role the type:gps widget plays on the
-     * household service form — so a fresh GPS reading is stamped on each
-     * session attendance row.
-     */
-    private void promptCaregiverSignatureThenSave(final String date) {
+    private void promptSignatureForRow(final String date, final List<AttendanceRowItem> rows,
+                                       final int index, final Map<String, String> signatures) {
+        if (index >= rows.size()) {
+            persistAttendance(date, signatures);
+            return;
+        }
+
+        AttendanceRowItem row = rows.get(index);
+        if (row == null || row.participant == null) {
+            promptSignatureForRow(date, rows, index + 1, signatures);
+            return;
+        }
+
+        boolean needsSignature = !"Absent".equalsIgnoreCase(row.caregiverAttendance)
+                || !"Absent".equalsIgnoreCase(row.childAttendance);
+        if (!needsSignature) {
+            signatures.put(row.participant.getParticipantId(), "");
+            promptSignatureForRow(date, rows, index + 1, signatures);
+            return;
+        }
+
         View dialogView = LayoutInflater.from(this)
                 .inflate(R.layout.dialog_caregiver_signature, null);
         final com.github.gcacace.signaturepad.views.SignaturePad pad =
                 dialogView.findViewById(R.id.dialog_signature_pad);
         final TextView tvLocation =
                 dialogView.findViewById(R.id.dialog_location_text);
-        // Reset between opens so a previous session's reading doesn't show
-        // as the current capture.
         capturedGps = "";
 
         final androidx.appcompat.app.AlertDialog dialog =
                 new androidx.appcompat.app.AlertDialog.Builder(this)
-                        .setTitle("Primary caregiver signature")
+                        .setTitle("Signature for " + row.participant.getCaregiverFullName())
                         .setView(dialogView)
                         .setCancelable(false)
                         .create();
@@ -182,14 +190,19 @@ public class RecordAttendanceActivity extends AppCompatActivity {
                         Toast.makeText(this, "Please sign before saving.", Toast.LENGTH_SHORT).show();
                         return;
                     }
+                    if (capturedGps == null || capturedGps.trim().isEmpty()) {
+                        Toast.makeText(this, "Capture GPS before saving this signature.", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
                     try {
                         android.graphics.Bitmap bmp = pad.getSignatureBitmap();
                         java.io.ByteArrayOutputStream bos = new java.io.ByteArrayOutputStream();
                         bmp.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, bos);
-                        capturedSignature = android.util.Base64.encodeToString(
+                        String signature = android.util.Base64.encodeToString(
                                 bos.toByteArray(), android.util.Base64.DEFAULT);
+                        signatures.put(row.participant.getParticipantId(), signature);
                         dialog.dismiss();
-                        persistAttendance(date);
+                        promptSignatureForRow(date, rows, index + 1, signatures);
                     } catch (Exception e) {
                         Toast.makeText(this, "Could not capture signature. Please retry.", Toast.LENGTH_SHORT).show();
                     }
@@ -269,6 +282,10 @@ public class RecordAttendanceActivity extends AppCompatActivity {
     }
 
     private void persistAttendance(String date) {
+        persistAttendance(date, new HashMap<>());
+    }
+
+    private void persistAttendance(String date, Map<String, String> signatures) {
         // Modal indeterminate spinner over the attendance screen while the IO block runs.
         // Blocks accidental re-taps and tells the user the form is being saved after they
         // tapped Save on the signature dialog.
@@ -281,7 +298,7 @@ public class RecordAttendanceActivity extends AppCompatActivity {
         List<AttendanceRowItem> rows = adapter.getRows();
         Threading.io(() -> {
             boolean isEditMode = SessionAttendanceDao.hasSession(groupId, sessionNumber);
-            saveFormEvent(date, rows, isEditMode);
+            saveFormEvent(date, rows, signatures, isEditMode);
             Threading.main(() -> {
                 if (saving.isShowing() && !isFinishing() && !isDestroyed()) saving.dismiss();
                 Toast.makeText(this, "Attendance saved", Toast.LENGTH_SHORT).show();
@@ -293,6 +310,10 @@ public class RecordAttendanceActivity extends AppCompatActivity {
     // ── Client processing ─────────────────────────────────────
 
     private void saveFormEvent(String date, List<AttendanceRowItem> rows, boolean isEditMode) {
+        saveFormEvent(date, rows, new HashMap<>(), isEditMode);
+    }
+
+    private void saveFormEvent(String date, List<AttendanceRowItem> rows, Map<String, String> signatures, boolean isEditMode) {
         try {
             FormUtils formUtils = new FormUtils(this);
             JSONObject template = formUtils.getFormJson("chimwemwe_session_attendance");
@@ -322,7 +343,7 @@ public class RecordAttendanceActivity extends AppCompatActivity {
                 }
             }
             ChimwemweFormUtils.ensureFieldValue(sessionForm, "session_type", sessionType);
-            ChimwemweFormUtils.ensureFieldValue(sessionForm, "caregiver_signature", capturedSignature);
+            ChimwemweFormUtils.ensureFieldValue(sessionForm, "caregiver_signature", "");
             // session_gps captured via the dialog's "Get location" button.
             // Empty string is fine — the column accepts NULL/blank.
             ChimwemweFormUtils.ensureFieldValue(sessionForm, "session_gps", capturedGps);
@@ -366,8 +387,10 @@ public class RecordAttendanceActivity extends AppCompatActivity {
                 ChimwemweFormUtils.ensureFieldValue(lineForm, "session_number", String.valueOf(sessionNumber));
                 ChimwemweFormUtils.ensureFieldValue(lineForm, "session_date", date);
                 ChimwemweFormUtils.ensureFieldValue(lineForm, "participant_id", pid);
+                String signature = signatures != null ? signatures.get(pid) : "";
                 ChimwemweFormUtils.ensureFieldValue(lineForm, "caregiver_attendance", row.caregiverAttendance);
                 ChimwemweFormUtils.ensureFieldValue(lineForm, "child_attendance", row.childAttendance);
+                ChimwemweFormUtils.ensureFieldValue(lineForm, "caregiver_signature", signature);
 
                 ChimwemweFormUtils.ProcessedForm processedLine = ChimwemweFormUtils.processRegistration(
                         lineForm,
@@ -384,6 +407,7 @@ public class RecordAttendanceActivity extends AppCompatActivity {
                 SessionAttendanceParticipantDao.upsertLine(
                         groupId, sessionNumber, date, pid,
                         row.caregiverAttendance, row.childAttendance);
+                SessionAttendanceParticipantDao.updateSignature(groupId, sessionNumber, pid, signature);
             }
         } catch (Exception e) {
             timber.log.Timber.e(e, "saveFormEvent failed for session attendance");
