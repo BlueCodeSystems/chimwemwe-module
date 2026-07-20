@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.bluecodeltd.chimwemwe.chw.activity.ChimwemweParticipantProfileActivity;
+import com.bluecodeltd.chimwemwe.chw.util.DistrictNameUtils;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -78,7 +79,7 @@ public class ParticipantOverviewFragment extends Fragment implements Participant
             if (tvGroupName != null) tvGroupName.setText(dash(group.getGroupName()));
             if (tvHotspotName != null) tvHotspotName.setText(dash(group.getHotspotName()));
             if (tvProvinceDistrict != null) {
-                tvProvinceDistrict.setText(dash(group.getProvince()) + " / " + dash(group.getDistrict()));
+                tvProvinceDistrict.setText(dash(group.getProvince()) + " / " + DistrictNameUtils.display(group.getDistrict()));
             }
             if (tvSessionLocation != null) tvSessionLocation.setText(dash(group.getLocationOfSession()));
             if (tvHealthFacility != null) tvHealthFacility.setText(dash(group.getNearestHealthFacility()));

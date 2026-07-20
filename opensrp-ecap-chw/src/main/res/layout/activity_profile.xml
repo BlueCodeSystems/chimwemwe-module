@@ -131,20 +131,6 @@
                             android:textColor="@android:color/white"
                             android:textSize="12sp"
                             android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/facility"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/bg_pill_translucent"
-                            android:paddingStart="12dp"
-                            android:paddingTop="6dp"
-                            android:paddingEnd="12dp"
-                            android:paddingBottom="6dp"
-                            android:text="Test Facility"
-                            android:textColor="@android:color/white"
-                            android:textSize="12sp"
-                            android:textStyle="bold" />
                     </LinearLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -176,29 +162,6 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
                         android:orientation="vertical">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:paddingBottom="10dp">
-
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="Partner"
-                                android:textColor="@color/black_text_color" />
-
-                            <TextView
-                                android:id="@+id/partner"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:gravity="end"
-                                android:text="BISO"
-                                android:textColor="@color/chimwemwe_primary_dark" />
-                        </LinearLayout>
 
                         <LinearLayout
                             android:layout_width="match_parent"

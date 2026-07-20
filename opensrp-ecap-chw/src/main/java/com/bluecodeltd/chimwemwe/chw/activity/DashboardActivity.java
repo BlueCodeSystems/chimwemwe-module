@@ -15,6 +15,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -32,13 +33,30 @@ import com.bluecodeltd.chimwemwe.chw.R;
 import com.bluecodeltd.chimwemwe.chw.actionhelper.CSVGeneratorHelper;
 import com.bluecodeltd.chimwemwe.chw.application.ChwApplication;
 import com.bluecodeltd.chimwemwe.chw.contract.GenerateCSVContract;
+import com.bluecodeltd.chimwemwe.chw.dao.HotspotGroupDao;
+import com.bluecodeltd.chimwemwe.chw.dao.HouseholdDao;
+import com.bluecodeltd.chimwemwe.chw.dao.ParticipantDao;
+import com.bluecodeltd.chimwemwe.chw.model.HotspotGroupModel;
 import com.bluecodeltd.chimwemwe.chw.presenter.GenerateCSVPresenter;
 import com.bluecodeltd.chimwemwe.chw.util.CsvFormImportService;
+import com.bluecodeltd.chimwemwe.chw.util.DistrictNameUtils;
 import com.bluecodeltd.chimwemwe.chw.activity.ChimwemweSummaryListActivity;
 import com.bluecodeltd.chimwemwe.chw.util.Threading;
 import com.bluecodeltd.chimwemwe.chw.util.UpdateManager;
 import com.bluecodeltd.chimwemwe.chw.viewmodel.DashboardViewModel;
 import com.github.javiersantos.appupdater.AppUpdater;
+import com.github.mikephil.charting.charts.HorizontalBarChart;
+import com.github.mikephil.charting.charts.PieChart;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.components.YAxis;
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.BarDataSet;
+import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.data.PieData;
+import com.github.mikephil.charting.data.PieDataSet;
+import com.github.mikephil.charting.data.PieEntry;
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
+import com.github.mikephil.charting.formatter.ValueFormatter;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -65,6 +83,10 @@ public class DashboardActivity extends AppCompatActivity
     private Toolbar toolbar;
     private AppUpdater appUpdater;
     private DashboardViewModel dashboardViewModel;
+
+    private static final int COLOR_MALE = Color.parseColor("#2563EB");
+    private static final int COLOR_FEMALE = Color.parseColor("#DB2777");
+    private static final int COLOR_UNSPECIFIED = Color.parseColor("#9CA3AF");
 
     private final Handler handler = new Handler();
     private Runnable runnable;
@@ -109,6 +131,7 @@ public class DashboardActivity extends AppCompatActivity
         csvGenerator = new CSVGeneratorHelper();
         appUpdater = new AppUpdater(this);
         UpdateManager.startOnce(this);
+        setupDashboardTabs();
 
         // Wire each dashboard stat card to its drill-down screen.
         wireSummaryCard(R.id.row_facilities,   ChimwemweSummaryListActivity.TYPE_FACILITIES);
@@ -138,7 +161,7 @@ public class DashboardActivity extends AppCompatActivity
         phone = sp.getString("phone", "");
 
         if (binding.dashFacilityName != null) {
-            binding.dashFacilityName.setText(district);
+            binding.dashFacilityName.setText(DistrictNameUtils.display(district));
         }
         String caseworkerName = sp.getString("caseworker_name", "");
         TextView dashName = findViewById(R.id.dash_caseworker_name);
@@ -199,11 +222,188 @@ public class DashboardActivity extends AppCompatActivity
         });
     }
 
+
+    private void setupDashboardTabs() {
+        TextView tabOverview = findViewById(R.id.tab_overview);
+        TextView tabCharts = findViewById(R.id.tab_charts);
+        View overview = findViewById(R.id.section_overview);
+        View charts = findViewById(R.id.section_charts);
+        if (tabOverview == null || tabCharts == null || overview == null || charts == null) return;
+
+        View.OnClickListener showOverview = v -> setDashboardTab(true, tabOverview, tabCharts, overview, charts);
+        View.OnClickListener showCharts = v -> setDashboardTab(false, tabOverview, tabCharts, overview, charts);
+        tabOverview.setOnClickListener(showOverview);
+        tabCharts.setOnClickListener(showCharts);
+        setDashboardTab(true, tabOverview, tabCharts, overview, charts);
+    }
+
+    private void setDashboardTab(boolean overviewSelected, TextView tabOverview, TextView tabCharts, View overview, View charts) {
+        overview.setVisibility(overviewSelected ? View.VISIBLE : View.GONE);
+        charts.setVisibility(overviewSelected ? View.GONE : View.VISIBLE);
+
+        int activeBg = getResources().getColor(R.color.chimwemwe_primary);
+        int inactiveBg = Color.TRANSPARENT;
+        int activeText = Color.WHITE;
+        int inactiveText = getResources().getColor(R.color.chimwemwe_text_secondary);
+
+        tabOverview.setBackgroundColor(overviewSelected ? activeBg : inactiveBg);
+        tabOverview.setTextColor(overviewSelected ? activeText : inactiveText);
+        tabCharts.setBackgroundColor(overviewSelected ? inactiveBg : activeBg);
+        tabCharts.setTextColor(overviewSelected ? inactiveText : activeText);
+    }
+
     private void loadData() {
         if (binding.dashProgressbar != null) {
             binding.dashProgressbar.setVisibility(View.VISIBLE);
         }
         dashboardViewModel.refresh();
+        loadHomepageCharts();
+    }
+
+    private void loadHomepageCharts() {
+        Threading.io(() -> {
+            int[] childGenderCounts = ParticipantDao.getChildGenderCounts();
+            int[] parentGenderCounts = new int[]{
+                    parseCount(HouseholdDao.countMaleCaregivers()),
+                    parseCount(HouseholdDao.countFemaleCaregivers()),
+                    0
+            };
+            List<HotspotGroupModel> groups = HotspotGroupDao.getAllGroups();
+            Threading.main(() -> {
+                if (isFinishing() || isDestroyed()) return;
+                renderGenderPie(R.id.chart_child_gender, R.id.tv_child_gender_empty, childGenderCounts, "Children");
+                renderGenderPie(R.id.chart_parent_gender, R.id.tv_parent_gender_empty, parentGenderCounts, "Parents");
+                renderGroupSessions(groups);
+            });
+        });
+    }
+
+    private int parseCount(String value) {
+        try {
+            return Integer.parseInt(value == null ? "0" : value.trim());
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    private void renderGenderPie(int chartId, int emptyId, int[] counts, String centerLabel) {
+        PieChart chart = findViewById(chartId);
+        TextView empty = findViewById(emptyId);
+        if (chart == null || empty == null) return;
+
+        int total = (counts == null) ? 0 : counts[0] + counts[1] + counts[2];
+        if (total == 0) {
+            chart.setVisibility(View.GONE);
+            empty.setVisibility(View.VISIBLE);
+            return;
+        }
+        chart.setVisibility(View.VISIBLE);
+        empty.setVisibility(View.GONE);
+
+        List<PieEntry> entries = new ArrayList<>();
+        List<Integer> colors = new ArrayList<>();
+        if (counts[0] > 0) { entries.add(new PieEntry(counts[0], "Male")); colors.add(COLOR_MALE); }
+        if (counts[1] > 0) { entries.add(new PieEntry(counts[1], "Female")); colors.add(COLOR_FEMALE); }
+        if (counts[2] > 0) { entries.add(new PieEntry(counts[2], "Unspecified")); colors.add(COLOR_UNSPECIFIED); }
+
+        PieDataSet set = new PieDataSet(entries, "");
+        set.setColors(colors);
+        set.setValueTextColor(Color.WHITE);
+        set.setValueTextSize(13f);
+        set.setValueFormatter(new ValueFormatter() {
+            @Override public String getFormattedValue(float value) {
+                return String.valueOf((int) value);
+            }
+        });
+
+        chart.setData(new PieData(set));
+        chart.getDescription().setEnabled(false);
+        chart.setEntryLabelColor(Color.WHITE);
+        chart.setEntryLabelTextSize(12f);
+        chart.setUsePercentValues(false);
+        chart.setDrawHoleEnabled(true);
+        chart.setHoleRadius(42f);
+        chart.setTransparentCircleRadius(46f);
+        chart.setHoleColor(Color.TRANSPARENT);
+        chart.setCenterText(centerLabel + "\n" + total);
+        chart.setCenterTextSize(13f);
+        chart.getLegend().setWordWrapEnabled(true);
+        chart.animateY(500);
+        chart.invalidate();
+    }
+
+    private void renderGroupSessions(List<HotspotGroupModel> groups) {
+        HorizontalBarChart chart = findViewById(R.id.chart_group_sessions);
+        TextView empty = findViewById(R.id.tv_group_sessions_empty);
+        if (chart == null || empty == null) return;
+
+        if (groups == null || groups.isEmpty()) {
+            chart.setVisibility(View.GONE);
+            empty.setVisibility(View.VISIBLE);
+            return;
+        }
+        chart.setVisibility(View.VISIBLE);
+        empty.setVisibility(View.GONE);
+
+        List<BarEntry> entries = new ArrayList<>();
+        List<String> labels = new ArrayList<>();
+        for (int i = groups.size() - 1; i >= 0; i--) {
+            HotspotGroupModel group = groups.get(i);
+            String name = group.getGroupName() != null && !group.getGroupName().trim().isEmpty()
+                    ? group.getGroupName().trim() : "(unnamed)";
+            int index = labels.size();
+            labels.add(name);
+            entries.add(new BarEntry(index, group.getSessionsRecorded()));
+        }
+
+        BarDataSet set = new BarDataSet(entries, "Sessions completed");
+        set.setColor(androidx.core.content.ContextCompat.getColor(this, R.color.chimwemwe_primary));
+        set.setValueTextSize(10f);
+        set.setValueFormatter(new ValueFormatter() {
+            @Override public String getFormattedValue(float value) {
+                return String.valueOf((int) value);
+            }
+        });
+
+        BarData data = new BarData(set);
+        data.setBarWidth(0.6f);
+        chart.setData(data);
+        chart.getDescription().setEnabled(false);
+        chart.getLegend().setEnabled(false);
+        chart.setFitBars(true);
+        chart.setDrawValueAboveBar(true);
+        chart.setScaleEnabled(false);
+
+        XAxis x = chart.getXAxis();
+        x.setValueFormatter(new IndexAxisValueFormatter(labels));
+        x.setPosition(XAxis.XAxisPosition.BOTTOM);
+        x.setGranularity(1f);
+        x.setGranularityEnabled(true);
+        x.setDrawGridLines(false);
+        x.setLabelCount(labels.size());
+
+        YAxis left = chart.getAxisLeft();
+        left.setAxisMinimum(0f);
+        left.setAxisMaximum(14f);
+        left.setGranularity(1f);
+
+        YAxis right = chart.getAxisRight();
+        right.setAxisMinimum(0f);
+        right.setAxisMaximum(14f);
+        right.setDrawLabels(false);
+
+        float density = getResources().getDisplayMetrics().density;
+        int perBar = Math.round(46 * density);
+        int minHeight = Math.round(280 * density);
+        int desiredHeight = Math.max(minHeight, groups.size() * perBar);
+        ViewGroup.LayoutParams lp = chart.getLayoutParams();
+        if (lp != null && lp.height != desiredHeight) {
+            lp.height = desiredHeight;
+            chart.setLayoutParams(lp);
+        }
+
+        chart.animateY(500);
+        chart.invalidate();
     }
 
     private void refreshData() {
@@ -251,7 +451,7 @@ public class DashboardActivity extends AppCompatActivity
         // Always refresh local counts when sync finishes, regardless of who triggered it.
         loadData();
 
-        // Only show the completion popup when the user explicitly initiated the sync —
+        // Only show the completion popup when the user explicitly initiated the sync ?
         // background/periodic syncs should not interrupt with a dialog.
         if (!userInitiatedSync) return;
         userInitiatedSync = false;
@@ -259,14 +459,14 @@ public class DashboardActivity extends AppCompatActivity
         if (isFinishing() || isDestroyed()) return;
         String message;
         if (fetchStatus == FetchStatus.fetched) {
-            message = "Sync complete — your data is up to date.";
+            message = "Sync complete ? your data is up to date.";
         } else if (fetchStatus == FetchStatus.nothingFetched) {
-            message = "Sync complete — you are already up to date.";
+            message = "Sync complete ? you are already up to date.";
         } else {
             String reason = fetchStatus != null && fetchStatus.displayValue() != null
                     ? fetchStatus.displayValue()
                     : "Please check your connection and try again.";
-            message = "Sync failed — " + reason;
+            message = "Sync failed ? " + reason;
         }
 
         try {
@@ -305,7 +505,7 @@ public class DashboardActivity extends AppCompatActivity
         }
     }
 
-    // ── Options menu ──────────────────────────────────────────────
+    // ?? Options menu ??????????????????????????????????????????????
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -327,7 +527,7 @@ public class DashboardActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
-    // ── CSV contract ──────────────────────────────────────────────
+    // ?? CSV contract ??????????????????????????????????????????????
 
     @Override
     public void showCSVGeneratedMessage(String filePath) {}
@@ -335,10 +535,10 @@ public class DashboardActivity extends AppCompatActivity
     @Override
     public void showError(String errorMessage) {}
 
-    // ── Keycloak token / credential refresh ───────────────────────
+    // ?? Keycloak token / credential refresh ???????????????????????
 
     private void getToken(final String username, final String password) {
-        String url = "https://keycloak.zeir.smartregister.org/auth/realms/ecap-stage/protocol/openid-connect/token";
+        String url = "https://keycloak.zeir.smartregister.org/auth/realms/chimwemwe/protocol/openid-connect/token";
         StringRequest req = new StringRequest(Request.Method.POST, url,
                 response -> {
                     try {
@@ -367,7 +567,7 @@ public class DashboardActivity extends AppCompatActivity
     }
 
     private void getCreds(String token) {
-        String url = "https://keycloak.zeir.smartregister.org/auth/realms/ecap-stage/protocol/openid-connect/userinfo";
+        String url = "https://keycloak.zeir.smartregister.org/auth/realms/chimwemwe/protocol/openid-connect/userinfo";
         StringRequest req = new StringRequest(Request.Method.GET, url,
                 response -> {
                     try {
@@ -403,7 +603,7 @@ public class DashboardActivity extends AppCompatActivity
         ChwApplication.getApplicationFlavor().chwAppInstance().addToRequestQueue(req, "req_creds");
     }
 
-    // ── CSV import ────────────────────────────────────────────────
+    // ?? CSV import ????????????????????????????????????????????????
 
     private void openCsvPicker() {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
@@ -517,13 +717,13 @@ public class DashboardActivity extends AppCompatActivity
         return uris;
     }
 
-    // ── Dimension helper ──────────────────────────────────────────
+    // ?? Dimension helper ??????????????????????????????????????????
 
     private int dpToPx(int dp) {
         return Math.round(dp * getResources().getDisplayMetrics().density);
     }
 
-    // ── Dialog helper ─────────────────────────────────────────────
+    // ?? Dialog helper ?????????????????????????????????????????????
 
     public void showCustomDialog(Context context, String message) {
         showCustomDialog(context, message, null);

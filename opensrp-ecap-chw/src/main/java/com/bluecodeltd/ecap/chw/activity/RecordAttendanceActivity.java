@@ -52,11 +52,18 @@ public class RecordAttendanceActivity extends AppCompatActivity {
 
     private TextView    etDate;
     private String      capturedGps       = "";
+    // Session-level GPS loaded on edit, reused when every present participant already signed so the
+    // save does not overwrite the stored session_gps with an empty value (Option A).
+    private String      existingSessionGps  = "";
     // Pending callback, set when the user taps "Get location" before the
     // permission has been granted. Fired in onRequestPermissionsResult once
     // the user grants ACCESS_FINE_LOCATION.
     private Runnable    pendingLocationCallback;
     private AttendanceAdapter adapter;
+
+    /** Receives the captured "lat,lng" string so a single capture routine can feed
+     *  the participant/session GPS fields. */
+    private interface GpsSink { void accept(String gps); }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,12 +121,33 @@ public class RecordAttendanceActivity extends AppCompatActivity {
                 AttendanceModel att = existingMap.get(p.getParticipantId());
                 String cgAtt = att != null ? att.getCaregiverAttendance() : "";
                 String chAtt = att != null ? att.getChildAttendance() : "";
-                rows.add(new AttendanceRowItem(p, cgAtt, chAtt));
+                AttendanceRowItem item = new AttendanceRowItem(p, cgAtt, chAtt);
+                // Carry the existing signature + GPS forward so present participants who already signed
+                // are not re-prompted or re-located on edit (Option A).
+                item.caregiverSignature = att != null && att.getCaregiverSignature() != null
+                        ? att.getCaregiverSignature() : "";
+                item.caregiverGps = att != null && att.getCaregiverGps() != null
+                        ? att.getCaregiverGps() : "";
+
+                // Sequential eligibility: if this participant missed an earlier session, hard-block
+                // them for this one. Force Absent so the persisted state can never contradict the
+                // block, even if a recycled/stale spinner reports a present value.
+                item.missedSession = SessionAttendanceParticipantDao
+                        .firstMissedSessionBefore(groupId, sessionNumber, p.getParticipantId());
+                if (item.isBlocked()) {
+                    item.caregiverAttendance = "";
+                    item.childAttendance     = "";
+                }
+
+                rows.add(item);
             }
             String existingDate = SessionAttendanceDao.getSessionDate(groupId, sessionNumber);
             String defaultDate = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(new Date());
+            // Preserve the existing session location when editing participant attendance.
+            String loadedSessionGps  = SessionAttendanceDao.getSessionGps(groupId, sessionNumber);
             Threading.main(() -> {
                 etDate.setText(existingDate != null && !existingDate.trim().isEmpty() ? existingDate : defaultDate);
+                existingSessionGps  = loadedSessionGps != null ? loadedSessionGps : "";
                 adapter.setData(rows);
             });
         });
@@ -135,6 +163,10 @@ public class RecordAttendanceActivity extends AppCompatActivity {
     }
     private void promptCaregiverSignaturesThenSave(final String date) {
         List<AttendanceRowItem> rows = adapter.getRows();
+        // Seed the session GPS from the stored value so that when every present participant already
+        // signed (nothing new to capture), the save keeps the existing session_gps instead of blanking
+        // it. A per-participant dialog that does open will overwrite this with a fresh fix.
+        capturedGps = existingSessionGps != null ? existingSessionGps : "";
         if (rows == null || rows.isEmpty()) {
             persistAttendance(date, new HashMap<>());
             return;
@@ -155,21 +187,51 @@ public class RecordAttendanceActivity extends AppCompatActivity {
             return;
         }
 
-        boolean needsSignature = !"Absent".equalsIgnoreCase(row.caregiverAttendance)
-                || !"Absent".equalsIgnoreCase(row.childAttendance);
+        boolean needsSignature = isPresentAttendance(row.caregiverAttendance);
         if (!needsSignature) {
+            // Absent (or not present): no signature required.
             signatures.put(row.participant.getParticipantId(), "");
             promptSignatureForRow(date, rows, index + 1, signatures);
             return;
         }
 
+        if (row.hasSignature()) {
+            // Option A: this present participant already signed in a prior save — reuse it and don't
+            // re-prompt. Editing another (e.g. previously-absent) participant no longer forces
+            // everyone who was Group/Home Visit to sign again.
+            signatures.put(row.participant.getParticipantId(), row.caregiverSignature);
+            promptSignatureForRow(date, rows, index + 1, signatures);
+            return;
+        }
+
+        showCaregiverSignatureDialog(row, (signature, gps) -> {
+            capturedGps = gps;
+            row.caregiverSignature = signature;
+            row.caregiverGps = gps;
+            signatures.put(row.participant.getParticipantId(), signature);
+            promptSignatureForRow(date, rows, index + 1, signatures);
+        });
+    }
+
+    /** Receives a captured caregiver signature (Base64 PNG) and its GPS "lat,lng". */
+    private interface SignatureSink { void accept(String signature, String gps); }
+
+    /**
+     * Shows the caregiver signature + GPS dialog for one participant and hands the captured pair to
+     * {@code onCaptured} on Save. Both a signature and a GPS fix are mandatory before it dismisses.
+     * Shared by the save-flow ({@link #promptSignatureForRow}) and the per-row "tap to re-sign"
+     * action so there is a single signature-capture implementation.
+     */
+    private void showCaregiverSignatureDialog(final AttendanceRowItem row, final SignatureSink onCaptured) {
         View dialogView = LayoutInflater.from(this)
                 .inflate(R.layout.dialog_caregiver_signature, null);
         final com.github.gcacace.signaturepad.views.SignaturePad pad =
                 dialogView.findViewById(R.id.dialog_signature_pad);
         final TextView tvLocation =
                 dialogView.findViewById(R.id.dialog_location_text);
-        capturedGps = "";
+        // Local capture buffer so re-signing one row can't leave a half-written session GPS behind
+        // if the user cancels; the caller commits capturedGps only on a successful capture.
+        final String[] gpsBuffer = { "" };
 
         final androidx.appcompat.app.AlertDialog dialog =
                 new androidx.appcompat.app.AlertDialog.Builder(this)
@@ -183,14 +245,14 @@ public class RecordAttendanceActivity extends AppCompatActivity {
         dialogView.findViewById(R.id.dialog_signature_cancel)
                 .setOnClickListener(v -> dialog.dismiss());
         dialogView.findViewById(R.id.dialog_location_capture)
-                .setOnClickListener(v -> captureLocation(tvLocation));
+                .setOnClickListener(v -> captureLocation(tvLocation, gps -> gpsBuffer[0] = gps));
         dialogView.findViewById(R.id.dialog_signature_save)
                 .setOnClickListener(v -> {
                     if (pad.isEmpty()) {
                         Toast.makeText(this, "Please sign before saving.", Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    if (capturedGps == null || capturedGps.trim().isEmpty()) {
+                    if (gpsBuffer[0] == null || gpsBuffer[0].trim().isEmpty()) {
                         Toast.makeText(this, "Capture GPS before saving this signature.", Toast.LENGTH_SHORT).show();
                         return;
                     }
@@ -200,9 +262,8 @@ public class RecordAttendanceActivity extends AppCompatActivity {
                         bmp.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, bos);
                         String signature = android.util.Base64.encodeToString(
                                 bos.toByteArray(), android.util.Base64.DEFAULT);
-                        signatures.put(row.participant.getParticipantId(), signature);
                         dialog.dismiss();
-                        promptSignatureForRow(date, rows, index + 1, signatures);
+                        onCaptured.accept(signature, gpsBuffer[0]);
                     } catch (Exception e) {
                         Toast.makeText(this, "Could not capture signature. Please retry.", Toast.LENGTH_SHORT).show();
                     }
@@ -211,18 +272,22 @@ public class RecordAttendanceActivity extends AppCompatActivity {
         dialog.show();
     }
 
+
     /**
      * GPS capture for the session attendance — mirrors what the type:gps
      * widget on the household service form does. User-initiated: only fires
      * when the worker taps "Get location" in the signature dialog. Reads
-     * last-known fix from GPS first, NETWORK_PROVIDER as fallback. Writes the
-     * result back into {@link #capturedGps} and updates the readout TextView.
+     * last-known fix from GPS first, NETWORK_PROVIDER as fallback. Hands the
+     * result to {@code sink} and updates the readout TextView.
      */
-    private void captureLocation(final TextView readout) {
+    private void captureLocation(final TextView readout, final GpsSink sink) {
         if (androidx.core.content.ContextCompat.checkSelfPermission(this,
                 android.Manifest.permission.ACCESS_FINE_LOCATION)
+                != android.content.pm.PackageManager.PERMISSION_GRANTED
+                && androidx.core.content.ContextCompat.checkSelfPermission(this,
+                android.Manifest.permission.ACCESS_COARSE_LOCATION)
                 != android.content.pm.PackageManager.PERMISSION_GRANTED) {
-            pendingLocationCallback = () -> captureLocation(readout);
+            pendingLocationCallback = () -> captureLocation(readout, sink);
             androidx.core.app.ActivityCompat.requestPermissions(this,
                     new String[]{
                             android.Manifest.permission.ACCESS_FINE_LOCATION,
@@ -232,37 +297,77 @@ public class RecordAttendanceActivity extends AppCompatActivity {
             return;
         }
 
-        readout.setText("Acquiring location…");
+        readout.setText("Acquiring location... keep GPS on and wait for a fix.");
         android.location.LocationManager lm =
                 (android.location.LocationManager) getSystemService(LOCATION_SERVICE);
-        android.location.Location loc = null;
-        try {
-            loc = lm.getLastKnownLocation(android.location.LocationManager.GPS_PROVIDER);
-        } catch (SecurityException | IllegalArgumentException ignored) {
-            // SecurityException: permission revoked between the check and call.
-            // IllegalArgumentException: provider not present on this device.
-        }
-        if (loc == null) {
-            try {
-                loc = lm.getLastKnownLocation(android.location.LocationManager.NETWORK_PROVIDER);
-            } catch (SecurityException | IllegalArgumentException ignored) {
-                // Same defensive catch — some emulators / stripped builds
-                // omit the network provider.
-            }
+        if (lm == null) {
+            readout.setText("Location service is unavailable on this device.");
+            return;
         }
 
-        if (loc != null) {
-            // Form the same simple "lat,lng" string the type:gps widget
-            // produces. Display matches the widget's multi-line readout:
-            // Latitude / Longitude / Accuracy on separate lines.
-            capturedGps = loc.getLatitude() + "," + loc.getLongitude();
-            readout.setText(String.format(java.util.Locale.US,
-                    "Latitude: %.5f\nLongitude: %.5f\nAccuracy: %dm",
-                    loc.getLatitude(), loc.getLongitude(),
-                    Math.round(loc.getAccuracy())));
-        } else {
-            readout.setText("Could not get a location — try again outdoors.");
+        final boolean[] delivered = {false};
+        android.os.Handler handler = new android.os.Handler(android.os.Looper.getMainLooper());
+        android.location.LocationListener listener = new android.location.LocationListener() {
+            @Override public void onLocationChanged(android.location.Location location) {
+                if (location == null || delivered[0]) return;
+                delivered[0] = true;
+                try { lm.removeUpdates(this); } catch (Exception ignored) {}
+                publishLocation(location, readout, sink);
+            }
+            @Override public void onStatusChanged(String provider, int status, android.os.Bundle extras) {}
+            @Override public void onProviderEnabled(String provider) {}
+            @Override public void onProviderDisabled(String provider) {}
+        };
+
+        boolean requested = false;
+        try {
+            if (lm.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER)) {
+                lm.requestLocationUpdates(android.location.LocationManager.GPS_PROVIDER, 0L, 0f,
+                        listener, android.os.Looper.getMainLooper());
+                requested = true;
+            }
+        } catch (SecurityException | IllegalArgumentException ignored) {}
+        try {
+            if (lm.isProviderEnabled(android.location.LocationManager.NETWORK_PROVIDER)) {
+                lm.requestLocationUpdates(android.location.LocationManager.NETWORK_PROVIDER, 0L, 0f,
+                        listener, android.os.Looper.getMainLooper());
+                requested = true;
+            }
+        } catch (SecurityException | IllegalArgumentException ignored) {}
+
+        if (!requested) {
+            readout.setText("Enable device location/GPS, then tap Get location again.");
+            return;
         }
+
+        handler.postDelayed(() -> {
+            if (delivered[0]) return;
+            delivered[0] = true;
+            try { lm.removeUpdates(listener); } catch (Exception ignored) {}
+            android.location.Location fallback = bestLastKnownLocation(lm);
+            if (fallback != null) {
+                publishLocation(fallback, readout, sink);
+            } else {
+                readout.setText("Still acquiring location. Move near a window/outdoors and tap Get location again.");
+            }
+        }, 15000L);
+    }
+
+    private android.location.Location bestLastKnownLocation(android.location.LocationManager lm) {
+        android.location.Location best = null;
+        try { best = lm.getLastKnownLocation(android.location.LocationManager.GPS_PROVIDER); } catch (Exception ignored) {}
+        try {
+            android.location.Location network = lm.getLastKnownLocation(android.location.LocationManager.NETWORK_PROVIDER);
+            if (best == null || (network != null && network.getTime() > best.getTime())) best = network;
+        } catch (Exception ignored) {}
+        return best;
+    }
+
+    private void publishLocation(android.location.Location loc, TextView readout, GpsSink sink) {
+        sink.accept(String.format(java.util.Locale.US, "%.6f,%.6f", loc.getLatitude(), loc.getLongitude()));
+        readout.setText(String.format(java.util.Locale.US,
+                "Latitude: %.5f\nLongitude: %.5f\nAccuracy: %dm",
+                loc.getLatitude(), loc.getLongitude(), Math.round(loc.getAccuracy())));
     }
 
     @Override
@@ -315,6 +420,18 @@ public class RecordAttendanceActivity extends AppCompatActivity {
 
     private void saveFormEvent(String date, List<AttendanceRowItem> rows, Map<String, String> signatures, boolean isEditMode) {
         try {
+            // Enforce sequential eligibility at the persistence layer: a participant blocked for this
+            // session (missed an earlier one) is always saved Absent, no matter what the row/spinner
+            // holds. The disabled UI is the visible half of the hard block; this is the enforcement.
+            if (rows != null) {
+                for (AttendanceRowItem row : rows) {
+                    if (row != null && row.isBlocked()) {
+                        row.caregiverAttendance = "";
+                        row.childAttendance     = "";
+                    }
+                }
+            }
+
             FormUtils formUtils = new FormUtils(this);
             JSONObject template = formUtils.getFormJson("chimwemwe_session_attendance");
             if (template == null) return;
@@ -388,9 +505,14 @@ public class RecordAttendanceActivity extends AppCompatActivity {
                 ChimwemweFormUtils.ensureFieldValue(lineForm, "session_date", date);
                 ChimwemweFormUtils.ensureFieldValue(lineForm, "participant_id", pid);
                 String signature = signatures != null ? signatures.get(pid) : "";
+                // Per-participant GPS: only a present participant carries a location; absent/blocked
+                // rows are forced empty so a stale fix can't linger after they're marked Absent.
+                String gps = isPresentAttendance(row.caregiverAttendance)
+                        ? (row.caregiverGps != null ? row.caregiverGps : "") : "";
                 ChimwemweFormUtils.ensureFieldValue(lineForm, "caregiver_attendance", row.caregiverAttendance);
                 ChimwemweFormUtils.ensureFieldValue(lineForm, "child_attendance", row.childAttendance);
                 ChimwemweFormUtils.ensureFieldValue(lineForm, "caregiver_signature", signature);
+                ChimwemweFormUtils.ensureFieldValue(lineForm, "caregiver_gps", gps);
 
                 ChimwemweFormUtils.ProcessedForm processedLine = ChimwemweFormUtils.processRegistration(
                         lineForm,
@@ -408,6 +530,7 @@ public class RecordAttendanceActivity extends AppCompatActivity {
                         groupId, sessionNumber, date, pid,
                         row.caregiverAttendance, row.childAttendance);
                 SessionAttendanceParticipantDao.updateSignature(groupId, sessionNumber, pid, signature);
+                SessionAttendanceParticipantDao.updateGps(groupId, sessionNumber, pid, gps);
             }
         } catch (Exception e) {
             timber.log.Timber.e(e, "saveFormEvent failed for session attendance");
@@ -420,12 +543,37 @@ public class RecordAttendanceActivity extends AppCompatActivity {
         ParticipantModel participant;
         String caregiverAttendance;
         String childAttendance;
+        // Existing caregiver signature loaded on edit. Reused so a present participant who already
+        // signed in a prior save is not asked to sign again (Option A). Empty for new/never-signed.
+        String caregiverSignature = "";
+        // Per-participant GPS ("lat,lng") captured with the signature. Loaded on edit and reused
+        // alongside the signature so present participants are not re-located on every save.
+        String caregiverGps = "";
+        // Sequential eligibility: >0 means this participant was absent in that earlier session and
+        // is hard-blocked for the current session until the earlier absence is corrected. 0 = eligible.
+        int missedSession;
 
         AttendanceRowItem(ParticipantModel p, String cg, String ch) {
             this.participant         = p;
-            this.caregiverAttendance = cg;
-            this.childAttendance     = ch;
+            this.caregiverAttendance = normalizeAttendance(cg);
+            this.childAttendance     = normalizeAttendance(ch);
         }
+
+        boolean hasSignature() {
+            return caregiverSignature != null && !caregiverSignature.trim().isEmpty();
+        }
+
+        boolean isBlocked() { return missedSession > 0; }
+    }
+
+    private static boolean isPresentAttendance(String value) {
+        return "Group".equalsIgnoreCase(value) || "Home Visit".equalsIgnoreCase(value);
+    }
+
+    private static String normalizeAttendance(String value) {
+        if ("Group".equalsIgnoreCase(value)) return "Group";
+        if ("Home Visit".equalsIgnoreCase(value)) return "Home Visit";
+        return "";
     }
 
     // ── Adapter ──────────────────────────────────────────────
@@ -473,10 +621,49 @@ public class RecordAttendanceActivity extends AppCompatActivity {
             h.tvCaregiverName.setText(row.participant.getCaregiverFullName());
             h.tvChildName.setText(row.participant.getChildFullName());
 
+            // Sequential eligibility gate. Reset both ways every bind — ViewHolders are recycled.
+            boolean blocked = row.isBlocked();
+            if (blocked) {
+                h.tvIneligibleReason.setText("Ineligible: missed Session " + row.missedSession);
+                h.tvIneligibleReason.setVisibility(View.VISIBLE);
+            } else {
+                h.tvIneligibleReason.setVisibility(View.GONE);
+            }
+            h.spinnerCaregiver.setEnabled(!blocked);
+            h.spinnerChild.setEnabled(!blocked);
+
+            // Option B: per-row signature status + "tap to re-sign". Only meaningful for a present,
+            // already-signed, eligible participant. Reset every bind (ViewHolders are recycled).
+            if (!blocked && isPresentAttendance(row.caregiverAttendance) && row.hasSignature()) {
+                h.tvSignatureStatus.setText("✓ Signed · tap to re-sign");
+                h.tvSignatureStatus.setVisibility(View.VISIBLE);
+                h.tvSignatureStatus.setOnClickListener(v -> showCaregiverSignatureDialog(row, (signature, gps) -> {
+                    row.caregiverSignature = signature;
+                    row.caregiverGps = gps;
+                    // A fresh capture updates the session GPS too, mirroring the save-flow dialog.
+                    capturedGps = gps;
+                    existingSessionGps = gps;
+                    int p = h.getAdapterPosition();
+                    if (p != RecyclerView.NO_POSITION) notifyItemChanged(p);
+                    Toast.makeText(RecordAttendanceActivity.this,
+                            "Signature updated for " + row.participant.getCaregiverFullName(),
+                            Toast.LENGTH_SHORT).show();
+                }));
+            } else {
+                h.tvSignatureStatus.setVisibility(View.GONE);
+                h.tvSignatureStatus.setOnClickListener(null);
+            }
+
             // Null old listeners before setAdapter/setSelection so recycled ViewHolders
-            // don't fire stale callbacks that overwrite row data with "".
+            // don't fire stale callbacks that overwrite row data.
             h.spinnerCaregiver.setOnItemSelectedListener(null);
             h.spinnerChild.setOnItemSelectedListener(null);
+            // Any selection change during (re)binding is PROGRAMMATIC and must not be written back.
+            // Only a real user tap flips these true. This closes a recycling race where a stray
+            // programmatic onItemSelected wrote another participant's "present" value into this row,
+            // making an Absent participant get asked to sign.
+            h.userTouchedCaregiver = false;
+            h.userTouchedChild     = false;
 
             // Setup spinners
             ArrayAdapter<String> adapter = new ArrayAdapter<>(
@@ -494,34 +681,37 @@ public class RecordAttendanceActivity extends AppCompatActivity {
             h.spinnerCaregiver.setAdapter(adapter);
             h.spinnerChild.setAdapter(adapter2);
 
-            // Restore selections
+            // Restore selections (programmatic — guarded by the touch flags above)
             setSpinnerValue(h.spinnerCaregiver, row.caregiverAttendance);
             setSpinnerValue(h.spinnerChild, row.childAttendance);
 
-            // Track changes — write back into filteredRows (which are shared refs from allRows)
-            h.spinnerCaregiver.post(() ->
-                    h.spinnerCaregiver.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
-                        @Override
-                        public void onItemSelected(android.widget.AdapterView<?> parent, View view, int position, long id) {
-                            int adapterPos = h.getAdapterPosition();
-                            if (adapterPos != RecyclerView.NO_POSITION && adapterPos < filteredRows.size())
-                                filteredRows.get(adapterPos).caregiverAttendance =
-                                        position == 0 ? "" : ATTENDANCE_OPTIONS[position];
-                        }
-                        @Override public void onNothingSelected(android.widget.AdapterView<?> parent) {}
-                    }));
+            // A real tap marks the spinner user-driven; only then is its selection written back.
+            h.spinnerCaregiver.setOnTouchListener((v, e) -> { h.userTouchedCaregiver = true; return false; });
+            h.spinnerChild.setOnTouchListener((v, e) -> { h.userTouchedChild = true; return false; });
 
-            h.spinnerChild.post(() ->
-                    h.spinnerChild.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
-                        @Override
-                        public void onItemSelected(android.widget.AdapterView<?> parent, View view, int position, long id) {
-                            int adapterPos = h.getAdapterPosition();
-                            if (adapterPos != RecyclerView.NO_POSITION && adapterPos < filteredRows.size())
-                                filteredRows.get(adapterPos).childAttendance =
-                                        position == 0 ? "" : ATTENDANCE_OPTIONS[position];
-                        }
-                        @Override public void onNothingSelected(android.widget.AdapterView<?> parent) {}
-                    }));
+            h.spinnerCaregiver.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(android.widget.AdapterView<?> parent, View view, int position, long id) {
+                    if (!h.userTouchedCaregiver) return; // ignore programmatic selection during (re)bind
+                    int adapterPos = h.getAdapterPosition();
+                    if (adapterPos != RecyclerView.NO_POSITION && adapterPos < filteredRows.size())
+                        filteredRows.get(adapterPos).caregiverAttendance =
+                                position == 0 ? "" : ATTENDANCE_OPTIONS[position];
+                }
+                @Override public void onNothingSelected(android.widget.AdapterView<?> parent) {}
+            });
+
+            h.spinnerChild.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(android.widget.AdapterView<?> parent, View view, int position, long id) {
+                    if (!h.userTouchedChild) return; // ignore programmatic selection during (re)bind
+                    int adapterPos = h.getAdapterPosition();
+                    if (adapterPos != RecyclerView.NO_POSITION && adapterPos < filteredRows.size())
+                        filteredRows.get(adapterPos).childAttendance =
+                                position == 0 ? "" : ATTENDANCE_OPTIONS[position];
+                }
+                @Override public void onNothingSelected(android.widget.AdapterView<?> parent) {}
+            });
         }
 
         private void setSpinnerValue(Spinner spinner, String value) {
@@ -536,15 +726,20 @@ public class RecordAttendanceActivity extends AppCompatActivity {
         public int getItemCount() { return filteredRows.size(); }
 
         class VH extends RecyclerView.ViewHolder {
-            TextView tvCaregiverName, tvChildName;
+            TextView tvCaregiverName, tvChildName, tvIneligibleReason, tvSignatureStatus;
             Spinner  spinnerCaregiver, spinnerChild;
+            // True only after a real user tap on the respective spinner; gates write-back so
+            // programmatic selection during (re)binding never mutates a participant's attendance.
+            boolean  userTouchedCaregiver, userTouchedChild;
 
             VH(View v) {
                 super(v);
-                tvCaregiverName  = v.findViewById(R.id.tv_caregiver_name);
-                tvChildName      = v.findViewById(R.id.tv_child_name);
-                spinnerCaregiver = v.findViewById(R.id.spinner_caregiver);
-                spinnerChild     = v.findViewById(R.id.spinner_child);
+                tvCaregiverName    = v.findViewById(R.id.tv_caregiver_name);
+                tvChildName        = v.findViewById(R.id.tv_child_name);
+                tvIneligibleReason = v.findViewById(R.id.tv_ineligible_reason);
+                tvSignatureStatus  = v.findViewById(R.id.tv_signature_status);
+                spinnerCaregiver   = v.findViewById(R.id.spinner_caregiver);
+                spinnerChild       = v.findViewById(R.id.spinner_child);
             }
         }
     }

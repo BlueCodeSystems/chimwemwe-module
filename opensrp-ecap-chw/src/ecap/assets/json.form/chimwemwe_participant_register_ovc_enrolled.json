@@ -52,6 +52,20 @@
     "display_back_button": "true",
     "fields": [
       {
+        "key": "group_id",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "group_id",
+        "type": "hidden",
+        "read_only": "true",
+        "hint": "Group ID",
+        "edit_type": "name",
+        "v_required": {
+          "value": true,
+          "err": ""
+        }
+      },
+      {
         "key": "participant_id",
         "openmrs_entity_parent": "",
         "openmrs_entity": "person_attribute",
@@ -127,9 +141,9 @@
         "edit_type": "name",
         "read_only": "true",
         "v_required": {
-          "value": "false",
+          "value": "true",
           "read_only": "true",
-          "err": ""
+          "err": "Please enter the child's surname"
         }
       },
       {
@@ -144,8 +158,8 @@
         "max_date": "today",
         "read_only": "true",
         "v_required": {
-          "value": "false",
-          "err": ""
+          "value": "true",
+          "err": "Please enter the date of birth"
         }
       },
       {
@@ -183,6 +197,21 @@
         "v_required": {
           "value": "Yes",
           "err": ""
+        }
+      },
+      {
+        "key": "enrollment_date",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "enrollment_date",
+        "type": "date_picker",
+        "hint": "Date of Enrollment",
+        "expanded": false,
+        "min_date": "today-10y",
+        "max_date": "today",
+        "v_required": {
+          "value": "true",
+          "err": "Please enter the date of enrollment"
         }
       },
       {

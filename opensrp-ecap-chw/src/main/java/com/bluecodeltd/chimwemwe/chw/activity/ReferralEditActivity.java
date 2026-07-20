@@ -3,6 +3,7 @@ package com.bluecodeltd.chimwemwe.chw.activity;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,13 +15,11 @@ import com.bluecodeltd.chimwemwe.chw.model.ChimwemweReferralModel;
 import com.bluecodeltd.chimwemwe.chw.model.ParticipantModel;
 import com.bluecodeltd.chimwemwe.chw.util.ChimwemweFormUtils;
 import com.bluecodeltd.chimwemwe.chw.util.Threading;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.bluecodeltd.chimwemwe.chw.util.ReferralFormPrefill;
 
 import org.json.JSONObject;
-import org.smartregister.chw.core.utils.CoreJsonFormUtils;
 import org.smartregister.util.FormUtils;
 
-import java.util.Map;
 
 import timber.log.Timber;
 
@@ -57,7 +56,6 @@ public class ReferralEditActivity extends AppCompatActivity {
                     ChimwemweFormUtils.ensureFieldValue(form, "group_id", participant.getGroupId());
                     ChimwemweFormUtils.ensureFieldValue(form, "participant_id", participant.getParticipantId());
                 }
-
                 ChimwemweReferralModel existing = null;
                 if (referralBaseEntityId != null && !referralBaseEntityId.trim().isEmpty() && participant != null) {
                     for (ChimwemweReferralModel item : ChimwemweReferralDao.getParticipantReferrals(participant.getParticipantId())) {
@@ -69,11 +67,7 @@ public class ReferralEditActivity extends AppCompatActivity {
                 }
 
                 if (existing != null) {
-                    try {
-                        CoreJsonFormUtils.populateJsonForm(form, new ObjectMapper().convertValue(existing, Map.class));
-                    } catch (Exception e) {
-                        Timber.w(e, "populateJsonForm referral");
-                    }
+                    ReferralFormPrefill.populate(form, existing);
                     String baseEntityId = existing.getBase_entity_id();
                     if (baseEntityId != null && !baseEntityId.trim().isEmpty()) {
                         form.put("entity_id", baseEntityId);
@@ -124,21 +118,43 @@ public class ReferralEditActivity extends AppCompatActivity {
         Threading.io(() -> {
             try {
                 JSONObject form = new JSONObject(jsonString);
-                boolean isEdit = !form.optString("entity_id", "").isEmpty();
+                boolean isEdit = referralBaseEntityId != null && !referralBaseEntityId.trim().isEmpty();
                 ParticipantModel participant = ParticipantDao.getParticipantByCode(participantCode);
                 if (participant != null) {
                     ChimwemweFormUtils.ensureFieldValue(form, "group_id", participant.getGroupId());
                     ChimwemweFormUtils.ensureFieldValue(form, "participant_id", participant.getParticipantId());
                 }
-                ChimwemweFormUtils.saveRegistration(
+                String referralId = form.optString("entity_id", "").trim();
+                if (referralId.isEmpty()) {
+                    referralId = org.smartregister.util.JsonFormUtils.generateRandomUUIDString();
+                    form.put("entity_id", referralId);
+                }
+                ChimwemweFormUtils.ensureFieldValue(form, "referral_id", referralId);
+                String selectedServices = com.bluecodeltd.chimwemwe.chw.util.ReferralServiceAggregator.aggregate(form);
+                if (!selectedServices.trim().isEmpty() || !isEdit) {
+                    ChimwemweFormUtils.ensureFieldValue(form, "service_being_referred", selectedServices);
+                }
+                boolean saved = ChimwemweFormUtils.saveRegistration(
                         ChimwemweFormUtils.processRegistration(form, "ec_chimwemwe_referral", null),
                         isEdit
                 );
-                setResult(RESULT_OK);
-                Threading.main(this::finish);
+                if (saved) {
+                    setResult(RESULT_OK);
+                }
+                Threading.main(() -> {
+                    Toast.makeText(
+                            this,
+                            saved ? "Referral saved successfully" : "Could not save referral. Please try again.",
+                            saved ? Toast.LENGTH_SHORT : Toast.LENGTH_LONG
+                    ).show();
+                    finish();
+                });
             } catch (Exception e) {
                 Timber.e(e, "ReferralEditActivity onActivityResult");
-                Threading.main(this::finish);
+                Threading.main(() -> {
+                    Toast.makeText(this, "Could not save referral. Please try again.", Toast.LENGTH_LONG).show();
+                    finish();
+                });
             }
         });
     }

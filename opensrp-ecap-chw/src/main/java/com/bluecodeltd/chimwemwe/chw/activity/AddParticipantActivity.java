@@ -1,6 +1,7 @@
 package com.bluecodeltd.chimwemwe.chw.activity;
 
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -37,6 +38,7 @@ public class AddParticipantActivity extends AppCompatActivity {
 
     private EditText etCaregiverFirst, etCaregiverSurname, etCaregiverId;
     private EditText etChildFirst, etChildSurname, etChildDob, etVcaId;
+    private android.widget.TextView tvVcaIdLabel;
     private Spinner  spinnerSex, spinnerOvc;
 
     @Override
@@ -60,6 +62,7 @@ public class AddParticipantActivity extends AppCompatActivity {
         etChildFirst       = findViewById(R.id.et_child_first_name);
         etChildSurname     = findViewById(R.id.et_child_surname);
         etChildDob         = findViewById(R.id.et_child_dob);
+        tvVcaIdLabel       = findViewById(R.id.tv_vca_id_label);
         etVcaId            = findViewById(R.id.et_vca_id);
         spinnerSex         = findViewById(R.id.spinner_child_sex);
         spinnerOvc         = findViewById(R.id.spinner_enrolled_ovc);
@@ -75,6 +78,17 @@ public class AddParticipantActivity extends AppCompatActivity {
                 new String[]{"-- Select --", "Yes", "No"});
         ovcAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerOvc.setAdapter(ovcAdapter);
+        spinnerOvc.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(android.widget.AdapterView<?> parent, android.view.View view, int position, long id) {
+                updateIdFieldLabel();
+            }
+
+            @Override
+            public void onNothingSelected(android.widget.AdapterView<?> parent) {
+                updateIdFieldLabel();
+            }
+        });
 
         if (participantId != -1 || (participantCode != null && !participantCode.trim().isEmpty())) {
             if (getSupportActionBar() != null) getSupportActionBar().setTitle("Edit Participant");
@@ -83,6 +97,7 @@ public class AddParticipantActivity extends AppCompatActivity {
             etVcaId.setText(generateVcaId());
             etCaregiverId.setText(generateCaregiverId());
         }
+        updateIdFieldLabel();
 
         Button btnSave = findViewById(R.id.btn_save_participant);
         btnSave.setOnClickListener(v -> save());
@@ -108,8 +123,18 @@ public class AddParticipantActivity extends AppCompatActivity {
                 etVcaId.setText(m.getVcaId());
                 setSpinner(spinnerSex, m.getChildSex());
                 setSpinner(spinnerOvc, m.getIsEnrolledOvc());
+                updateIdFieldLabel();
             });
         });
+    }
+
+    private void updateIdFieldLabel() {
+        String enrolled = spinnerOvc != null && spinnerOvc.getSelectedItem() != null
+                ? spinnerOvc.getSelectedItem().toString() : "";
+        boolean yes = "Yes".equalsIgnoreCase(enrolled);
+        String label = yes ? "CA ID" : "Child ID";
+        if (tvVcaIdLabel != null) tvVcaIdLabel.setText(label);
+        if (etVcaId != null) etVcaId.setHint(label);
     }
 
     private String generateVcaId() {
@@ -148,9 +173,20 @@ public class AddParticipantActivity extends AppCompatActivity {
         String cgSur   = etCaregiverSurname.getText().toString().trim();
         String chFirst = etChildFirst.getText().toString().trim();
         String chSur   = etChildSurname.getText().toString().trim();
+        String childDob = etChildDob.getText().toString().trim();
 
         if (cgFirst.isEmpty() && cgSur.isEmpty() && chFirst.isEmpty() && chSur.isEmpty()) {
             Toast.makeText(this, "Please enter at least one name", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        boolean isNewParticipant = participantId == -1 && (participantCode == null || participantCode.trim().isEmpty());
+        if (isNewParticipant && TextUtils.isEmpty(chSur)) {
+            Toast.makeText(this, "Child surname is required", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (isNewParticipant && TextUtils.isEmpty(childDob)) {
+            Toast.makeText(this, "Child date of birth is required", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -162,7 +198,7 @@ public class AddParticipantActivity extends AppCompatActivity {
         m.setCaregiverSurname(cgSur.isEmpty() ? null : cgSur);
         m.setChildFirstName(chFirst.isEmpty() ? null : chFirst);
         m.setChildSurname(chSur.isEmpty() ? null : chSur);
-        m.setChildDob(etChildDob.getText().toString().trim());
+        m.setChildDob(childDob);
         m.setCaregiverId(etCaregiverId.getText().toString().trim());
         m.setVcaId(etVcaId.getText().toString().trim());
 

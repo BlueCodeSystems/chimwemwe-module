@@ -29,6 +29,7 @@ import com.bluecodeltd.chimwemwe.chw.dao.HotspotGroupDao;
 import com.bluecodeltd.chimwemwe.chw.dao.MonthlyReviewDao;
 import com.bluecodeltd.chimwemwe.chw.dao.ParticipantDao;
 import com.bluecodeltd.chimwemwe.chw.dao.SessionAttendanceDao;
+import com.bluecodeltd.chimwemwe.chw.dao.SessionAttendanceParticipantDao;
 import com.bluecodeltd.chimwemwe.chw.fragment.HotspotGroupOverviewFragment;
 import com.bluecodeltd.chimwemwe.chw.fragment.HotspotGroupParticipantsFragment;
 import com.bluecodeltd.chimwemwe.chw.fragment.HotspotGroupSessionsFragment;
@@ -37,7 +38,9 @@ import com.bluecodeltd.chimwemwe.chw.model.HotspotGroupModel;
 import com.bluecodeltd.chimwemwe.chw.model.MonthlyReviewModel;
 import com.bluecodeltd.chimwemwe.chw.model.ParticipantModel;
 import com.bluecodeltd.chimwemwe.chw.util.ChimwemweFormUtils;
+import com.bluecodeltd.chimwemwe.chw.util.DistrictNameUtils;
 import com.bluecodeltd.chimwemwe.chw.util.Threading;
+import com.bluecodeltd.chimwemwe.chw.util.SupervisorSignOffHelper;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.vijay.jsonwizard.constants.JsonFormConstants;
@@ -51,7 +54,11 @@ import org.smartregister.opd.utils.OpdConstants;
 import org.smartregister.util.FormUtils;
 
 import java.time.LocalDate;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -77,6 +84,10 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
     private int          pendingNextSn = 1;
     private HotspotGroupModel currentGroup;
     private final String[] sessionDates = new String[14];
+    // Session progression gate: sessionUnlocked[i] == true means session i+1 may be opened.
+    // Session 1 is always unlocked; session N unlocks only once session N-1 is complete
+    // (>=1 participant marked Group or Home Visit). All-Absent sessions leave the next locked.
+    private final boolean[] sessionUnlocked = new boolean[14];
     private List<ParticipantModel> participants = Collections.emptyList();
     private List<MonthlyReviewModel> reviews = Collections.emptyList();
     private TabLayout tabLayout;
@@ -127,20 +138,29 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
     }
 
     private void promptDeleteGroup() {
-        final String gid = groupIdentifier != null ? groupIdentifier.trim() : "";
-        if (gid.isEmpty()) {
+        final String gid = resolveActiveGroupIdentifier();
+        // Old groups created before the business group_id column (DB v37) have only a SQLite row id,
+        // no group_id. Resolve that so they can still be deleted; we only truly can't identify the
+        // group when BOTH the business id and the row id are missing.
+        final long dbId = resolveActiveGroupDbId();
+        if (gid.isEmpty() && dbId <= 0) {
             Toast.makeText(this, "Missing group id", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        int participantCount = ParticipantDao.countParticipants(gid);
-        if (participantCount > 0) {
-            new AlertDialog.Builder(this)
-                    .setTitle("Cannot delete group")
-                    .setMessage("This group has " + participantCount + " participant(s). Remove participants first.")
-                    .setPositiveButton("OK", null)
-                    .show();
-            return;
+        // The participant guard can only match participants by business group_id. When there is no
+        // business id (legacy group), there are no participants that can be linked to it, so skip
+        // the guard rather than block deletion.
+        if (!gid.isEmpty()) {
+            int participantCount = ParticipantDao.countParticipants(gid);
+            if (participantCount > 0) {
+                new AlertDialog.Builder(this)
+                        .setTitle("Cannot delete group")
+                        .setMessage("This group has " + participantCount + " participant(s). Remove participants first.")
+                        .setPositiveButton("OK", null)
+                        .show();
+                return;
+            }
         }
 
         new AlertDialog.Builder(this)
@@ -150,17 +170,21 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
                 .setPositiveButton("Delete", (d, w) -> Threading.io(() -> {
                     boolean ok = false;
                     try {
-                        long dbId = currentGroup != null ? currentGroup.getId() : -1L;
                         if (dbId > 0) {
-                            // 1. Cascading local soft-delete (immediate UX + cleans up
-                            //    child tables that the form/Event path does not touch).
+                            // 1. Cascading local soft-delete by row id. deleteGroup falls back to the
+                            //    row id for child-table cleanup when the group has no business id, and
+                            //    always soft-deletes the group row itself so it leaves the register.
                             HotspotGroupDao.deleteGroup(dbId);
-                            // 2. Emit a syncable Event so the server (and other devices,
-                            //    on next pull) see the delete. The form now carries a
-                            //    delete_status field that maps to Client.attributes.delete_status,
-                            //    which ec_client_fields.json materialises into the table column.
-                            emitGroupDeleteEvent(currentGroup, gid);
                             ok = true;
+                        } else if (!gid.isEmpty()) {
+                            // No row id resolved but we do have a business id — soft-delete by it.
+                            HotspotGroupDao.deleteGroupByBusinessId(gid);
+                            ok = true;
+                        }
+                        // 2. Emit a syncable delete Event when we have a business id (the Client's
+                        //    baseEntityId). Legacy groups without one are deleted locally only.
+                        if (ok && !gid.isEmpty() && currentGroup != null) {
+                            emitGroupDeleteEvent(currentGroup, gid);
                         }
                     } catch (Exception e) {
                         Timber.e(e, "Delete group failed");
@@ -177,6 +201,52 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
                     });
                 }))
                 .show();
+    }
+
+    /**
+     * Resolve the group's SQLite row id from whatever we have loaded: the in-memory model, the
+     * intent-supplied db id, or a last-resort lookup by business id. Returns -1 when none resolves.
+     * Lets legacy groups (no business group_id) still be deleted by their row id.
+     */
+    private long resolveActiveGroupDbId() {
+        if (currentGroup != null && currentGroup.getId() > 0) return currentGroup.getId();
+        if (groupDbId > 0) return groupDbId;
+        String gid = groupIdentifier != null ? groupIdentifier.trim() : "";
+        if (!gid.isEmpty()) {
+            try {
+                HotspotGroupModel g = HotspotGroupDao.getGroupByBusinessId(gid);
+                if (g != null && g.getId() > 0) {
+                    currentGroup = g;
+                    return g.getId();
+                }
+            } catch (Exception e) {
+                Timber.w(e, "resolveActiveGroupDbId");
+            }
+        }
+        return -1L;
+    }
+
+    private String resolveActiveGroupIdentifier() {
+        if (groupIdentifier != null && !groupIdentifier.trim().isEmpty()) {
+            return groupIdentifier.trim();
+        }
+        if (currentGroup != null && currentGroup.getGroupId() != null && !currentGroup.getGroupId().trim().isEmpty()) {
+            groupIdentifier = currentGroup.getGroupId().trim();
+            return groupIdentifier;
+        }
+        if (groupDbId != -1) {
+            try {
+                HotspotGroupModel group = HotspotGroupDao.getGroup(groupDbId);
+                if (group != null && group.getGroupId() != null && !group.getGroupId().trim().isEmpty()) {
+                    currentGroup = group;
+                    groupIdentifier = group.getGroupId().trim();
+                    return groupIdentifier;
+                }
+            } catch (Exception e) {
+                Timber.w(e, "resolveActiveGroupIdentifier");
+            }
+        }
+        return "";
     }
 
     /**
@@ -244,6 +314,16 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
                         : null;
             }
 
+            // Session progression gate. Session 1 is always open; each later session unlocks only
+            // once the immediately preceding session is complete (>=1 participant Group/Home Visit).
+            boolean[] loadedSessionUnlocked = new boolean[14];
+            loadedSessionUnlocked[0] = true;
+            boolean hasGroupId = resolvedGroupIdentifier != null && !resolvedGroupIdentifier.isEmpty();
+            for (int i = 2; i <= 14; i++) {
+                loadedSessionUnlocked[i - 1] = hasGroupId
+                        && SessionAttendanceParticipantDao.isSessionComplete(resolvedGroupIdentifier, i - 1);
+            }
+
             Threading.main(() -> {
                 groupDbId = resolvedDbId;
                 groupIdentifier = resolvedGroupIdentifier;
@@ -251,6 +331,7 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
                 participants = loadedParticipants != null ? loadedParticipants : Collections.emptyList();
                 reviews = loadedReviews != null ? loadedReviews : Collections.emptyList();
                 System.arraycopy(loadedSessionDates, 0, sessionDates, 0, sessionDates.length);
+                System.arraycopy(loadedSessionUnlocked, 0, sessionUnlocked, 0, sessionUnlocked.length);
                 bindHeader(group);
                 updateTabTitles();
                 notifySectionFragments();
@@ -266,7 +347,7 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
         if (g == null) return;
         String name = g.getGroupName() != null ? g.getGroupName() : "";
         tvAvatar.setText(initials(name));
-        tvName.setText(name.isEmpty() ? "—" : name);
+        tvName.setText(name.isEmpty() ? "?" : name);
         tvHotspot.setText(g.getHotspotName() != null ? g.getHotspotName() : "");
         String displayId = g.getGroupId() != null ? g.getGroupId().trim() : "";
         tvCode.setText(displayId);
@@ -350,7 +431,7 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
 
         if (currentGroup != null) {
             if (tvProvince != null)        tvProvince.setText(orDash(currentGroup.getProvince()));
-            if (tvDistrict != null)        tvDistrict.setText(orDash(currentGroup.getDistrict()));
+            if (tvDistrict != null)        tvDistrict.setText(DistrictNameUtils.display(currentGroup.getDistrict()));
             if (tvSessionLocation != null) tvSessionLocation.setText(orDash(currentGroup.getLocationOfSession()));
             if (tvHealthFacility != null)  tvHealthFacility.setText(orDash(currentGroup.getNearestHealthFacility()));
             if (tvFacilitators != null) {
@@ -445,6 +526,8 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
             final int sessionNum = i + 1;
             String date  = sessionDates[i];
             boolean hasDate = date != null && !date.isEmpty();
+            // Session 1 is always open; later sessions follow the progression gate.
+            final boolean locked = sessionNum > 1 && !sessionUnlocked[i];
 
             Button btn = new Button(this);
             btn.setText("S" + sessionNum + (hasDate ? "\n" + date : "\n--"));
@@ -453,12 +536,19 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
             btn.setGravity(Gravity.CENTER);
             btn.setLines(2);
 
-            if (hasDate) {
+            if (locked) {
+                // Greyed / muted: the session cannot be opened until the previous one is complete.
+                btn.setBackground(androidx.core.content.ContextCompat.getDrawable(this, R.drawable.bg_session_pending));
+                btn.setTextColor(androidx.core.content.ContextCompat.getColor(this, R.color.chimwemwe_text_secondary));
+                btn.setAlpha(0.4f);
+            } else if (hasDate) {
                 btn.setBackground(androidx.core.content.ContextCompat.getDrawable(this, R.drawable.bg_session_recorded));
                 btn.setTextColor(Color.WHITE);
+                btn.setAlpha(1f);
             } else {
                 btn.setBackground(androidx.core.content.ContextCompat.getDrawable(this, R.drawable.bg_session_pending));
                 btn.setTextColor(androidx.core.content.ContextCompat.getColor(this, R.color.chimwemwe_primary));
+                btn.setAlpha(1f);
             }
 
             GridLayout.LayoutParams params = new GridLayout.LayoutParams();
@@ -472,6 +562,13 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
             btn.setOnClickListener(v -> {
                 if (groupIdentifier == null || groupIdentifier.trim().isEmpty()) {
                     Toast.makeText(this, "Save the group first", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (locked) {
+                    Toast.makeText(this,
+                            "You cannot open Session " + sessionNum + " because Session " + (sessionNum - 1) +
+                                    " does not have any participants marked as Group or Home Visit.",
+                            Toast.LENGTH_LONG).show();
                     return;
                 }
                 openRecordAttendance(sessionNum);
@@ -495,14 +592,17 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
             return;
         }
 
-        for (ParticipantModel p : participants) {
+        for (int i = 0; i < participants.size(); i++) {
+            ParticipantModel p = participants.get(i);
             View row = LayoutInflater.from(this).inflate(R.layout.item_participant_row, llParticipants, false);
 
-            ((TextView) row.findViewById(R.id.tv_sn)).setText(String.format("%02d", p.getSn()));
+            ((TextView) row.findViewById(R.id.tv_sn)).setText(String.format(java.util.Locale.getDefault(), "%02d", i + 1));
             ((TextView) row.findViewById(R.id.tv_caregiver_name)).setText(
-                    p.getCaregiverFullName().isEmpty() ? "—" : p.getCaregiverFullName());
+                    p.getCaregiverFullName().isEmpty() ? "?" : p.getCaregiverFullName());
             ((TextView) row.findViewById(R.id.tv_child_name)).setText(
-                    p.getChildFullName().isEmpty() ? "—" : p.getChildFullName());
+                    p.getChildFullName().isEmpty() ? "?" : p.getChildFullName());
+            ((TextView) row.findViewById(R.id.tv_child_demographics))
+                    .setText(formatChildDemographics(p.getChildDob(), p.getChildSex()));
 
             TextView tvDone = row.findViewById(R.id.tv_sessions_done);
             int sessionsCompleted = p.getSessionsCompleted();
@@ -543,7 +643,85 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
         }
     }
 
-    // ── Participant form ──────────────────────────────────────
+    /**
+     * Builds the child's "age/sex" tag shown next to the child name, e.g. "11/F".
+     * Degrades gracefully: shows just the age or just the sex initial when only one is
+     * available, and returns "" when neither is known (the tag then renders empty).
+     */
+    private String formatChildDemographics(String dob, String sex) {
+        int age = computeAgeYears(dob);
+        String sexInitial = "";
+        if (sex != null) {
+            String s = sex.trim();
+            if (!s.isEmpty() && !s.equalsIgnoreCase("null")) {
+                sexInitial = s.substring(0, 1).toUpperCase(java.util.Locale.getDefault());
+            }
+        }
+        if (age >= 0 && !sexInitial.isEmpty()) return age + "/" + sexInitial;
+        if (age >= 0)                          return String.valueOf(age);
+        return sexInitial; // "" when unknown
+    }
+
+    /**
+     * Age in whole years from a stored date of birth, or -1 if the DOB is missing or
+     * unparseable. Accepts the same range of formats as the participant profile's DOB
+     * normaliser, since child_dob is stored as whatever the register form wrote.
+     */
+    private int computeAgeYears(String dob) {
+        if (dob == null) return -1;
+        String datePart = dob.trim();
+        if (datePart.isEmpty() || datePart.equalsIgnoreCase("null")) return -1;
+        if (datePart.contains("T")) datePart = datePart.substring(0, datePart.indexOf('T'));
+        else if (datePart.contains(" ")) datePart = datePart.substring(0, datePart.indexOf(' '));
+        datePart = datePart.trim();
+
+        String[] inputFormats = {
+                "yyyy-MM-dd", "dd-MM-yyyy", "dd/MM/yyyy", "MM/dd/yyyy",
+                "yyyy/MM/dd", "dd.MM.yyyy", "yyyy.MM.dd",
+                "yyyy-MM-dd'Z'", "d-M-yyyy", "d/M/yyyy", "M/d/yyyy", "yyyy-M-d"
+        };
+        for (String fmt : inputFormats) {
+            try {
+                java.time.LocalDate d = java.time.LocalDate.parse(datePart,
+                        java.time.format.DateTimeFormatter.ofPattern(fmt));
+                java.time.LocalDate today = java.time.LocalDate.now();
+                if (d.isAfter(today)) return -1; // future DOB ? treat as unknown
+                return java.time.Period.between(d, today).getYears();
+            } catch (Exception ignored) {}
+        }
+
+        DateTimeFormatter[] twoDigitYearFormats = {
+                new DateTimeFormatterBuilder()
+                        .appendPattern("d/M/")
+                        .appendValueReduced(ChronoField.YEAR, 2, 2, 2000)
+                        .toFormatter(),
+                new DateTimeFormatterBuilder()
+                        .appendPattern("d-M-")
+                        .appendValueReduced(ChronoField.YEAR, 2, 2, 2000)
+                        .toFormatter()
+        };
+        for (DateTimeFormatter formatter : twoDigitYearFormats) {
+            try {
+                LocalDate d = LocalDate.parse(datePart, formatter);
+                LocalDate today = LocalDate.now();
+                if (d.isAfter(today)) return -1;
+                return java.time.Period.between(d, today).getYears();
+            } catch (Exception ignored) {}
+        }
+
+        try {
+            long raw = Long.parseLong(datePart);
+            LocalDate d = raw > 100000000000L
+                    ? Instant.ofEpochMilli(raw).atZone(ZoneId.systemDefault()).toLocalDate()
+                    : LocalDate.ofEpochDay(raw);
+            LocalDate today = LocalDate.now();
+            if (d.isAfter(today)) return -1;
+            return java.time.Period.between(d, today).getYears();
+        } catch (Exception ignored) {}
+        return -1;
+    }
+
+    // ?? Participant form ??????????????????????????????????????
 
     void openAddParticipant() {
         if (groupIdentifier == null || groupIdentifier.trim().isEmpty()) {
@@ -573,9 +751,9 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
 
     /**
      * Launch chimwemwe_participant_register.json.
-     *   null            → blank form, new insert (sn = next available)
-     *   model, id=-1    → caregiver fields pre-filled, child fields blank, new insert (copied caregiver)
-     *   model, id>0     → all fields pre-filled, update existing record (edit flow)
+     *   null            ? blank form, new insert (sn = next available)
+     *   model, id=-1    ? caregiver fields pre-filled, child fields blank, new insert (copied caregiver)
+     *   model, id>0     ? all fields pre-filled, update existing record (edit flow)
      */
     private void launchParticipantForm(ParticipantModel existing, int sn) {
         Threading.io(() -> {
@@ -583,6 +761,7 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
                 FormUtils formUtils = new FormUtils(this);
                 JSONObject form = formUtils.getFormJson("chimwemwe_participant_register");
                 populateParticipantForm(form, existing, sn);
+                applyParticipantIdLabel(form, existing != null && "Yes".equalsIgnoreCase(existing.getIsEnrolledOvc()));
                 launchJsonWizardForm(form, REQUEST_CODE_PARTICIPANT_FORM, true,
                         "Error launching participant form");
             } catch (Exception e) {
@@ -597,6 +776,7 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
                 FormUtils formUtils = new FormUtils(this);
                 JSONObject form = formUtils.getFormJson("chimwemwe_participant_register_ovc_enrolled");
                 populateOvcParticipantForm(form, ovcRecord, sn);
+                applyParticipantIdLabel(form, true);
                 launchJsonWizardForm(form, REQUEST_CODE_PARTICIPANT_FORM, true,
                         "Error launching OVC participant form");
             } catch (Exception e) {
@@ -614,7 +794,7 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
     }
 
     private String normalizeDob(String dob) {
-        if (dob == null || dob.isEmpty()) return "";
+        if (dob == null || dob.isEmpty() || dob.equalsIgnoreCase("null")) return "";
         // Strip time component: "2020-04-20T00:00:00" or "2020-04-20 00:00:00"
         String datePart = dob.trim();
         if (datePart.contains("T")) datePart = datePart.substring(0, datePart.indexOf('T'));
@@ -624,7 +804,8 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
         String[] inputFormats = {
                 "yyyy-MM-dd", "dd-MM-yyyy", "dd/MM/yyyy", "MM/dd/yyyy",
                 "yyyy/MM/dd", "dd.MM.yyyy", "yyyy.MM.dd",
-                "yyyy-MM-dd'Z'", "d-M-yyyy", "d/M/yyyy"
+                "yyyy-MM-dd'Z'", "d-M-yyyy", "d/M/yyyy", "M/d/yyyy", "yyyy-M-d",
+                "dd-MM-yy", "dd/MM/yy", "d-M-yy", "d/M/yy"
         };
         DateTimeFormatter out = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         for (String fmt : inputFormats) {
@@ -633,7 +814,7 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
                 return d.format(out);
             } catch (Exception ignored) {}
         }
-        return datePart; // unrecognised format — pass through and let the form handle it
+        return datePart; // unrecognised format ? pass through and let the form handle it
     }
 
     @Override
@@ -702,26 +883,36 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
         if (requestCode == REQUEST_CODE_REVIEW_FORM) {
             String jsonString = data.getStringExtra(com.vijay.jsonwizard.constants.JsonFormConstants.JSON_FORM_KEY.JSON);
             if (jsonString == null) return;
-            Threading.io(() -> {
-                try {
-                    JSONObject form  = new JSONObject(jsonString);
-                    JSONObject step1 = form.optJSONObject("step1");
+            try {
+                JSONObject form = new JSONObject(jsonString);
+                boolean isEdit = !form.optString("entity_id", "").isEmpty();
+                ChimwemweFormUtils.ensureFieldValue(form, "group_id", groupIdentifier);
+                SupervisorSignOffHelper.prompt(this, (signature, gps) -> Threading.io(() -> {
+                    try {
+                        ChimwemweFormUtils.ensureFieldValue(form, "supervisor_signature", signature);
+                        ChimwemweFormUtils.ensureFieldValue(form, "supervisor_gps", gps);
+                        boolean saved = ChimwemweFormUtils.saveRegistration(
+                                ChimwemweFormUtils.processRegistration(form, "ec_chimwemwe_review", null),
+                                isEdit
+                        );
 
-                    boolean isEdit = !form.optString("entity_id", "").isEmpty();
-                    ChimwemweFormUtils.ensureFieldValue(form, "group_id", groupIdentifier);
-                    ChimwemweFormUtils.saveRegistration(
-                            ChimwemweFormUtils.processRegistration(form, "ec_chimwemwe_review", null),
-                            isEdit
-                    );
-
-                    Threading.main(() -> {
-                        Toast.makeText(this, "Review saved", Toast.LENGTH_SHORT).show();
-                        loadGroup();
-                    });
-                } catch (Exception e) {
-                    Timber.e(e, "Error saving monthly review");
-                }
-            });
+                        Threading.main(() -> {
+                            Toast.makeText(
+                                    this,
+                                    saved ? "Review saved" : "Could not save review. Please try again.",
+                                    saved ? Toast.LENGTH_SHORT : Toast.LENGTH_LONG
+                            ).show();
+                            if (saved) {
+                                loadGroup();
+                            }
+                        });
+                    } catch (Exception e) {
+                        Timber.e(e, "Error saving monthly review");
+                    }
+                }));
+            } catch (Exception e) {
+                Timber.e(e, "Error preparing monthly review sign-off");
+            }
             return;
         }
 
@@ -742,6 +933,10 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
             ovcRecord.setUniqueId(uniqueId         != null ? uniqueId      : "");
             ovcRecord.setHouseholdId(householdId   != null ? householdId   : "");
             ovcRecord.setCaregiverName(caregiverName != null ? caregiverName : "");
+            Timber.d("OVC record: firstName=%s, lastName=%s, gender=%s, birthdate='%s', uniqueId=%s, householdId=%s, caregiverName=%s",
+                    ovcRecord.getFirstName(), ovcRecord.getLastName(), ovcRecord.getGender(),
+                    ovcRecord.getBirthdate(), ovcRecord.getUniqueId(), ovcRecord.getHouseholdId(),
+                    ovcRecord.getCaregiverName());
             launchOvcParticipantForm(ovcRecord, pendingNextSn);
             return;
         }
@@ -774,6 +969,7 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
                 m.setChildSurname(fieldValue(childStep,        "child_surname"));
                 m.setChildDob(fieldValue(childStep,            "child_dob"));
                 m.setChildSex(fieldValue(childStep,            "child_sex"));
+                m.setEnrollmentDate(fieldValue(childStep,      "enrollment_date"));
                 m.setIsEnrolledOvc(fieldValue(childStep,       "is_enrolled_ovc"));
                 m.setVcaId(fieldValue(childStep,               "vca_id"));
                 m.setCaregiverId(fieldValue(childStep,         "caregiver_id"));
@@ -804,6 +1000,58 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
                             : "CHIM-" + participantId;
                 }
                 m.setParticipantId(participantIdCode);
+ 
+                if (participantId == -1L) {
+                    if (m.getChildSurname() == null || m.getChildSurname().trim().isEmpty()) {
+                        Threading.main(() -> Toast.makeText(this,
+                                "Child surname is required",
+                                Toast.LENGTH_LONG).show());
+                        return;
+                    }
+                    if (m.getChildDob() == null || m.getChildDob().trim().isEmpty()) {
+                        Threading.main(() -> Toast.makeText(this,
+                                "Child date of birth is required",
+                                Toast.LENGTH_LONG).show());
+                        return;
+                    }
+                }
+
+
+                if (participantId == -1L) {
+                    ParticipantModel existingByVca = ParticipantDao.getParticipantByVcaId(m.getVcaId());
+                    if (existingByVca != null) {
+                        String existingGroupId = existingByVca.getGroupId();
+                        String currentGroupId = groupIdentifier != null ? groupIdentifier.trim() : "";
+                        if (existingGroupId != null && !existingGroupId.trim().isEmpty()
+                                && !existingGroupId.trim().equals(currentGroupId)) {
+                            Threading.main(() -> Toast.makeText(this,
+                                    "This CA is already enrolled in another group.",
+                                    Toast.LENGTH_LONG).show());
+                            return;
+                        }
+                    }
+                }
+
+                // Enrollment age gate (issue #46): only accept children aged 10?14 at the time of
+                // enrollment. Applied only to NEW enrollments (participantId == -1) ? editing an
+                // existing participant is not an enrollment, so it isn't re-gated (this also avoids
+                // wrongly blocking legacy participants with no stored enrollment date who have since
+                // aged out). Age is measured against the enrollment date, falling back to today.
+                // A missing/unparseable DOB (age == -1) is not blocked.
+                if (participantId == -1L) {
+                    int ageAtEnrollment = ChimwemweFormUtils.ageAtEnrollment(m.getChildDob(), m.getEnrollmentDate());
+                    if (ageAtEnrollment != -1
+                            && (ageAtEnrollment < ChimwemweFormUtils.MIN_ENROLLMENT_AGE
+                                || ageAtEnrollment > ChimwemweFormUtils.MAX_ENROLLMENT_AGE)) {
+                        final int rejectedAge = ageAtEnrollment;
+                        Threading.main(() -> Toast.makeText(this,
+                                "Child must be " + ChimwemweFormUtils.MIN_ENROLLMENT_AGE + "?"
+                                        + ChimwemweFormUtils.MAX_ENROLLMENT_AGE + " years old at enrollment "
+                                        + "(this child is " + rejectedAge + "). Participant not saved.",
+                                Toast.LENGTH_LONG).show());
+                        return;
+                    }
+                }
 
                 // Standard OpenSRP save only: the client processor writes to ec_chimwemwe_participant via ec_client_fields.json.
                 ChimwemweFormUtils.ensureFieldValue(form, "group_id", groupIdentifier);
@@ -832,11 +1080,11 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
         });
     }
 
-    // ── Standard event persistence (sync) ────────────────────
+    // ?? Standard event persistence (sync) ????????????????????
 
 
 
-    // ── Helpers ───────────────────────────────────────────────
+    // ?? Helpers ???????????????????????????????????????????????
 
     /** Read the submitted value for a field key from a step's fields array. */
     private String fieldValue(JSONObject step, String key) {
@@ -1000,8 +1248,9 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
             setFieldValue(form, "step1", "caregiver_surname", existing.getCaregiverSurname());
             setFieldValue(form, "step1", "child_first_name", existing.getChildFirstName());
             setFieldValue(form, "step1", "child_surname", existing.getChildSurname());
-            setFieldValue(form, "step1", "child_dob", existing.getChildDob());
+            setFieldValue(form, "step1", "child_dob", normalizeDob(existing.getChildDob()));
             setFieldValue(form, "step1", "child_sex", existing.getChildSex());
+            setFieldValue(form, "step1", "enrollment_date", normalizeDob(existing.getEnrollmentDate()));
             setFieldValue(form, "step1", "is_enrolled_ovc", existing.getIsEnrolledOvc());
             setFieldValue(form, "step1", "who_referred", existing.getWhoReferred());
             setFieldValue(form, "step1", "service_referred_for", existing.getServiceReferredFor());
@@ -1028,18 +1277,42 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
         form.put("_is_edit", isEdit);
     }
 
+    private void applyParticipantIdLabel(JSONObject form, boolean enrolledInOvc) {
+        if (form == null) return;
+        String label = enrolledInOvc ? "CA ID" : "Child ID";
+        try {
+            JSONArray steps = form.names();
+            if (steps == null) return;
+            for (int i = 0; i < steps.length(); i++) {
+                String stepName = steps.optString(i);
+                JSONObject step = form.optJSONObject(stepName);
+                if (step == null) continue;
+                JSONArray fields = step.optJSONArray("fields");
+                if (fields == null) continue;
+                for (int j = 0; j < fields.length(); j++) {
+                    JSONObject field = fields.optJSONObject(j);
+                    if (field == null || !"vca_id".equals(field.optString("key"))) continue;
+                    field.put("hint", label);
+                    field.put("label", label);
+                    return;
+                }
+            }
+        } catch (Exception e) {
+            Timber.w(e, "applyParticipantIdLabel");
+        }
+    }
+
     private void populateOvcParticipantForm(JSONObject form, ChimwemweIndexModel ovcRecord, int sn)
             throws Exception {
         if (form == null || ovcRecord == null) return;
-        String rawDob = ovcRecord.getBirthdate();
-        String normalizedDob = normalizeDob(rawDob);
-        Timber.d("OVC DOB — raw: [%s]  normalized: [%s]", rawDob, normalizedDob);
         setFieldValue(form, "step1", "group_id", groupIdentifier);
         setFieldValue(form, "step1", "child_first_name", ovcRecord.getFirstName());
         setFieldValue(form, "step1", "child_surname", ovcRecord.getLastName());
+        String normalizedDob = normalizeDob(ovcRecord.getBirthdate());
         setFieldValue(form, "step1", "child_dob", normalizedDob);
-        setFieldValue(form, "step1", "date_of_birth", normalizedDob);
+        setFieldValue(form, "step1", "birthdate", normalizedDob);
         setFieldValue(form, "step1", "dob", normalizedDob);
+        setFieldValue(form, "step1", "date_of_birth", normalizedDob);
         setFieldValue(form, "step1", "child_sex", normalizeGender(ovcRecord.getGender()));
         setFieldValue(form, "step1", "is_enrolled_ovc", "Yes");
         setFieldValue(form, "step1", "vca_id", ovcRecord.getUniqueId());
@@ -1106,7 +1379,7 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
         return cfg;
     }
 
-    // ── Monthly review ───────────────────────────────────────
+    // ?? Monthly review ???????????????????????????????????????
 
     public void openMonthlyReview() {
         openMonthlyReview(null);
@@ -1151,7 +1424,7 @@ public class HotspotGroupDetailActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    // ── Attendance ────────────────────────────────────────────
+    // ?? Attendance ????????????????????????????????????????????
 
     void openRecordAttendance(int sessionNum) {
         Threading.io(() -> {

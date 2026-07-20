@@ -207,6 +207,48 @@ public class ChimwemweFormUtils {
         return "chimwemwe-attendance-" + gid + "-" + sessionNumber + "-" + participantId;
     }
 
+    // ── Enrollment age eligibility (issue #46) ────────────────
+    /** Inclusive minimum child age (years) accepted at enrollment. */
+    public static final int MIN_ENROLLMENT_AGE = 10;
+    /** Inclusive maximum child age (years) accepted at enrollment. */
+    public static final int MAX_ENROLLMENT_AGE = 14;
+
+    private static final String[] FLEXIBLE_DATE_FORMATS = {
+            "yyyy-MM-dd", "dd-MM-yyyy", "dd/MM/yyyy", "MM/dd/yyyy",
+            "yyyy/MM/dd", "dd.MM.yyyy", "yyyy.MM.dd",
+            "yyyy-MM-dd'Z'", "d-M-yyyy", "d/M/yyyy", "M/d/yyyy", "yyyy-M-d"
+    };
+
+    /** Parse a stored date across the formats the register forms may write, or null. */
+    private static java.time.LocalDate parseFlexibleDate(String raw) {
+        if (raw == null) return null;
+        String s = raw.trim();
+        if (s.isEmpty() || s.equalsIgnoreCase("null")) return null;
+        if (s.contains("T")) s = s.substring(0, s.indexOf('T'));
+        else if (s.contains(" ")) s = s.substring(0, s.indexOf(' '));
+        s = s.trim();
+        for (String fmt : FLEXIBLE_DATE_FORMATS) {
+            try {
+                return java.time.LocalDate.parse(s, java.time.format.DateTimeFormatter.ofPattern(fmt));
+            } catch (Exception ignored) {}
+        }
+        return null;
+    }
+
+    /**
+     * Child's whole-years age as of the enrollment date, or -1 if the DOB can't be parsed.
+     * When the enrollment date is missing/unparseable, "today" is used. Returns -1 (rather than
+     * throwing) so callers can choose to skip the age rule when the DOB is unknown.
+     */
+    public static int ageAtEnrollment(String childDob, String enrollmentDate) {
+        java.time.LocalDate dob = parseFlexibleDate(childDob);
+        if (dob == null) return -1;
+        java.time.LocalDate asOf = parseFlexibleDate(enrollmentDate);
+        if (asOf == null) asOf = java.time.LocalDate.now();
+        if (dob.isAfter(asOf)) return -1; // DOB after enrollment — treat as unknown/invalid input
+        return java.time.Period.between(dob, asOf).getYears();
+    }
+
     public static String reviewEntityId(long reviewId) {
         return "chimwemwe-review-" + reviewId;
     }

@@ -21,29 +21,27 @@ import com.bluecodeltd.chimwemwe.chw.R;
 import com.bluecodeltd.chimwemwe.chw.adapter.ViewPager2Adapter;
 import com.bluecodeltd.chimwemwe.chw.dao.HotspotGroupDao;
 import com.bluecodeltd.chimwemwe.chw.dao.ChimwemweReferralDao;
-import com.bluecodeltd.chimwemwe.chw.dao.MonthlyReviewDao;
 import com.bluecodeltd.chimwemwe.chw.dao.ParticipantDao;
 import com.bluecodeltd.chimwemwe.chw.fragment.ParticipantOverviewFragment;
 import com.bluecodeltd.chimwemwe.chw.fragment.ParticipantProfileSection;
 import com.bluecodeltd.chimwemwe.chw.fragment.ParticipantReferralsFragment;
-import com.bluecodeltd.chimwemwe.chw.fragment.ParticipantReviewsFragment;
-import com.bluecodeltd.chimwemwe.chw.fragment.ParticipantServicesFragment;
 import com.bluecodeltd.chimwemwe.chw.model.ChimwemweReferralModel;
 import com.bluecodeltd.chimwemwe.chw.model.HotspotGroupModel;
-import com.bluecodeltd.chimwemwe.chw.model.HouseholdServiceReportModel;
 import com.bluecodeltd.chimwemwe.chw.model.ParticipantModel;
-import com.bluecodeltd.chimwemwe.chw.model.chimwemweParticipantReviewModel;
 import com.bluecodeltd.chimwemwe.chw.util.ChimwemweFormUtils;
 import com.bluecodeltd.chimwemwe.chw.util.Threading;
+import com.bluecodeltd.chimwemwe.chw.util.ReferralServiceAggregator;
+import com.bluecodeltd.chimwemwe.chw.util.ReferralFormPrefill;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.json.JSONObject;
 import org.smartregister.chw.core.utils.CoreJsonFormUtils;
 import org.smartregister.util.FormUtils;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -52,23 +50,17 @@ import java.util.Map;
 import timber.log.Timber;
 
 public class ChimwemweParticipantProfileActivity extends AppCompatActivity
-        implements ParticipantReviewsFragment.ParticipantFormHost,
-        ParticipantReferralsFragment.ParticipantFormHost,
-        ParticipantServicesFragment.ParticipantFormHost {
+        implements ParticipantReferralsFragment.ParticipantFormHost {
 
     public static final String EXTRA_PARTICIPANT_ID = "participant_id";
     public static final String EXTRA_PARTICIPANT_CODE = "participant_code";
 
     private static final int REQ_PARTICIPANT = 3001;
-    private static final int REQ_REVIEW      = 3002;
     private static final int REQ_REFERRAL    = 3003;
-    private static final int REQ_SERVICE     = 3004;
 
-    // Tab page indices \u2014 Services sits between Reviews and Referrals per spec.
+    // Tab page indices
     private static final int PAGE_OVERVIEW  = 0;
-    private static final int PAGE_REVIEWS   = 1;
-    private static final int PAGE_SERVICES  = 2;
-    private static final int PAGE_REFERRALS = 3;
+    private static final int PAGE_REFERRALS = 1;
 
     private static final String DASH = "\u2014";
 
@@ -77,8 +69,6 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity
 
     private ParticipantModel participant;
     private HotspotGroupModel group;
-    private int reviewsCount = 0;
-    private int servicesCount = 0;
     private int referralsCount = 0;
 
     private TextView tvCaregiverName;
@@ -123,12 +113,7 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity
         setupViewPager();
 
         fabAdd.setOnClickListener(v -> {
-            if (currentPage == PAGE_REVIEWS) {
-                ParticipantReviewsFragment f = findReviewsFragment();
-                if (f != null) f.launchReviewForm(null);
-            } else if (currentPage == PAGE_SERVICES) {
-                launchServiceForm(null);
-            } else if (currentPage == PAGE_REFERRALS) {
+            if (currentPage == PAGE_REFERRALS) {
                 launchReferralForm(null);
             }
         });
@@ -151,13 +136,11 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity
     }
 
     public void setReviewsCount(int count) {
-        reviewsCount = Math.max(0, count);
-        updateTabTitles();
+        // No-op: reviews tab removed
     }
 
     public void setServicesCount(int count) {
-        servicesCount = Math.max(0, count);
-        updateTabTitles();
+        // No-op: services tab removed
     }
 
     public void setReferralsCount(int count) {
@@ -198,8 +181,6 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity
     private void setupViewPager() {
         List<Fragment> fragments = Arrays.asList(
                 new ParticipantOverviewFragment(),
-                new ParticipantReviewsFragment(),
-                new ParticipantServicesFragment(),
                 new ParticipantReferralsFragment()
         );
         ViewPager2Adapter adapter = new ViewPager2Adapter(this, fragments);
@@ -215,8 +196,6 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity
         tabMediator.attach();
 
         setTabTitle(PAGE_OVERVIEW,  "Overview",  -1);
-        setTabTitle(PAGE_REVIEWS,   "Reviews",    0);
-        setTabTitle(PAGE_SERVICES,  "Services",   0);
         setTabTitle(PAGE_REFERRALS, "Referrals",  0);
 
         viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
@@ -237,10 +216,8 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity
         }
         fabAdd.setVisibility(View.VISIBLE);
         // Label tracks the active tab so the user sees what tapping the
-        // FAB will create (Add Reviews / Add Services / Add Referrals).
+        // FAB will create (Add Referrals).
         switch (currentPage) {
-            case PAGE_REVIEWS:   fabAdd.setText("Add Reviews");   break;
-            case PAGE_SERVICES:  fabAdd.setText("Add Services");  break;
             case PAGE_REFERRALS: fabAdd.setText("Add Referrals"); break;
             default:             fabAdd.setText("Add");           break;
         }
@@ -248,8 +225,6 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity
 
     private void updateTabTitles() {
         setTabTitle(PAGE_OVERVIEW,  "Overview",  -1);
-        setTabTitle(PAGE_REVIEWS,   "Reviews",    reviewsCount);
-        setTabTitle(PAGE_SERVICES,  "Services",   servicesCount);
         setTabTitle(PAGE_REFERRALS, "Referrals",  referralsCount);
     }
 
@@ -295,9 +270,7 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity
                 participant = p;
                 group = g;
                 // Let the fragments load their own lists and update tab counts
-                // via setReviewsCount() / setServicesCount() / setReferralsCount().
-                reviewsCount = 0;
-                servicesCount = 0;
+                // via setReferralsCount().
                 referralsCount = 0;
 
                 bindHeader();
@@ -410,65 +383,19 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity
                 if (form == null) return;
                 form.put("entity_id", participant.getParticipantId());
                 form.put("base_entity_id", participant.getParticipantId());
-                CoreJsonFormUtils.populateJsonForm(form, participantToMap(participant));
+                java.util.Map<String, String> map = participantToMap(participant);
+                String dob = map.get("child_dob");
+                if (dob != null && !dob.isEmpty() && !dob.equalsIgnoreCase("null")) {
+                    map.put("child_dob", normalizeDob(dob));
+                }
+                String enrolled = map.get("enrollment_date");
+                if (enrolled != null && !enrolled.isEmpty() && !enrolled.equalsIgnoreCase("null")) {
+                    map.put("enrollment_date", normalizeDob(enrolled));
+                }
+                CoreJsonFormUtils.populateJsonForm(form, map);
                 launchJsonForm(form, REQ_PARTICIPANT);
             } catch (Exception e) {
                 Timber.e(e, "launchParticipantForm");
-            }
-        });
-    }
-
-    @Override
-    public void launchReviewForm(@Nullable chimwemweParticipantReviewModel existing) {
-        ParticipantReviewsFragment f = findReviewsFragment();
-        if (f != null) f.launchReviewForm(existing);
-    }
-
-    /**
-     * Loads {@code service_report_household.json} for a new record (or
-     * {@code service_report_household_edit.json} pre-populated with the
-     * existing row for an edit) and launches it. The participant's code is
-     * pushed into the form's {@code household_id} field so each saved row
-     * lands on {@code ec_household_service_report.household_id} — that's how
-     * the Services tab scopes records per-participant.
-     */
-    @Override
-    public void launchServiceForm(@Nullable HouseholdServiceReportModel existing) {
-        if (participant == null) return;
-        final String participantCode = participant.getParticipantId();
-        Threading.io(() -> {
-            try {
-                FormUtils formUtils = new FormUtils(this);
-                String formName = (existing == null)
-                        ? "service_report_household"
-                        : "service_report_household_edit";
-                JSONObject form = formUtils.getFormJson(formName);
-                if (form == null) {
-                    Timber.w("Service form %s not found in assets", formName);
-                    return;
-                }
-
-                // Per-participant scoping: store the participant code in household_id.
-                ChimwemweFormUtils.ensureFieldValue(form, "household_id", participantCode);
-
-                if (existing != null) {
-                    try {
-                        CoreJsonFormUtils.populateJsonForm(
-                                form,
-                                new ObjectMapper().convertValue(existing, Map.class)
-                        );
-                    } catch (Exception e) {
-                        Timber.w(e, "populateJsonForm service");
-                    }
-                    String baseEntityId = existing.getBase_entity_id();
-                    if (baseEntityId != null && !baseEntityId.trim().isEmpty()) {
-                        form.put("entity_id", baseEntityId);
-                    }
-                }
-
-                launchJsonForm(form, REQ_SERVICE);
-            } catch (Exception e) {
-                Timber.e(e, "launchServiceForm");
             }
         });
     }
@@ -485,16 +412,8 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity
                     ChimwemweFormUtils.ensureFieldValue(form, "group_id", participant.getGroupId());
                     ChimwemweFormUtils.ensureFieldValue(form, "participant_id", participant.getParticipantId());
                 }
-
                 if (existing != null) {
-                    try {
-                        CoreJsonFormUtils.populateJsonForm(
-                                form,
-                                new ObjectMapper().convertValue(existing, Map.class)
-                        );
-                    } catch (Exception e) {
-                        Timber.w(e, "populateJsonForm referral");
-                    }
+                    ReferralFormPrefill.populate(form, existing);
                     String baseEntityId = existing.getBase_entity_id();
                     if (baseEntityId != null && !baseEntityId.trim().isEmpty()) form.put("entity_id", baseEntityId);
                 }
@@ -504,15 +423,6 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity
                 Timber.e(e, "launchReferralForm");
             }
         });
-    }
-
-    @Nullable
-    private ParticipantReviewsFragment findReviewsFragment() {
-        try {
-            return (ParticipantReviewsFragment) getSupportFragmentManager().findFragmentByTag("f1");
-        } catch (Exception ignored) {
-            return null;
-        }
     }
 
     private void launchJsonForm(JSONObject form, int requestCode) {
@@ -539,8 +449,6 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        // Reviews are launched/saved from ParticipantReviewsFragment.
-        if (requestCode == REQ_REVIEW) return;
         if (resultCode != Activity.RESULT_OK || data == null) return;
         String jsonString = data.getStringExtra(com.vijay.jsonwizard.constants.JsonFormConstants.JSON_FORM_KEY.JSON);
         if (jsonString == null) return;
@@ -563,44 +471,41 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity
                             ChimwemweFormUtils.processRegistration(form, "ec_chimwemwe_participant", participantCode),
                             true
                     );
-
-                } else if (requestCode == REQ_REVIEW) {
-                    boolean isEdit = !form.optString("entity_id", "").isEmpty();
-                    ChimwemweFormUtils.ensureFieldValue(form, "group_id",
-                            participant != null ? participant.getGroupId() : "");
-                    ChimwemweFormUtils.ensureFieldValue(form, "participant_id",
-                            participant != null ? participant.getParticipantId() : "");
-                    ChimwemweFormUtils.saveRegistration(
-                            ChimwemweFormUtils.processRegistration(form, "ec_chimwemwe_review", null),
-                            isEdit
-                    );
+                    loadData();
 
                 } else if (requestCode == REQ_REFERRAL) {
-                    boolean isEdit = !form.optString("entity_id", "").isEmpty();
+                    boolean isEdit = !form.optString("entity_id", "").trim().isEmpty();
                     ChimwemweFormUtils.ensureFieldValue(form, "group_id",
                             participant != null ? participant.getGroupId() : "");
                     ChimwemweFormUtils.ensureFieldValue(form, "participant_id",
-                            participant != null ? participant.getParticipantId() : "");
-                    ChimwemweFormUtils.saveRegistration(
+                            participant != null ? participant.getParticipantId() : "" );
+                    String referralId = form.optString("entity_id", "").trim();
+                    if (referralId.isEmpty()) {
+                        referralId = "chimwemwe-referral-" + org.smartregister.util.JsonFormUtils.generateRandomUUIDString();
+                        form.put("entity_id", referralId);
+                    }
+                    ChimwemweFormUtils.ensureFieldValue(form, "referral_id", referralId);
+                    String selectedServices = ReferralServiceAggregator.aggregate(form);
+                    if (!selectedServices.trim().isEmpty() || !isEdit) {
+                        ChimwemweFormUtils.ensureFieldValue(form, "service_being_referred", selectedServices);
+                    }
+                    boolean saved = ChimwemweFormUtils.saveRegistration(
                             ChimwemweFormUtils.processRegistration(form, "ec_chimwemwe_referral", null),
                             isEdit
                     );
-
-                } else if (requestCode == REQ_SERVICE) {
-                    boolean isEdit = !form.optString("entity_id", "").isEmpty();
-                    // Reaffirm the per-participant scoping in case the form was
-                    // re-entered or the field cleared in the UI.
-                    ChimwemweFormUtils.ensureFieldValue(form, "household_id",
-                            participant != null ? participant.getParticipantId() : "");
-                    ChimwemweFormUtils.saveRegistration(
-                            ChimwemweFormUtils.processRegistration(form, "ec_household_service_report", null),
-                            isEdit
-                    );
+                    Threading.main(() -> Toast.makeText(
+                            this,
+                            saved ? "Referral saved successfully" : "Could not save referral. Please try again.",
+                            saved ? Toast.LENGTH_SHORT : Toast.LENGTH_LONG
+                    ).show());
+                    if (saved) {
+                        loadData();
+                    }
                 }
-
-                loadData();
             } catch (Exception e) {
                 Timber.e(e, "onActivityResult profile");
+                Threading.main(() -> Toast.makeText(
+                        this, "Could not save the form. Please try again.", Toast.LENGTH_LONG).show());
             }
         });
     }
@@ -632,6 +537,28 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity
         }
     }
 
+    private String normalizeDob(String dob) {
+        if (dob == null || dob.isEmpty() || dob.equalsIgnoreCase("null")) return "";
+        String datePart = dob.trim();
+        if (datePart.contains("T")) datePart = datePart.substring(0, datePart.indexOf('T'));
+        else if (datePart.contains(" ")) datePart = datePart.substring(0, datePart.indexOf(' '));
+        datePart = datePart.trim();
+
+        String[] inputFormats = {
+                "yyyy-MM-dd", "dd-MM-yyyy", "dd/MM/yyyy", "MM/dd/yyyy",
+                "yyyy/MM/dd", "dd.MM.yyyy", "yyyy.MM.dd",
+                "yyyy-MM-dd'Z'", "d-M-yyyy", "d/M/yyyy", "M/d/yyyy", "yyyy-M-d"
+        };
+        DateTimeFormatter out = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        for (String fmt : inputFormats) {
+            try {
+                LocalDate d = LocalDate.parse(datePart, DateTimeFormatter.ofPattern(fmt));
+                return d.format(out);
+            } catch (Exception ignored) {}
+        }
+        return datePart;
+    }
+
     private java.util.Map<String, String> participantToMap(ParticipantModel p) {
         java.util.Map<String, String> map = new java.util.HashMap<>();
         if (p == null) return map;
@@ -644,6 +571,7 @@ public class ChimwemweParticipantProfileActivity extends AppCompatActivity
         map.put("child_surname",        p.getChildSurname());
         map.put("child_dob",            p.getChildDob());
         map.put("child_sex",            p.getChildSex());
+        map.put("enrollment_date",      p.getEnrollmentDate());
         map.put("is_enrolled_ovc",      p.getIsEnrolledOvc());
         map.put("caregiver_id",         p.getCaregiverId());
         map.put("vca_id",               p.getVcaId());

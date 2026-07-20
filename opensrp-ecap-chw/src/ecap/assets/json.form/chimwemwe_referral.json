@@ -1,160 +1,2680 @@
 {
-  "count": "1",
-  "encounter_type": "Chimwemwe Referral",
-  "entity_id": "",
-  "metadata": {
-    "start": {
-      "openmrs_entity_parent": "",
-      "openmrs_entity": "person_attribute",
-      "openmrs_data_type": "start",
-      "openmrs_entity_id": "163137AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-    },
-    "end": {
-      "openmrs_entity_parent": "",
-      "openmrs_entity": "person_attribute",
-      "openmrs_data_type": "end",
-      "openmrs_entity_id": "163138AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-    },
-    "today": {
-      "openmrs_entity_parent": "",
-      "openmrs_entity": "encounter",
-      "openmrs_entity_id": "encounter_date"
-    },
-    "deviceid": {
-      "openmrs_entity_parent": "",
-      "openmrs_entity": "person_attribute",
-      "openmrs_data_type": "deviceid",
-      "openmrs_entity_id": "163149AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-    },
-    "subscriberid": {
-      "openmrs_entity_parent": "",
-      "openmrs_entity": "person_attribute",
-      "openmrs_data_type": "subscriberid",
-      "openmrs_entity_id": "163150AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-    },
-    "simserial": {
-      "openmrs_entity_parent": "",
-      "openmrs_entity": "person_attribute",
-      "openmrs_data_type": "simserial",
-      "openmrs_entity_id": "163151AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-    },
-    "phonenumber": {
-      "openmrs_entity_parent": "",
-      "openmrs_entity": "person_attribute",
-      "openmrs_data_type": "phonenumber",
-      "openmrs_entity_id": "163152AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-    },
-    "encounter_location": ""
-  },
-
-  "step1": {
-    "title": "Referral Details",
-    "display_back_button": "true",
-    "fields": [
-      {
-        "key": "participant_id",
-        "openmrs_entity_parent": "",
-        "openmrs_entity": "person_attribute",
-        "openmrs_entity_id": "participant_id",
-        "type": "hidden",
-        "value": ""
-      },
-      {
-        "key": "group_id",
-        "openmrs_entity_parent": "",
-        "openmrs_entity": "person_attribute",
-        "openmrs_entity_id": "group_id",
-        "type": "hidden",
-        "read_only": "true",
-        "hint": "Group ID",
-        "edit_type": "name",
-        "v_required": { "value": true, "err": "" }
-      },
-      {
-        "key": "referral_note",
-        "openmrs_entity_parent": "",
-        "openmrs_entity": "person_attribute",
-        "openmrs_entity_id": "referral_note",
-        "type": "toaster_notes",
-        "text": "Complete this section if the participant is being referred for a service. Leave blank if no referral.",
-        "toaster_type": "info"
-      },
-      {
-        "key": "who_referred",
-        "openmrs_entity_parent": "",
-        "openmrs_entity": "person_attribute",
-        "openmrs_entity_id": "who_referred",
-        "type": "spinner",
-        "hint": "Who is being referred for services?",
-        "values": ["-- Select --", "Caregiver", "Child", "Both"],
-        "v_required": {
-          "value": "true",
-          "err": "Please select who is being referred"
-        }
-      },
-      {
-        "key": "service_referred_for",
-        "openmrs_entity_parent": "",
-        "openmrs_entity": "person_attribute",
-        "openmrs_entity_id": "service_referred_for",
-        "type": "edit_text",
-        "hint": "Indicate the service(s) being referred for",
-        "edit_type": "name",
-        "v_required": {
-          "value": "true",
-          "err": "Please indicate the service(s) being referred for"
-        }
-      },
-      {
-        "key": "referral_date",
-        "openmrs_entity_parent": "",
-        "openmrs_entity": "person_attribute",
-        "openmrs_entity_id": "referral_date",
-        "type": "date_picker",
-        "hint": "Date of Referral (DD/MM/YY)",
-        "expanded": false,
-        "min_date": "today-3y",
-        "max_date": "today+1y",
-        "v_required": { "value": "true", "err": "Please enter the date of referral" }
-      },
-      {
-        "key": "receiving_org",
-        "openmrs_entity_parent": "",
-        "openmrs_entity": "person_attribute",
-        "openmrs_entity_id": "receiving_org",
-        "type": "edit_text",
-        "hint": "Name of receiving organization",
-        "edit_type": "name",
-        "v_required": {
-          "value": "false",
-          "err": ""
-        }
-      },
-      {
-        "key": "job_title",
-        "openmrs_entity_parent": "",
-        "openmrs_entity": "person_attribute",
-        "openmrs_entity_id": "job_title",
-        "type": "edit_text",
-        "hint": "Job title of individual providing services",
-        "edit_type": "name",
-        "v_required": {
-          "value": "false",
-          "err": ""
-        }
-      },
-      {
-        "key": "service_date",
-        "openmrs_entity_parent": "",
-        "openmrs_entity": "person_attribute",
-        "openmrs_entity_id": "service_date",
-        "type": "date_picker",
-        "hint": "Date service was provided (DD/MM/YY)",
-        "expanded": false,
-        "min_date": "today-3y",
-        "max_date": "today+1y",
-        "v_required": { "value": "false", "err": "" }
-      }
-    ]
-  }
+    "count":  "1",
+    "encounter_type":  "Chimwemwe Referral",
+    "entity_id":  "",
+    "metadata":  {
+                     "start":  {
+                                   "openmrs_entity_parent":  "",
+                                   "openmrs_entity":  "person_attribute",
+                                   "openmrs_data_type":  "start",
+                                   "openmrs_entity_id":  "163137AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                               },
+                     "end":  {
+                                 "openmrs_entity_parent":  "",
+                                 "openmrs_entity":  "person_attribute",
+                                 "openmrs_data_type":  "end",
+                                 "openmrs_entity_id":  "163138AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                             },
+                     "today":  {
+                                   "openmrs_entity_parent":  "",
+                                   "openmrs_entity":  "encounter",
+                                   "openmrs_entity_id":  "encounter_date"
+                               },
+                     "deviceid":  {
+                                      "openmrs_entity_parent":  "",
+                                      "openmrs_entity":  "person_attribute",
+                                      "openmrs_data_type":  "deviceid",
+                                      "openmrs_entity_id":  "163149AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                  },
+                     "subscriberid":  {
+                                          "openmrs_entity_parent":  "",
+                                          "openmrs_entity":  "person_attribute",
+                                          "openmrs_data_type":  "subscriberid",
+                                          "openmrs_entity_id":  "163150AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                      },
+                     "simserial":  {
+                                       "openmrs_entity_parent":  "",
+                                       "openmrs_entity":  "person_attribute",
+                                       "openmrs_data_type":  "simserial",
+                                       "openmrs_entity_id":  "163151AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                   },
+                     "phonenumber":  {
+                                         "openmrs_entity_parent":  "",
+                                         "openmrs_entity":  "person_attribute",
+                                         "openmrs_data_type":  "phonenumber",
+                                         "openmrs_entity_id":  "163152AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                                     },
+                     "encounter_location":  ""
+                 },
+    "step1":  {
+                  "title":  "Referral Details",
+                  "display_back_button":  "true",
+                  "fields":  [
+                                 {
+                                     "key":  "referral_id",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "referral_id",
+                                     "type":  "hidden",
+                                     "read_only":  "true",
+                                     "value":  ""
+                                 },
+                                 {
+                                     "key":  "participant_id",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "participant_id",
+                                     "type":  "hidden",
+                                     "value":  ""
+                                 },
+                                 {
+                                     "key":  "group_id",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "group_id",
+                                     "type":  "hidden",
+                                     "read_only":  "true",
+                                     "hint":  "Group ID",
+                                     "edit_type":  "name",
+                                     "v_required":  {
+                                                        "value":  true,
+                                                        "err":  ""
+                                                    }
+                                 },
+                                 {
+                                     "key":  "referral_note",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "referral_note",
+                                     "type":  "toaster_notes",
+                                     "text":  "Complete this section if the participant is being referred for a service. Leave blank if no referral.",
+                                     "toaster_type":  "info"
+                                 },
+                                 {
+                                     "key":  "who_is_referred",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "who_is_referred",
+                                     "type":  "spinner",
+                                     "hint":  "Who is being referred for services?",
+                                     "values":  [
+                                                    "-- Select --",
+                                                    "Caregiver",
+                                                    "Child",
+                                                    "Both"
+                                                ],
+                                     "v_required":  {
+                                                        "value":  "true",
+                                                        "err":  "Please select who is being referred"
+                                                    }
+                                 },
+                                 {
+                                     "key":  "provider",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "provider",
+                                     "type":  "spinner",
+                                     "hint":  "Who is providing the service?",
+                                     "values":  [
+                                                    "-- Select --",
+                                                    "Caseworker",
+                                                    "External Person"
+                                                ],
+                                     "v_required":  {
+                                                        "value":  "true",
+                                                        "err":  "Please select who is providing the service"
+                                                    }
+                                 },
+                                 {
+                                     "key":  "referral_date",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "referral_date",
+                                     "type":  "date_picker",
+                                     "hint":  "Date of Referral (DD/MM/YY)",
+                                     "expanded":  false,
+                                     "min_date":  "today-3y",
+                                     "max_date":  "today+1y",
+                                     "v_required":  {
+                                                        "value":  "true",
+                                                        "err":  "Please enter the date of referral"
+                                                    }
+                                 },
+                                 {
+                                     "key":  "service_domain_note",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "service_domain_note",
+                                     "type":  "toaster_notes",
+                                     "text":  "Select all services being referred. Caseworker and External Person options are shown separately.",
+                                     "toaster_type":  "info"
+                                 },
+                                 {
+                                     "key":  "caseworker_healthy_label",
+                                     "type":  "label",
+                                     "label_text_style":  "bold",
+                                     "text":  "If provided by a Caseworker - HEALTHY",
+                                     "text_color":  "#000000",
+                                     "v_required":  {
+                                                        "value":  false
+                                                    },
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "caseworker_healthy_age_appropriate_hiv_treatment_literacy",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "caseworker_healthy_age_appropriate_hiv_treatment_literacy",
+                                     "label":  "Age-appropriate HIV treatment literacy",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "caseworker_healthy_age_appropriate_counselling",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "caseworker_healthy_age_appropriate_counselling",
+                                     "label":  "Age-appropriate counselling",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "caseworker_healthy_hiv_disclosure_support",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "caseworker_healthy_hiv_disclosure_support",
+                                     "label":  "HIV disclosure support",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "caseworker_healthy_hiv_adherence_support",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "caseworker_healthy_hiv_adherence_support",
+                                     "label":  "HIV adherence support",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "caseworker_healthy_tracked_developmental_milestones",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "caseworker_healthy_tracked_developmental_milestones",
+                                     "label":  "Tracked developmental milestones",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "caseworker_healthy_age_appropriate_hiv_prevention_support",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "caseworker_healthy_age_appropriate_hiv_prevention_support",
+                                     "label":  "Age-appropriate HIV prevention support",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "caseworker_healthy_provided_condoms",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "caseworker_healthy_provided_condoms",
+                                     "label":  "Provided condoms",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "caseworker_healthy_conducted_hiv_testing_accompanied_to_health_facility_for_testing",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "caseworker_healthy_conducted_hiv_testing_accompanied_to_health_facility_for_testing",
+                                     "label":  "Conducted HIV testing/accompanied to health facility for testing",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "caseworker_healthy_conducted_index_hiv_testing_accompanied_to_health_facility_for_testing",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "caseworker_healthy_conducted_index_hiv_testing_accompanied_to_health_facility_for_testing",
+                                     "label":  "Conducted Index HIV testing/accompanied to health facility for testing",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "caseworker_healthy_conducted_facilitated_vl_sample_collection",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "caseworker_healthy_conducted_facilitated_vl_sample_collection",
+                                     "label":  "Conducted/facilitated VL Sample Collection",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "caseworker_healthy_lost_to_follow_up_tracing",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "caseworker_healthy_lost_to_follow_up_tracing",
+                                     "label":  "Lost to follow up tracing",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "caseworker_healthy_appointment_reminders",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "caseworker_healthy_appointment_reminders",
+                                     "label":  "Appointment reminders",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "caseworker_healthy_art_and_other_drugs_collection_delivery",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "caseworker_healthy_art_and_other_drugs_collection_delivery",
+                                     "label":  "ART and other drugs collection / delivery",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "caseworker_healthy_covid_messaging",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "caseworker_healthy_covid_messaging",
+                                     "label":  "COVID Messaging",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "caseworker_healthy_conducted_covid_testing_accompanied_to_health_facility_for_testing",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "caseworker_healthy_conducted_covid_testing_accompanied_to_health_facility_for_testing",
+                                     "label":  "Conducted COVID testing/accompanied to health facility for testing",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "caseworker_healthy_other",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "caseworker_healthy_other",
+                                     "label":  "Other",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "caseworker_healthy_other_specify",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "caseworker_healthy_other_specify",
+                                     "type":  "edit_text",
+                                     "hint":  "Specify",
+                                     "edit_type":  "name",
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   },
+                                     "v_required":  {
+                                                        "value":  "false",
+                                                        "err":  ""
+                                                    }
+                                 },
+                                 {
+                                     "key":  "caseworker_schooled_label",
+                                     "type":  "label",
+                                     "label_text_style":  "bold",
+                                     "text":  "SCHOOLED",
+                                     "text_color":  "#000000",
+                                     "v_required":  {
+                                                        "value":  false
+                                                    },
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "caseworker_schooled_child_received_school_uniform",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "caseworker_schooled_child_received_school_uniform",
+                                     "label":  "Child received school uniform",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "caseworker_schooled_child_received_school_shoes",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "caseworker_schooled_child_received_school_shoes",
+                                     "label":  "Child received school shoes",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "caseworker_schooled_child_received_schoolbooks_and_other_materials_pencils_pens_etc",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "caseworker_schooled_child_received_schoolbooks_and_other_materials_pencils_pens_etc",
+                                     "label":  "Child received schoolbooks and other materials (pencils, pens etc)",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "caseworker_schooled_child_received_bursary_tuition_or_school_fees_from_ecapii",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "caseworker_schooled_child_received_bursary_tuition_or_school_fees_from_ecapii",
+                                     "label":  "Child received bursary, tuition or school fees from ECAPII",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "caseworker_schooled_child_received_assistance_for_re_enrollment",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "caseworker_schooled_child_received_assistance_for_re_enrollment",
+                                     "label":  "Child received assistance for re-enrollment",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "caseworker_schooled_post_violence_trauma_counselling",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "caseworker_schooled_post_violence_trauma_counselling",
+                                     "label":  "Post violence trauma counselling",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "caseworker_schooled_cw_provided_a_report_of_suspected_abuse_to_child_protection_office_police_or_other_local_authority",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "caseworker_schooled_cw_provided_a_report_of_suspected_abuse_to_child_protection_office_police_or_other_local_authority",
+                                     "label":  "CW provided a report of suspected abuse to child protection office, police or other local authority",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "caseworker_schooled_received_regular_assistance_support_with_homework_e_g_homework_club_participation",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "caseworker_schooled_received_regular_assistance_support_with_homework_e_g_homework_club_participation",
+                                     "label":  "Received regular assistance/support with homework (e.g. homework club participation)",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "caseworker_schooled_other",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "caseworker_schooled_other",
+                                     "label":  "Other",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "caseworker_schooled_other_specify",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "caseworker_schooled_other_specify",
+                                     "type":  "edit_text",
+                                     "hint":  "Specify",
+                                     "edit_type":  "name",
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   },
+                                     "v_required":  {
+                                                        "value":  "false",
+                                                        "err":  ""
+                                                    }
+                                 },
+                                 {
+                                     "key":  "caseworker_safe_label",
+                                     "type":  "label",
+                                     "label_text_style":  "bold",
+                                     "text":  "SAFE",
+                                     "text_color":  "#000000",
+                                     "v_required":  {
+                                                        "value":  false
+                                                    },
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "caseworker_safe_safety_plan_developed",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "caseworker_safe_safety_plan_developed",
+                                     "label":  "Safety plan developed",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "caseworker_safe_family_case_conferencing_to_prevent_occurrence_of_child_abuse_neglect",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "caseworker_safe_family_case_conferencing_to_prevent_occurrence_of_child_abuse_neglect",
+                                     "label":  "Family/case conferencing to prevent occurrence of child abuse/neglect",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "caseworker_safe_legal_assistance_e_g_transport_legal_fees_related_to_maltreatment_gbv_exploitation_etc",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "caseworker_safe_legal_assistance_e_g_transport_legal_fees_related_to_maltreatment_gbv_exploitation_etc",
+                                     "label":  "Legal assistance (e.g. transport, legal fees) related to maltreatment, GBV, exploitation etc.",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "caseworker_safe_emergency_shelter_care_facility",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "caseworker_safe_emergency_shelter_care_facility",
+                                     "label":  "Emergency shelter/Care facility",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "caseworker_safe_child_participated_in_evidence_based_intervention_for_preventing_hiv_and_sexual_violence_e_g_chimwemwe_program",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "caseworker_safe_child_participated_in_evidence_based_intervention_for_preventing_hiv_and_sexual_violence_e_g_chimwemwe_program",
+                                     "label":  "Child participated in evidence-based intervention for preventing HIV and sexual violence (e.g. Chimwemwe program)",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "caseworker_safe_other",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "caseworker_safe_other",
+                                     "label":  "Other",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "caseworker_safe_other_specify",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "caseworker_safe_other_specify",
+                                     "type":  "edit_text",
+                                     "hint":  "Specify",
+                                     "edit_type":  "name",
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   },
+                                     "v_required":  {
+                                                        "value":  "false",
+                                                        "err":  ""
+                                                    }
+                                 },
+                                 {
+                                     "key":  "caseworker_stable_label",
+                                     "type":  "label",
+                                     "label_text_style":  "bold",
+                                     "text":  "STABLE",
+                                     "text_color":  "#000000",
+                                     "v_required":  {
+                                                        "value":  false
+                                                    },
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "caseworker_stable_linked_to_we_program",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "caseworker_stable_linked_to_we_program",
+                                     "label":  "Linked to WE Program",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "caseworker_stable_actively_participating_in_we",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "caseworker_stable_actively_participating_in_we",
+                                     "label":  "Actively participating in WE",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "caseworker_stable_linked_to_other_savings_group",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "caseworker_stable_linked_to_other_savings_group",
+                                     "label":  "Linked to other savings group",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "caseworker_stable_financial_literacy_training",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "caseworker_stable_financial_literacy_training",
+                                     "label":  "Financial literacy training",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "caseworker_stable_business_entrepreneurship_skills_training",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "caseworker_stable_business_entrepreneurship_skills_training",
+                                     "label":  "Business/Entrepreneurship skills training",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "caseworker_stable_agribusiness_training",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "caseworker_stable_agribusiness_training",
+                                     "label":  "Agribusiness training",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "caseworker_stable_linkages_to_formal_financial_institutions_banks_credit_unions_etc",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "caseworker_stable_linkages_to_formal_financial_institutions_banks_credit_unions_etc",
+                                     "label":  "Linkages to formal financial institutions (banks, credit unions etc)",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "caseworker_stable_numeracy_training",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "caseworker_stable_numeracy_training",
+                                     "label":  "Numeracy training",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "caseworker_stable_other",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "caseworker_stable_other",
+                                     "label":  "Other",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "caseworker_stable_other_specify",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "caseworker_stable_other_specify",
+                                     "type":  "edit_text",
+                                     "hint":  "Specify",
+                                     "edit_type":  "name",
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   },
+                                     "v_required":  {
+                                                        "value":  "false",
+                                                        "err":  ""
+                                                    }
+                                 },
+                                 {
+                                     "key":  "caseworker_hh_label",
+                                     "type":  "label",
+                                     "label_text_style":  "bold",
+                                     "text":  "Other HH Level Services",
+                                     "text_color":  "#000000",
+                                     "v_required":  {
+                                                        "value":  false
+                                                    },
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "caseworker_hh_household_hygiene_counselling_and_wash",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "caseworker_hh_household_hygiene_counselling_and_wash",
+                                     "label":  "Household hygiene counselling and WASH",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "caseworker_hh_family_psychosocial_support_for_family_conflict_mitigation",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "caseworker_hh_family_psychosocial_support_for_family_conflict_mitigation",
+                                     "label":  "Family/psychosocial support for family conflict mitigation",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "caseworker_hh_family_received_cash_support",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "caseworker_hh_family_received_cash_support",
+                                     "label":  "Family received cash support",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "caseworker_hh_family_received_material_support",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "caseworker_hh_family_received_material_support",
+                                     "label":  "Family received material support",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "caseworker_hh_linked_to_evidence_based_parenting_intervention_to_prevent_hiv_and_sexual_violence_to_their_children_e_g_chimwemwe_program",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "caseworker_hh_linked_to_evidence_based_parenting_intervention_to_prevent_hiv_and_sexual_violence_to_their_children_e_g_chimwemwe_program",
+                                     "label":  "Linked to evidence-based parenting intervention to prevent HIV and sexual violence to their children (e.g. Chimwemwe program)",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "caseworker_hh_other",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "caseworker_hh_other",
+                                     "label":  "Other",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "caseworker_hh_other_specify",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "caseworker_hh_other_specify",
+                                     "type":  "edit_text",
+                                     "hint":  "Specify",
+                                     "edit_type":  "name",
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   },
+                                     "v_required":  {
+                                                        "value":  "false",
+                                                        "err":  ""
+                                                    }
+                                 },
+                                 {
+                                     "key":  "external_healthy_label",
+                                     "type":  "label",
+                                     "label_text_style":  "bold",
+                                     "text":  "If provided by an External Person - HEALTHY",
+                                     "text_color":  "#000000",
+                                     "v_required":  {
+                                                        "value":  false
+                                                    },
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "external_healthy_cd4",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "external_healthy_cd4",
+                                     "label":  "CD4",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "external_healthy_hiv_adherence_support",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "external_healthy_hiv_adherence_support",
+                                     "label":  "HIV adherence support",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "external_healthy_early_infant_diagnosis_pcr",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "external_healthy_early_infant_diagnosis_pcr",
+                                     "label":  "Early infant diagnosis (PCR)",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "external_healthy_post_gbv_care_pre_exposure_prophylaxis",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "external_healthy_post_gbv_care_pre_exposure_prophylaxis",
+                                     "label":  "Post-GBV Care (pre-exposure prophylaxis)",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "external_healthy_hiv_counseling_and_testing",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "external_healthy_hiv_counseling_and_testing",
+                                     "label":  "HIV counseling and testing",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "external_healthy_substance_abuse_support_by_a_trained_provider",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "external_healthy_substance_abuse_support_by_a_trained_provider",
+                                     "label":  "Substance Abuse Support by a trained provider",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "external_healthy_tb_screening",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "external_healthy_tb_screening",
+                                     "label":  "TB Screening",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "external_healthy_supplementary_or_therapeutic_feeding",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "external_healthy_supplementary_or_therapeutic_feeding",
+                                     "label":  "Supplementary or Therapeutic feeding",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "external_healthy_family_planning_methods",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "external_healthy_family_planning_methods",
+                                     "label":  "Family planning methods",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "external_healthy_prep",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "external_healthy_prep",
+                                     "label":  "PrEP",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "external_healthy_insecticide_treated_net",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "external_healthy_insecticide_treated_net",
+                                     "label":  "Insecticide Treated Net",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "external_healthy_age_appropriate_hiv_aids_treatment_literacy_clhiv",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "external_healthy_age_appropriate_hiv_aids_treatment_literacy_clhiv",
+                                     "label":  "Age-appropriate HIV/AIDS treatment literacy (CLHIV)",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "external_healthy_family_planning_women_s_health",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "external_healthy_family_planning_women_s_health",
+                                     "label":  "Family Planning (Women?s Health)",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "external_healthy_vmmc",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "external_healthy_vmmc",
+                                     "label":  "VMMC",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "external_healthy_immunization",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "external_healthy_immunization",
+                                     "label":  "Immunization",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "external_healthy_condom",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "external_healthy_condom",
+                                     "label":  "Condom",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "external_healthy_routine_health_care",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "external_healthy_routine_health_care",
+                                     "label":  "Routine health care",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "external_healthy_emergency_health_care",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "external_healthy_emergency_health_care",
+                                     "label":  "Emergency Health Care",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "external_healthy_age_appropriate_counselling_and_hiv_disclosure_support",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "external_healthy_age_appropriate_counselling_and_hiv_disclosure_support",
+                                     "label":  "Age-appropriate counselling and HIV disclosure support",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "external_healthy_hiv_treatment_and_care",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "external_healthy_hiv_treatment_and_care",
+                                     "label":  "HIV treatment and care",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "external_healthy_pmtct",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "external_healthy_pmtct",
+                                     "label":  "PMTCT",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "external_healthy_household_hygiene_counselling_wash",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "external_healthy_household_hygiene_counselling_wash",
+                                     "label":  "Household Hygiene counselling/WASH",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "external_healthy_sexually_transmitted_infections_stis",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "external_healthy_sexually_transmitted_infections_stis",
+                                     "label":  "Sexually transmitted infections (STIs)",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "external_healthy_structured_plha_support_group",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "external_healthy_structured_plha_support_group",
+                                     "label":  "Structured PLHA Support Group",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "external_healthy_viral_load_pcr",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "external_healthy_viral_load_pcr",
+                                     "label":  "Viral Load (PCR)",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "external_healthy_other",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "external_healthy_other",
+                                     "label":  "Other",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "external_healthy_other_specify",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "external_healthy_other_specify",
+                                     "type":  "edit_text",
+                                     "hint":  "Specify",
+                                     "edit_type":  "name",
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   },
+                                     "v_required":  {
+                                                        "value":  "false",
+                                                        "err":  ""
+                                                    }
+                                 },
+                                 {
+                                     "key":  "external_safe_label",
+                                     "type":  "label",
+                                     "label_text_style":  "bold",
+                                     "text":  "SAFE",
+                                     "text_color":  "#000000",
+                                     "v_required":  {
+                                                        "value":  false
+                                                    },
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "external_safe_emergency_shelter_care_facility",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "external_safe_emergency_shelter_care_facility",
+                                     "label":  "Emergency shelter/care facility",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "external_safe_post_violence_trauma_support_counselling",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "external_safe_post_violence_trauma_support_counselling",
+                                     "label":  "Post-Violence Trauma Support Counselling",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "external_safe_legal_assistance",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "external_safe_legal_assistance",
+                                     "label":  "Legal Assistance",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "external_safe_other",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "external_safe_other",
+                                     "label":  "Other",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "external_safe_other_specify",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "external_safe_other_specify",
+                                     "type":  "edit_text",
+                                     "hint":  "Specify",
+                                     "edit_type":  "name",
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   },
+                                     "v_required":  {
+                                                        "value":  "false",
+                                                        "err":  ""
+                                                    }
+                                 },
+                                 {
+                                     "key":  "external_schooled_label",
+                                     "type":  "label",
+                                     "label_text_style":  "bold",
+                                     "text":  "SCHOOLED",
+                                     "text_color":  "#000000",
+                                     "v_required":  {
+                                                        "value":  false
+                                                    },
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "external_schooled_support_vcas_with_uniforms_and_or_book_materials",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "external_schooled_support_vcas_with_uniforms_and_or_book_materials",
+                                     "label":  "Support VCAs with uniforms and/or book materials",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "external_schooled_re_enrolment_for_dropouts_or_teen_mothers",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "external_schooled_re_enrolment_for_dropouts_or_teen_mothers",
+                                     "label":  "Re-enrolment (for dropouts or teen mothers)",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "external_schooled_tuition_bursaries_fee_waiver",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "external_schooled_tuition_bursaries_fee_waiver",
+                                     "label":  "Tuition/Bursaries/Fee waiver",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "external_schooled_other",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "external_schooled_other",
+                                     "label":  "Other",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "external_schooled_other_specify",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "external_schooled_other_specify",
+                                     "type":  "edit_text",
+                                     "hint":  "Specify",
+                                     "edit_type":  "name",
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   },
+                                     "v_required":  {
+                                                        "value":  "false",
+                                                        "err":  ""
+                                                    }
+                                 },
+                                 {
+                                     "key":  "external_stable_label",
+                                     "type":  "label",
+                                     "label_text_style":  "bold",
+                                     "text":  "STABLE",
+                                     "text_color":  "#000000",
+                                     "v_required":  {
+                                                        "value":  false
+                                                    },
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "external_stable_cash_transfer_social_grant",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "external_stable_cash_transfer_social_grant",
+                                     "label":  "Cash transfer/social grant",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "external_stable_short_term_emergency_cash_support",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "external_stable_short_term_emergency_cash_support",
+                                     "label":  "Short term emergency cash support",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "external_stable_food_security_program_intervention",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "external_stable_food_security_program_intervention",
+                                     "label":  "Food security program/intervention",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "external_stable_other",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "external_stable_other",
+                                     "label":  "Other",
+                                     "type":  "check_box",
+                                     "options":  [
+                                                     {
+                                                         "key":  "referred",
+                                                         "text":  "Referred"
+                                                     },
+                                                     {
+                                                         "key":  "provided",
+                                                         "text":  "Provided"
+                                                     }
+                                                 ],
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   }
+                                 },
+                                 {
+                                     "key":  "external_stable_other_specify",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "external_stable_other_specify",
+                                     "type":  "edit_text",
+                                     "hint":  "Specify",
+                                     "edit_type":  "name",
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   },
+                                     "v_required":  {
+                                                        "value":  "false",
+                                                        "err":  ""
+                                                    }
+                                 },
+                                 {
+                                     "key":  "recieving_organisation",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "recieving_organisation",
+                                     "type":  "edit_text",
+                                     "hint":  "Name of recieving organisation",
+                                     "edit_type":  "name",
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   },
+                                     "v_required":  {
+                                                        "value":  "false",
+                                                        "err":  ""
+                                                    }
+                                 },
+                                 {
+                                     "key":  "job_title",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "job_title",
+                                     "type":  "edit_text",
+                                     "hint":  "Job title of individual providing services",
+                                     "edit_type":  "name",
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   },
+                                     "v_required":  {
+                                                        "value":  "false",
+                                                        "err":  ""
+                                                    }
+                                 },
+                                 {
+                                     "key":  "full_name_providing_services",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "full_name_providing_services",
+                                     "type":  "edit_text",
+                                     "hint":  "Full Name of person providing services",
+                                     "edit_type":  "name",
+                                     "relevance":  {
+                                                       "rules-engine":  {
+                                                                            "ex-rules":  {
+                                                                                             "rules-file":  "referral_relevance.yml"
+                                                                                         }
+                                                                        }
+                                                   },
+                                     "v_required":  {
+                                                        "value":  "false",
+                                                        "err":  ""
+                                                    }
+                                 },
+                                 {
+                                     "key":  "referral_status",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "referral_status",
+                                     "type":  "spinner",
+                                     "hint":  "Referral Status",
+                                     "values":  [
+                                                    "-- Select --",
+                                                    "Not Started",
+                                                    "In progress",
+                                                    "Complete"
+                                                ],
+                                     "v_required":  {
+                                                        "value":  "true",
+                                                        "err":  "Please select a referral status"
+                                                    }
+                                 },
+                                 {
+                                     "key":  "service_date",
+                                     "openmrs_entity_parent":  "",
+                                     "openmrs_entity":  "person_attribute",
+                                     "openmrs_entity_id":  "service_date",
+                                     "type":  "date_picker",
+                                     "hint":  "Date service was provided (DD/MM/YY)",
+                                     "expanded":  false,
+                                     "min_date":  "today-3y",
+                                     "max_date":  "today+1y",
+                                     "v_required":  {
+                                                        "value":  "false",
+                                                        "err":  ""
+                                                    }
+                                 }
+                             ]
+              }
 }

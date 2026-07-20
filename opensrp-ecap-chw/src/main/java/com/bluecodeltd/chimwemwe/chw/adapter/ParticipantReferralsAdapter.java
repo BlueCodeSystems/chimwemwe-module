@@ -46,9 +46,25 @@ public class ParticipantReferralsAdapter extends RecyclerView.Adapter<Participan
     @Override
     public void onBindViewHolder(@NonNull VH h, int position) {
         ChimwemweReferralModel r = data.get(position);
-        h.title.setText(dash(r.getServiceReferredFor()));
-        h.subtitle.setText("Referred: " + dash(r.getWhoReferred()) + "  \u2022  Date: " + dash(r.getReferralDate()));
-        h.detail.setText("To: " + dash(r.getReceivingOrg()));
+        h.title.setText(displayValue(r.getServiceReferredFor(), "Service not recorded"));
+        h.subtitle.setText("Who is being referred: "
+                + displayValue(r.getWhoReferred(), "Not recorded")
+                + "  \u2022  Date: "
+                + displayValue(r.getReferralDate(), "Not recorded"));
+
+        String provider = clean(r.getProvider());
+        String organisation = clean(r.getReceivingOrg());
+        if (provider.isEmpty() && organisation.isEmpty()) {
+            h.detail.setVisibility(View.GONE);
+        } else {
+            h.detail.setVisibility(View.VISIBLE);
+            String detail = provider.isEmpty() ? "" : "Provider: " + provider;
+            if (!organisation.isEmpty()) {
+                if (!detail.isEmpty()) detail += "  \u2022  ";
+                detail += "Organisation: " + organisation;
+            }
+            h.detail.setText(detail);
+        }
         h.btnEdit.setOnClickListener(v -> listener.onEdit(r));
         h.btnDelete.setOnClickListener(v -> listener.onDelete(r));
     }
@@ -73,9 +89,20 @@ public class ParticipantReferralsAdapter extends RecyclerView.Adapter<Participan
         }
     }
 
-    private String dash(String v) {
-        if (v == null) return DASH;
-        String t = v.trim();
-        return t.isEmpty() ? DASH : t;
+    private String displayValue(String value, String fallback) {
+        String cleaned = clean(value);
+        return cleaned.isEmpty() ? fallback : cleaned;
+    }
+
+    private String clean(String value) {
+        if (value == null) return "";
+        String cleaned = value.trim();
+        if (cleaned.isEmpty()
+                || "null".equalsIgnoreCase(cleaned)
+                || "@null".equalsIgnoreCase(cleaned)
+                || DASH.equals(cleaned)) {
+            return "";
+        }
+        return cleaned;
     }
 }
