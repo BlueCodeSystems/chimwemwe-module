@@ -111,6 +111,17 @@ public class ChimwemweRegisterFragment extends BaseSafeRegisterFragment
             View navbarContainer = view.findViewById(org.smartregister.R.id.register_nav_bar_container);
             if (navbarContainer != null) navbarContainer.bringToFront();
 
+            // Charts dashboard entry point (issue #49).
+            View dashboardBtn = view.findViewById(R.id.btn_open_dashboard);
+            if (dashboardBtn != null) {
+                dashboardBtn.setOnClickListener(v -> {
+                    if (getActivity() != null) {
+                        startActivity(new android.content.Intent(getActivity(),
+                                com.bluecodeltd.chimwemwe.chw.activity.ChimwemweDashboardActivity.class));
+                    }
+                });
+            }
+
             if (getSearchView() != null) {
                 getSearchView().setCompoundDrawablesWithIntrinsicBounds(
                         org.smartregister.R.drawable.ic_action_search, 0, 0, 0);

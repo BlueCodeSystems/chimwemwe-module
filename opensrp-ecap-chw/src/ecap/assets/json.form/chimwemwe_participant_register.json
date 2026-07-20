@@ -138,8 +138,8 @@
         "hint": "Child Surname",
         "edit_type": "name",
         "v_required": {
-          "value": "false",
-          "err": ""
+          "value": "true",
+          "err": "Please enter the child's surname"
         }
       },
       {
@@ -153,8 +153,23 @@
         "min_date": "today-25y",
         "max_date": "today",
         "v_required": {
-          "value": "false",
-          "err": ""
+          "value": "true",
+          "err": "Please enter the date of birth"
+        }
+      },
+      {
+        "key": "enrollment_date",
+        "openmrs_entity_parent": "",
+        "openmrs_entity": "person_attribute",
+        "openmrs_entity_id": "enrollment_date",
+        "type": "date_picker",
+        "hint": "Date of Enrollment",
+        "expanded": false,
+        "min_date": "today-10y",
+        "max_date": "today",
+        "v_required": {
+          "value": "true",
+          "err": "Please enter the date of enrollment"
         }
       },
       {

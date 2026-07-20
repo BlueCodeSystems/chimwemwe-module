@@ -30,6 +30,7 @@ import com.bluecodeltd.chimwemwe.chw.R;
 import com.bluecodeltd.chimwemwe.chw.application.ChwApplication;
 import com.bluecodeltd.chimwemwe.chw.dao.ChimwemweFacilitiesDao;
 import com.bluecodeltd.chimwemwe.chw.model.ChimwemweFacilityModel;
+import com.bluecodeltd.chimwemwe.chw.util.DistrictNameUtils;
 import com.bluecodeltd.chimwemwe.chw.util.Threading;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -64,6 +65,7 @@ public class ChimwemweFacilitiesActivity extends AppCompatActivity {
         setContentView(R.layout.activity_chimwemwe_facilities);
 
         selectMode = getIntent().getBooleanExtra(EXTRA_SELECT_MODE, false);
+        registerOfficialDistrictNames();
 
         SharedPreferences sp = androidx.preference.PreferenceManager.getDefaultSharedPreferences(this);
         userDistrict = selectMode ? sp.getString("district", "") : null;
@@ -74,7 +76,7 @@ public class ChimwemweFacilitiesActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             if (selectMode) {
                 String title = (userDistrict != null && !userDistrict.isEmpty())
-                        ? "Facilities – " + userDistrict
+                        ? "Facilities " + DistrictNameUtils.display(userDistrict)
                         : "Select Facility";
                 getSupportActionBar().setTitle(title);
             }
@@ -118,10 +120,23 @@ public class ChimwemweFacilitiesActivity extends AppCompatActivity {
         }
     }
 
+    /** Loads every official district label bundled with the app into the display normalizer. */
+    private void registerOfficialDistrictNames() {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(
+                getResources().openRawResource(R.raw.zambia_facilities), "UTF-8"))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split("\\t", -1);
+                if (parts.length >= 3) DistrictNameUtils.registerOfficialName(parts[2]);
+            }
+        } catch (Exception e) {
+            Timber.w(e, "Could not load official district display names");
+        }
+    }
     private void onFacilitySelected(ChimwemweFacilityModel facility) {
         Intent result = new Intent();
         result.putExtra(RESULT_FACILITY_NAME, facility.getFacilityName());
-        result.putExtra(RESULT_FACILITY_DISTRICT, facility.getDistrict());
+        result.putExtra(RESULT_FACILITY_DISTRICT, DistrictNameUtils.display(facility.getDistrict()));
         result.putExtra(RESULT_FACILITY_PROVINCE, facility.getProvince());
         setResult(RESULT_OK, result);
         finish();
@@ -421,9 +436,9 @@ public class ChimwemweFacilitiesActivity extends AppCompatActivity {
             ChimwemweFacilityModel m = data.get(position);
             h.tvName.setText(m.getFacilityName() != null ? m.getFacilityName() : "");
             String meta = "";
-            if (m.getDistrict() != null && !m.getDistrict().trim().isEmpty()) meta += m.getDistrict().trim();
+            if (m.getDistrict() != null && !m.getDistrict().trim().isEmpty()) meta += DistrictNameUtils.display(m.getDistrict()).trim();
             if (m.getProvince() != null && !m.getProvince().trim().isEmpty()) {
-                meta += (meta.isEmpty() ? "" : " • ") + m.getProvince().trim();
+                meta += (meta.isEmpty() ? "" : " ") + m.getProvince().trim();
             }
             h.tvMeta.setText(meta);
             if (listener != null) {

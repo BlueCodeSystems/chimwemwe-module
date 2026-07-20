@@ -13,13 +13,10 @@ import com.bluecodeltd.chimwemwe.chw.dao.MonthlyReviewDao;
 import com.bluecodeltd.chimwemwe.chw.model.MonthlyReviewModel;
 import com.bluecodeltd.chimwemwe.chw.util.ChimwemweFormUtils;
 import com.bluecodeltd.chimwemwe.chw.util.Threading;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
+import com.bluecodeltd.chimwemwe.chw.util.SupervisorSignOffHelper;
+import com.bluecodeltd.chimwemwe.chw.util.ReviewFormPrefill;
 import org.json.JSONObject;
-import org.smartregister.chw.core.utils.CoreJsonFormUtils;
 import org.smartregister.util.FormUtils;
-
-import java.util.Map;
 
 import timber.log.Timber;
 
@@ -64,11 +61,7 @@ public class ReviewEditActivity extends AppCompatActivity {
                 }
 
                 if (existing != null) {
-                    try {
-                        CoreJsonFormUtils.populateJsonForm(form, new ObjectMapper().convertValue(existing, Map.class));
-                    } catch (Exception e) {
-                        Timber.w(e, "populateJsonForm review");
-                    }
+                    ReviewFormPrefill.populate(form, existing);
                     String baseEntityId = existing.getBase_entity_id();
                     if (baseEntityId != null && !baseEntityId.trim().isEmpty()) {
                         form.put("entity_id", baseEntityId);
@@ -116,24 +109,40 @@ public class ReviewEditActivity extends AppCompatActivity {
             return;
         }
 
-        Threading.io(() -> {
-            try {
-                JSONObject form = new JSONObject(jsonString);
-                boolean isEdit = !form.optString("entity_id", "").isEmpty();
-                ChimwemweFormUtils.ensureFieldValue(form, "group_id", groupId);
-                ChimwemweFormUtils.saveRegistration(
-                        ChimwemweFormUtils.processRegistration(form, "ec_chimwemwe_review", null),
-                        isEdit
-                );
-                setResult(RESULT_OK);
-                Threading.main(() -> {
-                    Toast.makeText(this, "Review saved successfully", Toast.LENGTH_SHORT).show();
-                    finish();
-                });
-            } catch (Exception e) {
-                Timber.e(e, "ReviewEditActivity onActivityResult");
-                Threading.main(this::finish);
-            }
-        });
+        try {
+            JSONObject form = new JSONObject(jsonString);
+            boolean isEdit = !form.optString("entity_id", "").isEmpty();
+            ChimwemweFormUtils.ensureFieldValue(form, "group_id", groupId);
+            SupervisorSignOffHelper.prompt(this, (signature, gps) -> Threading.io(() -> {
+                try {
+                    ChimwemweFormUtils.ensureFieldValue(form, "supervisor_signature", signature);
+                    ChimwemweFormUtils.ensureFieldValue(form, "supervisor_gps", gps);
+                    boolean saved = ChimwemweFormUtils.saveRegistration(
+                            ChimwemweFormUtils.processRegistration(form, "ec_chimwemwe_review", null),
+                            isEdit
+                    );
+                    if (saved) {
+                        setResult(RESULT_OK);
+                    }
+                    Threading.main(() -> {
+                        Toast.makeText(
+                                this,
+                                saved ? "Review saved successfully" : "Could not save review. Please try again.",
+                                saved ? Toast.LENGTH_SHORT : Toast.LENGTH_LONG
+                        ).show();
+                        finish();
+                    });
+                } catch (Exception e) {
+                    Timber.e(e, "ReviewEditActivity onActivityResult");
+                    Threading.main(() -> {
+                        Toast.makeText(this, "Could not save review. Please try again.", Toast.LENGTH_LONG).show();
+                        finish();
+                    });
+                }
+            }));
+        } catch (Exception e) {
+            Timber.e(e, "ReviewEditActivity prepare sign-off");
+            finish();
+        }
     }
 }

@@ -59,6 +59,28 @@
             android:maxLines="1"
             android:ellipsize="end" />
 
+        <TextView
+            android:id="@+id/tv_ineligible_reason"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:textColor="#DC2626"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/tv_signature_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:paddingTop="2dp"
+            android:paddingBottom="2dp"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:textColor="#059669"
+            android:visibility="gone" />
+
     </LinearLayout>
 
     <!-- Caregiver attendance -->

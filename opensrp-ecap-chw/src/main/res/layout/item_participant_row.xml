@@ -47,23 +47,43 @@
             android:layout_marginStart="12dp"
             android:orientation="vertical">
 
+            <!-- Child name (primary) with gender/age -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/tv_child_name"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Child Name"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/chimwemwe_text_primary"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+
+                <TextView
+                    android:id="@+id/tv_child_demographics"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/chimwemwe_primary"
+                    android:maxLines="1" />
+
+            </LinearLayout>
+
             <TextView
                 android:id="@+id/tv_caregiver_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Caregiver Name"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                android:textColor="@color/chimwemwe_text_primary"
-                android:maxLines="1"
-                android:ellipsize="end" />
-
-            <TextView
-                android:id="@+id/tv_child_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:text="Child Name"
+                android:text="Caregiver Name"
                 android:textSize="12sp"
                 android:textColor="@color/chimwemwe_text_secondary"
                 android:maxLines="1"

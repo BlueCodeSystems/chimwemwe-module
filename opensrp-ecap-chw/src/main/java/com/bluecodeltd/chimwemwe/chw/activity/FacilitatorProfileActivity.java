@@ -14,6 +14,7 @@ import androidx.preference.PreferenceManager;
 
 import com.bluecodeltd.chimwemwe.chw.R;
 import com.bluecodeltd.chimwemwe.chw.pinlogin.SecurePinLogger;
+import com.bluecodeltd.chimwemwe.chw.util.DistrictNameUtils;
 
 public class FacilitatorProfileActivity extends AppCompatActivity {
 
@@ -49,8 +50,6 @@ public class FacilitatorProfileActivity extends AppCompatActivity {
         TextView txtCode = findViewById(R.id.code);
         TextView txtProvince = findViewById(R.id.province);
         TextView txtDistrict = findViewById(R.id.district);
-        TextView txtFacility = findViewById(R.id.facility);
-        TextView txtPartner = findViewById(R.id.partner);
         TextView txtNrc = findViewById(R.id.nrc);
         TextView txtPhone = findViewById(R.id.phone);
         TextView txtEmail = findViewById(R.id.email);
@@ -72,9 +71,7 @@ public class FacilitatorProfileActivity extends AppCompatActivity {
         if (txtPill != null) txtPill.setText("View Facilitator Profile");
         if (txtCode != null) txtCode.setText(sp.getString("code", "anonymous"));
         if (txtProvince != null) txtProvince.setText(sp.getString("province", "anonymous"));
-        if (txtDistrict != null) txtDistrict.setText(sp.getString("district", "anonymous"));
-        if (txtFacility != null) txtFacility.setText(sp.getString("facility", "anonymous"));
-        if (txtPartner != null) txtPartner.setText(sp.getString("partner", "anonymous"));
+        if (txtDistrict != null) txtDistrict.setText(DistrictNameUtils.display(sp.getString("district", "anonymous")));
         if (txtNrc != null) txtNrc.setText(sp.getString("nrc", "anonymous"));
         if (txtPhone != null) txtPhone.setText(sp.getString("phone", "anonymous"));
         if (txtEmail != null) txtEmail.setText(sp.getString("email", "anonymous"));

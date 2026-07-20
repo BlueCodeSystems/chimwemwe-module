@@ -92,6 +92,25 @@
 
             </LinearLayout>
 
+            <!-- Opens the charts dashboard (issue #49) -->
+            <FrameLayout
+                android:id="@+id/btn_open_dashboard"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/bg_icon_circle_white"
+                android:clickable="true"
+                android:focusable="true"
+                android:contentDescription="Open dashboard">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_dashboard_chart"
+                    app:tint="#FFFFFF" />
+
+            </FrameLayout>
+
         </LinearLayout>
 
     </LinearLayout>

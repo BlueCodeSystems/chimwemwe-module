@@ -14,7 +14,6 @@ buildscript {
 //        classpath 'com.google.firebase:firebase-crashlytics-gradle:3.0.2'
     }
 }
-
 apply plugin: 'com.android.application'
 apply plugin: 'jacoco'
 apply plugin: 'com.github.kt3k.coveralls'
@@ -68,7 +67,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.bluecodeltd.chw"
+        applicationId "com.bluecodeltd.chw.ecap.chimwemwe"
         minSdk 28
         targetSdk 35
         versionCode 14
@@ -310,19 +309,18 @@ android {
     productFlavors {
         ecap {
             dimension = 'baseDimension'
-            applicationIdSuffix ".ecap"
-            versionCode 42
-            versionName "v8.0.2"
-            buildConfigField "String", 'opensrp_url', '"https://opensrp.ecap.bluecodeltd.com/opensrp/"'
+            versionCode 1
+            versionName "v1.0.0"
+            buildConfigField "String", 'opensrp_url', '"https://opensrp.chimwemwe.bluecodeltd.com/opensrp/"'
             buildConfigField "String", 'guidebooks_url', '"https://opensrp.s3.amazonaws.com/media/ba/"'
-            buildConfigField "String", 'opensrp_url_debug', '"https://opensrp.ecap.bluecodeltd.com/opensrp/"'
-            buildConfigField "String[]", "LOCATION_HIERACHY", '{"Country","Province","District","Ward","Health Facility"}'
-            buildConfigField "String[]", "ALLOWED_LOCATION_LEVELS", '{"Country","Province","District","Ward","Health Facility"}'
-            buildConfigField "String[]", "ALLOWED_LOCATION_LEVELS_DEBUG", '{"Country","Province","District","Ward","Health Facility"}'
-            buildConfigField "String", 'DEFAULT_LOCATION', '"Health Facility"'
-            buildConfigField "String", 'DEFAULT_LOCATION_DEBUG', '"Health Facility"'
+            buildConfigField "String", 'opensrp_url_debug', '"https://opensrp.chimwemwe.bluecodeltd.com/opensrp/"'
+            buildConfigField "String[]", "LOCATION_HIERACHY", '{"Country","Province","District","Ward","Facility"}'
+            buildConfigField "String[]", "ALLOWED_LOCATION_LEVELS", '{"Country","Province","District","Ward","Facility"}'
+            buildConfigField "String[]", "ALLOWED_LOCATION_LEVELS_DEBUG", '{"Country","Province","District","Ward","Facility"}'
+            buildConfigField "String", 'DEFAULT_LOCATION', '"Facility"'
+            buildConfigField "String", 'DEFAULT_LOCATION_DEBUG', '"Facility"'
             // Must not go below what is already on devices; SQLCipher blocks downgrades.
-            buildConfigField "int", "DATABASE_VERSION", '51'
+            buildConfigField "int", "DATABASE_VERSION", '56'
         }
     }
 }

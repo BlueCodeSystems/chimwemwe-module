@@ -464,7 +464,7 @@
     <string name="csv_generated_location">CSV files have been generated. You can find them in the Downloads/%1$s folder.</string>
     
     <!-- Config for libraries expecting resource-based URL -->
-    <string name="opensrp_url">https://opensrp.ecap.bluecodeltd.com/opensrp/</string>
+    <string name="opensrp_url">https://opensrp.chimwemwe.bluecodeltd.com/opensrp/</string>
 
     <!-- Common menu/action strings expected by library menus -->
     <string name="logout_text">Logout</string>

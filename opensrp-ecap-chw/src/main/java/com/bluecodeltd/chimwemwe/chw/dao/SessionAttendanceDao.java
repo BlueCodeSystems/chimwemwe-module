@@ -29,6 +29,8 @@ public class SessionAttendanceDao extends AbstractDao {
                     "  session_type           TEXT," +
                     "  session_gps            TEXT," +
                     "  caregiver_signature    TEXT," +
+                    "  supervisor_signature   TEXT," +
+                    "  supervisor_gps         TEXT," +
                     slotColumnsSql() +
                     ")";
 
@@ -112,6 +114,12 @@ public class SessionAttendanceDao extends AbstractDao {
         try { db.execSQL("ALTER TABLE " + TABLE + " ADD COLUMN caregiver_signature TEXT"); } catch (Exception ignored) {}
     }
 
+    /** Mandatory supervisor sign-off: signature (base64 PNG) and GPS captured per session (DB v52). */
+    public static void migrateToV52(SQLiteDatabase db) {
+        try { db.execSQL("ALTER TABLE " + TABLE + " ADD COLUMN supervisor_signature TEXT"); } catch (Exception ignored) {}
+        try { db.execSQL("ALTER TABLE " + TABLE + " ADD COLUMN supervisor_gps TEXT"); } catch (Exception ignored) {}
+    }
+
     public static boolean hasSession(String groupId, int sessionNumber) {
         List<Integer> res = AbstractDao.readData(
                 "SELECT COUNT(*) FROM " + TABLE +
@@ -147,6 +155,24 @@ public class SessionAttendanceDao extends AbstractDao {
     public static String getSessionSignature(String groupId, int sessionNumber) {
         List<String> res = AbstractDao.readData(
                 "SELECT caregiver_signature FROM " + TABLE +
+                        " WHERE group_id=" + q(groupId) + " AND session_number=" + sessionNumber +
+                        " ORDER BY last_interacted_with DESC LIMIT 1",
+                cursor -> cursor.getString(0));
+        return (res != null && !res.isEmpty()) ? res.get(0) : null;
+    }
+
+    public static String getSupervisorGps(String groupId, int sessionNumber) {
+        List<String> res = AbstractDao.readData(
+                "SELECT supervisor_gps FROM " + TABLE +
+                        " WHERE group_id=" + q(groupId) + " AND session_number=" + sessionNumber +
+                        " ORDER BY last_interacted_with DESC LIMIT 1",
+                cursor -> cursor.getString(0));
+        return (res != null && !res.isEmpty()) ? res.get(0) : null;
+    }
+
+    public static String getSupervisorSignature(String groupId, int sessionNumber) {
+        List<String> res = AbstractDao.readData(
+                "SELECT supervisor_signature FROM " + TABLE +
                         " WHERE group_id=" + q(groupId) + " AND session_number=" + sessionNumber +
                         " ORDER BY last_interacted_with DESC LIMIT 1",
                 cursor -> cursor.getString(0));

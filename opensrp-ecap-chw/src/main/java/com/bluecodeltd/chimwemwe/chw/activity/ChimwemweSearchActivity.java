@@ -50,11 +50,11 @@ import es.dmoral.toasty.Toasty;
  * Advanced Search Activity.
  *
  * Flow:
- *  1. Authenticate against PMP API  →  POST /auth/login  →  get token
+ *  1. Authenticate against PMP API  ???  POST /auth/login  ???  get token
  *  2. Use token + district (from Keycloak SharedPrefs) to fetch:
- *       VCA chip      →  GET /child/district/{district}
- *       Household/Caregiver chip → GET /household/district/{district}
- *       All chip      →  both endpoints, merged
+ *       CA chip       ???  GET /child/district/{district}
+ *       Household/Caregiver chip ??? GET /household/district/{district}
+ *       All chip      ???  both endpoints, merged
  *  3. Filter returned records locally by the typed search text.
  *  4. Let the caseworker save selected records into ec_chimwemwe_index.
  */
@@ -72,7 +72,7 @@ public class ChimwemweSearchActivity extends AppCompatActivity {
     public static final String RESULT_HOUSEHOLD_ID  = "result_household_id";
     public static final String RESULT_CAREGIVER_NAME = "result_caregiver_name";
 
-    // PMP authentication endpoint — credentials read from BuildConfig (set in local.properties)
+    // PMP authentication endpoint ??? credentials read from BuildConfig (set in local.properties)
     private static final String PMP_LOGIN_URL  = "https://pmp-api.bluecodeltd.com/auth/login";
     private static final String PMP_EMAIL      = BuildConfig.PMP_EMAIL;
     private static final String PMP_PASSWORD   = BuildConfig.PMP_PASSWORD;
@@ -94,12 +94,12 @@ public class ChimwemweSearchActivity extends AppCompatActivity {
     private SearchResultAdapter adapter;
     /** Subset currently shown in the RecyclerView (after chip + text filter). */
     private final List<ChimwemweIndexModel> results = new ArrayList<>();
-    /** Full cache of every record fetched from the server — never cleared between filter changes. */
+    /** Full cache of every record fetched from the server ??? never cleared between filter changes. */
     private final List<ChimwemweIndexModel> allResults = new ArrayList<>();
 
     private boolean selectionMode = false;
 
-    /** Cached PMP token — re-authenticated automatically on 401 or if null. */
+    /** Cached PMP token ??? re-authenticated automatically on 401 or if null. */
     private String pmpToken = null;
 
     /** District from Keycloak attributes (stored in SharedPreferences by DashboardActivity). */
@@ -118,7 +118,7 @@ public class ChimwemweSearchActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setTitle(selectionMode ? "Search OVC Register" : "Advanced Search");
+            getSupportActionBar().setTitle(selectionMode ? "Search CA Register" : "Advanced Search");
         }
 
         etSearchQuery      = findViewById(R.id.et_search_query);
@@ -145,7 +145,7 @@ public class ChimwemweSearchActivity extends AppCompatActivity {
         // Re-filter the cached list whenever the chip selection changes
         filterChipGroup.setOnCheckedStateChangeListener((group, checkedIds) -> applyFilters());
 
-        // Filter as the user types — no button press needed
+        // Filter as the user types ??? no button press needed
         etSearchQuery.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -191,10 +191,10 @@ public class ChimwemweSearchActivity extends AppCompatActivity {
     // Load & filter orchestration
     // -------------------------------------------------------------------------
 
-    /** Called once on open — fetches all records from both endpoints into allResults. */
+    /** Called once on open ??? fetches all records from both endpoints into allResults. */
     private void loadAll() {
         if (TextUtils.isEmpty(district)) {
-            showEmptyState("District not set — please log in again");
+            showEmptyState("District not set ??? please log in again");
             return;
         }
         showLoading(true);
@@ -211,7 +211,7 @@ public class ChimwemweSearchActivity extends AppCompatActivity {
 
     /**
      * Applies the active chip + typed text to allResults and updates the RecyclerView.
-     * Never makes a network call — purely in-memory.
+     * Never makes a network call ??? purely in-memory.
      */
     private void applyFilters() {
         int checkedId = filterChipGroup.getCheckedChipId();
@@ -220,12 +220,18 @@ public class ChimwemweSearchActivity extends AppCompatActivity {
         List<ChimwemweIndexModel> filtered = new ArrayList<>(allResults);
 
         // Chip filter
-        if (checkedId == R.id.chip_vca) {
-            filtered.removeIf(m -> !"VCA".equals(m.getSubPopulation()));
-        } else if (checkedId == R.id.chip_caregiver) {
-            filtered.removeIf(m -> !"Household".equals(m.getSubPopulation()));
+        if (checkedId == R.id.chip_male) {
+            filtered.removeIf(m -> !matchesGender(m, "male"));
+        } else if (checkedId == R.id.chip_female) {
+            filtered.removeIf(m -> !matchesGender(m, "female"));
+        } else if (checkedId == R.id.chip_age_10_11) {
+            filtered.removeIf(m -> !matchesAgeBand(m, 10, 11));
+        } else if (checkedId == R.id.chip_age_12_13) {
+            filtered.removeIf(m -> !matchesAgeBand(m, 12, 13));
+        } else if (checkedId == R.id.chip_age_14) {
+            filtered.removeIf(m -> !matchesAgeBand(m, 14, 14));
         }
-        // chip_all (or nothing checked): keep everything
+        // no chip checked: keep everything
 
         // Text filter
         if (!TextUtils.isEmpty(query)) {
@@ -320,7 +326,7 @@ public class ChimwemweSearchActivity extends AppCompatActivity {
                 if (!val.isEmpty() && !val.equalsIgnoreCase("null")) return val;
             }
 
-            // One and two levels nested — e.g. { "data": { "token": "..." } }
+            // One and two levels nested ??? e.g. { "data": { "token": "..." } }
             for (String wrapperKey : new String[]{"data", "result", "user", "auth", "payload", "response"}) {
                 JSONObject nested = obj.optJSONObject(wrapperKey);
                 if (nested == null) continue;
@@ -349,7 +355,7 @@ public class ChimwemweSearchActivity extends AppCompatActivity {
 
         } catch (Exception e) {
             timber.log.Timber.e("extractToken parse error: %s", e.getMessage());
-            // Response wasn't JSON — if it looks like a token, use it
+            // Response wasn't JSON ??? if it looks like a token, use it
             if (trimmed.length() > 20 && !trimmed.contains("\n") && !trimmed.contains("<")) {
                 return trimmed;
             }
@@ -361,8 +367,9 @@ public class ChimwemweSearchActivity extends AppCompatActivity {
     private void fetchBoth(String token) {
         final List<ChimwemweIndexModel> merged = new ArrayList<>();
         final int[] done = {0};
+        final int expectedResponses = 1;
 
-        for (String[] pair : new String[][]{{ENDPOINT_CHILD, "vca"}, {ENDPOINT_HOUSEHOLD, "household"}}) {
+        for (String[] pair : new String[][]{{ENDPOINT_CHILD, "vca"}}) {
             final String endpoint = pair[0];
             final String type     = pair[1];
             String url = DATA_BASE_URL + endpoint + Uri.encode(district);
@@ -375,7 +382,7 @@ public class ChimwemweSearchActivity extends AppCompatActivity {
                             merged.addAll(parseResponse(response, type));
                             done[0]++;
                         }
-                        if (done[0] == 2) {
+                        if (done[0] == expectedResponses) {
                             allResults.clear();
                             allResults.addAll(merged);
                             showLoading(false);
@@ -384,7 +391,7 @@ public class ChimwemweSearchActivity extends AppCompatActivity {
                     },
                     error -> {
                         synchronized (merged) { done[0]++; }
-                        if (done[0] == 2) {
+                        if (done[0] == expectedResponses) {
                             allResults.clear();
                             allResults.addAll(merged);
                             showLoading(false);
@@ -463,7 +470,7 @@ public class ChimwemweSearchActivity extends AppCompatActivity {
 
             m.setRemoteId(firstNonEmpty(obj, "id", "baseEntityId", "child_id", "household_id"));
 
-            // Name — for VCA records this is the child's name
+            // Name ??? for CA records this is the child's name
             String firstName = firstNonEmpty(obj, "first_name", "firstName", "child_first_name");
             String lastName  = firstNonEmpty(obj, "last_name",  "lastName",  "child_last_name",
                     "surname", "child_surname");
@@ -485,14 +492,14 @@ public class ChimwemweSearchActivity extends AppCompatActivity {
             m.setFirstName(firstName);
             m.setLastName(lastName);
 
-            // Gender / sex — child for VCA records
+            // Gender / sex ??? child for CA records
             m.setGender(firstNonEmpty(obj, "vca_gender", "gender", "sex", "child_gender", "child_sex"));
 
-            // Date of birth — child for VCA records
+            // Date of birth ??? child for CA records
             m.setBirthdate(firstNonEmpty(obj, "dob", "birthdate", "date_of_birth", "dateOfBirth",
-                    "birth_date", "child_dob", "child_birthdate"));
+                    "birth_date", "child_dob", "child_birthdate", "adolecent_birthdate", "adolescent_birthdate"));
 
-            // VCA unique ID
+            // CA unique ID
             m.setUniqueId(firstNonEmpty(obj, "uid", "unique_id", "uniqueId", "vca_id",
                     "child_unique_id", "national_id"));
 
@@ -500,7 +507,7 @@ public class ChimwemweSearchActivity extends AppCompatActivity {
             m.setHouseholdId(firstNonEmpty(obj, "household_id", "householdId",
                     "caregiver_household_id"));
 
-            // caregiver_name is the API field — use it directly, fall back to first+last if absent
+            // caregiver_name is the API field ??? use it directly, fall back to first+last if absent
             String cgFull = obj.optString("caregiver_name", "").trim();
             if (TextUtils.isEmpty(cgFull)) {
                 String cgFirst = firstNonEmpty(obj, "caregiver_first_name", "guardian_first_name");
@@ -521,7 +528,7 @@ public class ChimwemweSearchActivity extends AppCompatActivity {
             m.setFacility(firstNonEmpty(obj, "facility", "health_facility", "clinic"));
             m.setProvince(firstNonEmpty(obj, "province"));
             m.setCaseStatus(firstNonEmpty(obj, "case_status", "status", "caseStatus"));
-            m.setSubPopulation(type.equals("vca") ? "VCA" : "Household");
+            m.setSubPopulation("CA");
             m.setSource("remote");
             m.setDateAdded(LocalDate.now().toString());
 
@@ -538,6 +545,34 @@ public class ChimwemweSearchActivity extends AppCompatActivity {
             if (!val.isEmpty() && !val.equalsIgnoreCase("null")) return val;
         }
         return "";
+    }
+
+    private boolean matchesGender(ChimwemweIndexModel model, String expectedGender) {
+        if (model == null || TextUtils.isEmpty(model.getGender())) return false;
+        String normalized = model.getGender().trim().toLowerCase();
+        if (expectedGender.equals("male")) return normalized.startsWith("m");
+        if (expectedGender.equals("female")) return normalized.startsWith("f");
+        return false;
+    }
+
+    private boolean matchesAgeBand(ChimwemweIndexModel model, int minAge, int maxAge) {
+        int age = parseAgeYears(model == null ? null : model.getBirthdate());
+        return age >= minAge && age <= maxAge;
+    }
+
+    private int parseAgeYears(String birthdate) {
+        if (TextUtils.isEmpty(birthdate)) return -1;
+        String cleaned = birthdate.trim();
+        if (cleaned.contains("T")) cleaned = cleaned.substring(0, cleaned.indexOf("T"));
+        else if (cleaned.contains(" ")) cleaned = cleaned.substring(0, cleaned.indexOf(" "));
+        String[] formats = {"yyyy-MM-dd", "dd-MM-yyyy", "dd/MM/yyyy", "MM/dd/yyyy", "yyyy/MM/dd", "dd-MM-yy", "dd/MM/yy", "yyyy-M-d", "d/M/yyyy", "d-M-yyyy"};
+        for (String fmt : formats) {
+            try {
+                LocalDate dob = LocalDate.parse(cleaned, DateTimeFormatter.ofPattern(fmt));
+                return Period.between(dob, LocalDate.now()).getYears();
+            } catch (Exception ignored) {}
+        }
+        return -1;
     }
 
     private void showResults(List<ChimwemweIndexModel> filtered) {
@@ -562,7 +597,9 @@ public class ChimwemweSearchActivity extends AppCompatActivity {
 
     private void onItemAction(ChimwemweIndexModel model) {
         if (selectionMode) {
-            // caregiver_name is already in the VCA record from the API — use it directly
+            // caregiver_name is already in the CA record from the API ??? use it directly
+            timber.log.Timber.d("Returning selection: firstName=%s, birthdate='%s'",
+                    model.getFirstName(), model.getBirthdate());
             Intent result = new Intent();
             result.putExtra(RESULT_FIRST_NAME,     model.getFirstName());
             result.putExtra(RESULT_LAST_NAME,      model.getLastName());
@@ -663,15 +700,17 @@ public class ChimwemweSearchActivity extends AppCompatActivity {
             holder.btnSave.setOnClickListener(v -> listener.onItem(model));
         }
 
-        /** Builds "Female • 01-05-2012 (12 yrs)" or "Male • —" etc. */
+        /** Builds "Female | DOB: 01/05/2012 | Age: 12 yrs" or "DOB: 01/05/2012 | Age: 12 yrs". */
         private String buildMeta(String gender, String birthdate) {
             String g = formatGender(gender);
             String d = formatDob(birthdate);
-            return g + " • " + d;
+            if (TextUtils.isEmpty(g)) return d;
+            if (TextUtils.isEmpty(d)) return g;
+            return g + " | " + d;
         }
 
         private String formatGender(String gender) {
-            if (TextUtils.isEmpty(gender)) return "—";
+            if (TextUtils.isEmpty(gender)) return "";
             String g = gender.trim().toLowerCase();
             if (g.startsWith("m")) return "Male";
             if (g.startsWith("f")) return "Female";
@@ -679,19 +718,21 @@ public class ChimwemweSearchActivity extends AppCompatActivity {
         }
 
         private String formatDob(String birthdate) {
-            if (TextUtils.isEmpty(birthdate)) return "—";
-            String[] formats = {"yyyy-MM-dd", "dd-MM-yyyy", "dd/MM/yyyy", "MM/dd/yyyy", "yyyy/MM/dd"};
+            if (TextUtils.isEmpty(birthdate)) return "";
+            String cleaned = birthdate.trim();
+            if (cleaned.contains("T")) cleaned = cleaned.substring(0, cleaned.indexOf("T"));
+            else if (cleaned.contains(" ")) cleaned = cleaned.substring(0, cleaned.indexOf(" "));
+            String[] formats = {"yyyy-MM-dd", "dd-MM-yyyy", "dd/MM/yyyy", "MM/dd/yyyy", "yyyy/MM/dd", "dd-MM-yy", "dd/MM/yy", "yyyy-M-d", "d/M/yyyy", "d-M-yyyy"};
             for (String fmt : formats) {
                 try {
-                    LocalDate dob = LocalDate.parse(birthdate, DateTimeFormatter.ofPattern(fmt));
+                    LocalDate dob = LocalDate.parse(cleaned, DateTimeFormatter.ofPattern(fmt));
                     int years = Period.between(dob, LocalDate.now()).getYears();
-                    String display = dob.format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-                    return display + " (" + years + " yrs)";
+                    String display = dob.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+                    return "DOB: " + display + " | Age: " + years + " yrs";
                 } catch (Exception ignored) {}
             }
-            return birthdate; // show raw value if unparseable
+            return cleaned; // show cleaned raw value if unparseable
         }
-
         @Override
         public int getItemCount() { return data.size(); }
 

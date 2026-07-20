@@ -12,6 +12,8 @@ public class MonthlyReviewModel {
     private String reviewer_name;
     private String register_accurate;
     private String reviewer_notes;
+    private String supervisor_signature;
+    private String supervisor_gps;
     private String created_at;
 
     public String getBase_entity_id() { return base_entity_id; }
@@ -44,6 +46,12 @@ public class MonthlyReviewModel {
     public String getReviewer_notes() { return reviewer_notes; }
     public void setReviewer_notes(String v) { this.reviewer_notes = v; }
 
+    public String getSupervisor_signature() { return supervisor_signature; }
+    public void setSupervisor_signature(String v) { this.supervisor_signature = v; }
+
+    public String getSupervisor_gps() { return supervisor_gps; }
+    public void setSupervisor_gps(String v) { this.supervisor_gps = v; }
+
     public String getCreated_at() { return created_at; }
     public void setCreated_at(String v) { this.created_at = v; }
 
@@ -75,6 +83,12 @@ public class MonthlyReviewModel {
 
     public String getReviewerNotes() { return getReviewer_notes(); }
     public void setReviewerNotes(String v) { setReviewer_notes(v); }
+
+    public String getSupervisorSignature() { return getSupervisor_signature(); }
+    public void setSupervisorSignature(String v) { setSupervisor_signature(v); }
+
+    public String getSupervisorGps() { return getSupervisor_gps(); }
+    public void setSupervisorGps(String v) { setSupervisor_gps(v); }
 
     public String getCreatedAt() { return getCreated_at(); }
     public void setCreatedAt(String v) { setCreated_at(v); }
