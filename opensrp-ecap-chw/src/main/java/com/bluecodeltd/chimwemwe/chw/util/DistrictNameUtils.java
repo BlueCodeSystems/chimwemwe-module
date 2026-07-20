@@ -38,7 +38,7 @@ public final class DistrictNameUtils {
     }
 
     private static String normalizeKey(String value) {
-        return value.trim().toLowerCase(Locale.US).replaceAll("[\\s\\-']", "");
+        return value.trim().toLowerCase(Locale.US).replaceAll("[^a-z0-9]", "");
     }
 
     private static String toTitleCase(String value) {

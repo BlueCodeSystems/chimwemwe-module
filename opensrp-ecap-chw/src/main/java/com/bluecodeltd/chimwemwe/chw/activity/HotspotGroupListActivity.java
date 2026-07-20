@@ -25,6 +25,7 @@ import com.bluecodeltd.chimwemwe.chw.R;
 import com.bluecodeltd.chimwemwe.chw.dao.HotspotGroupDao;
 import com.bluecodeltd.chimwemwe.chw.model.HotspotGroupModel;
 import com.bluecodeltd.chimwemwe.chw.util.ChimwemweFormUtils;
+import com.bluecodeltd.chimwemwe.chw.util.DistrictNameUtils;
 import com.bluecodeltd.chimwemwe.chw.util.Threading;
 import com.bluecodeltd.chimwemwe.chw.view_holder.ChimwemweGroupViewHolder;
 import com.vijay.jsonwizard.constants.JsonFormConstants;
@@ -193,7 +194,7 @@ public class HotspotGroupListActivity extends AppCompatActivity {
 
                 // Pre-fill facility and keep district/province in sync with the selected facility.
                 setFieldValue(form, "step1", "nearest_health_facility", safeTrim(facilityName));
-                setFieldValue(form, "step1", "district", safeTrim(facilityDistrict));
+                setFieldValue(form, "step1", "district", DistrictNameUtils.display(facilityDistrict));
                 setFieldValue(form, "step1", "province", safeTrim(facilityProvince));
 
                 // Pre-fill caseworker name

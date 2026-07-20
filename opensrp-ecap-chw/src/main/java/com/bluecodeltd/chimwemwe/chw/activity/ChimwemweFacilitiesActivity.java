@@ -76,7 +76,7 @@ public class ChimwemweFacilitiesActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             if (selectMode) {
                 String title = (userDistrict != null && !userDistrict.isEmpty())
-                        ? "Facilities " + DistrictNameUtils.display(userDistrict)
+                        ? "Facility " + DistrictNameUtils.display(userDistrict)
                         : "Select Facility";
                 getSupportActionBar().setTitle(title);
             }

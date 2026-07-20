@@ -9,6 +9,7 @@ public class DistrictNameUtilsTest {
     @Test
     public void displayNormalizesKnownCompactDistrict() {
         assertEquals("Kapiri Mposhi", DistrictNameUtils.display("kapirimposhi"));
+        assertEquals("Kapiri Mposhi", DistrictNameUtils.display("kapiri\u00A0mposhi"));
     }
 
     @Test
