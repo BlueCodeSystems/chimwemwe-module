@@ -1,8 +1,10 @@
 package com.bluecodeltd.chimwemwe.chw.util;
 
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Normalizes district names for display only.
@@ -10,19 +12,27 @@ import java.util.Map;
  */
 public final class DistrictNameUtils {
 
-    private static final Map<String, String> DISPLAY_ALIASES = new ConcurrentHashMap<>();
+    private static final Map<String, String> CANONICAL_ALIASES;
+    private static final Map<String, String> REGISTERED_NAMES = new ConcurrentHashMap<>();
 
     static {
-        DISPLAY_ALIASES.put("kapirimposhi", "Kapiri Mposhi");
-        DISPLAY_ALIASES.put("sengahill", "Senga Hill");
-        DISPLAY_ALIASES.put("itezhitezhi", "Itezhi-Tezhi");
+        Map<String, String> aliases = new HashMap<>();
+        aliases.put("kapirimposhi", "Kapiri Mposhi");
+        aliases.put("sengahill", "Senga Hill");
+        aliases.put("itezhitezhi", "Itezhi-Tezhi");
+        CANONICAL_ALIASES = Collections.unmodifiableMap(aliases);
     }
 
     /** Registers an official district label so compact/raw variants resolve dynamically. */
     public static void registerOfficialName(String district) {
         if (district == null) return;
         String official = district.trim();
-        if (!official.isEmpty()) DISPLAY_ALIASES.put(normalizeKey(official), official);
+        if (official.isEmpty()) return;
+
+        String key = normalizeKey(official);
+        if (!CANONICAL_ALIASES.containsKey(key)) {
+            REGISTERED_NAMES.putIfAbsent(key, official);
+        }
     }
 
     private DistrictNameUtils() {}
@@ -32,8 +42,13 @@ public final class DistrictNameUtils {
         String raw = district.trim();
         if (raw.isEmpty()) return "";
 
-        String alias = DISPLAY_ALIASES.get(normalizeKey(raw));
-        if (alias != null) return alias;
+        String key = normalizeKey(raw);
+        String canonical = CANONICAL_ALIASES.get(key);
+        if (canonical != null) return canonical;
+
+        String registered = REGISTERED_NAMES.get(key);
+        if (registered != null) return registered;
+
         return toTitleCase(raw);
     }
 

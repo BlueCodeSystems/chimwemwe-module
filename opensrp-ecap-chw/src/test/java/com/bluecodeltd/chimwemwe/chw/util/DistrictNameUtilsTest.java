@@ -13,6 +13,12 @@ public class DistrictNameUtilsTest {
     }
 
     @Test
+    public void registeredRawFacilityDataDoesNotOverrideKnownCanonicalDistrict() {
+        DistrictNameUtils.registerOfficialName("Kapirimposhi");
+        assertEquals("Kapiri Mposhi", DistrictNameUtils.display("Kapirimposhi"));
+    }
+
+    @Test
     public void registeredOfficialNameNormalizesAnyCompactDistrict() {
         DistrictNameUtils.registerOfficialName("Chililabombwe District");
         assertEquals("Chililabombwe District", DistrictNameUtils.display("chililabombwedistrict"));
