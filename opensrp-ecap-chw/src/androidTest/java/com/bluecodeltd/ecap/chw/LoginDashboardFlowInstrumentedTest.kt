@@ -30,7 +30,7 @@ import org.junit.runner.RunWith
  * To run with credentials:
  * adb shell am instrument -w -r \
  *   -e username "yourUser" -e password "yourPass" \
- *   com.bluecodeltd.chw.ecap.test/androidx.test.runner.AndroidJUnitRunner
+ *   com.bluecodeltd.chw.chimwemwe.test/androidx.test.runner.AndroidJUnitRunner
  */
 @RunWith(AndroidJUnit4::class)
 @LargeTest

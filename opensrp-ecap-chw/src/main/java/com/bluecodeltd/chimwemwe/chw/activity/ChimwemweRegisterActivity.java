@@ -23,6 +23,7 @@ import com.bluecodeltd.chimwemwe.chw.fragment.ChimwemweRegisterFragment;
 import com.bluecodeltd.chimwemwe.chw.listener.ChwBottomNavigationListener;
 import com.bluecodeltd.chimwemwe.chw.presenter.ChimwemweGroupPresenter;
 import com.bluecodeltd.chimwemwe.chw.util.Constants;
+import com.bluecodeltd.chimwemwe.chw.util.DistrictNameUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vijay.jsonwizard.constants.JsonFormConstants;
 
@@ -54,6 +55,8 @@ public class ChimwemweRegisterActivity extends BaseRegisterActivity
     private final ObjectMapper oMapper = new ObjectMapper();
     private String pendingGroupId;
     private String pendingFacilityName;
+    private String pendingFacilityDistrict;
+    private String pendingFacilityProvince;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -140,8 +143,16 @@ public class ChimwemweRegisterActivity extends BaseRegisterActivity
                 if ("nearest_health_facility".equals(key) && pendingFacilityName != null) {
                     f.put("value", pendingFacilityName);
                 }
+                if ("district".equals(key) && pendingFacilityDistrict != null) {
+                    f.put("value", DistrictNameUtils.display(pendingFacilityDistrict));
+                }
+                if ("province".equals(key) && pendingFacilityProvince != null) {
+                    f.put("value", pendingFacilityProvince.trim());
+                }
             }
             pendingFacilityName = null;
+            pendingFacilityDistrict = null;
+            pendingFacilityProvince = null;
 
             android.content.Intent intent = new android.content.Intent(
                     this, org.smartregister.family.util.Utils.metadata().familyFormActivity);
@@ -178,6 +189,8 @@ public class ChimwemweRegisterActivity extends BaseRegisterActivity
         if (requestCode == REQUEST_CODE_SELECT_FACILITY) {
             if (resultCode == Activity.RESULT_OK && data != null) {
                 pendingFacilityName = data.getStringExtra(ChimwemweFacilitiesActivity.RESULT_FACILITY_NAME);
+                pendingFacilityDistrict = data.getStringExtra(ChimwemweFacilitiesActivity.RESULT_FACILITY_DISTRICT);
+                pendingFacilityProvince = data.getStringExtra(ChimwemweFacilitiesActivity.RESULT_FACILITY_PROVINCE);
                 startFormActivity("chimwemwe_group_register", null, "");
             }
             return;

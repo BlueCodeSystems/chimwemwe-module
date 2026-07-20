@@ -24,6 +24,8 @@ public class MonthlyReviewDao extends AbstractDao {
             "  reviewer_name         TEXT," +
             "  register_accurate     TEXT," +
             "  reviewer_notes        TEXT," +
+            "  supervisor_signature  TEXT," +
+            "  supervisor_gps        TEXT," +
             "  created_at            TEXT" +
             ")";
 
@@ -37,6 +39,11 @@ public class MonthlyReviewDao extends AbstractDao {
 
     public static void migrateToV33(SQLiteDatabase db) {
         try { db.execSQL("ALTER TABLE " + TABLE + " ADD COLUMN participant_id TEXT"); } catch (Exception ignored) {}
+    }
+
+    public static void migrateToV54(SQLiteDatabase db) {
+        try { db.execSQL("ALTER TABLE " + TABLE + " ADD COLUMN supervisor_signature TEXT"); } catch (Exception ignored) {}
+        try { db.execSQL("ALTER TABLE " + TABLE + " ADD COLUMN supervisor_gps TEXT"); } catch (Exception ignored) {}
     }
 
     public static void migrateToV43(SQLiteDatabase db) {
@@ -93,6 +100,8 @@ public class MonthlyReviewDao extends AbstractDao {
             record.setReviewer_name(getCursorValue(c, "reviewer_name"));
             record.setRegister_accurate(getCursorValue(c, "register_accurate"));
             record.setReviewer_notes(getCursorValue(c, "reviewer_notes"));
+            record.setSupervisor_signature(getCursorValue(c, "supervisor_signature"));
+            record.setSupervisor_gps(getCursorValue(c, "supervisor_gps"));
             record.setCreated_at(getCursorValue(c, "created_at"));
             return record;
         };

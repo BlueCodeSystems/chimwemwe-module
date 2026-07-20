@@ -187,6 +187,21 @@ public class ChwRepositoryFlv {
                 case 51:
                     upgradeToVersion51(db);
                     break;
+                case 52:
+                    upgradeToVersion52(db);
+                    break;
+                case 53:
+                    upgradeToVersion53(db);
+                    break;
+                case 54:
+                    upgradeToVersion54(db);
+                    break;
+                case 55:
+                    upgradeToVersion55(db);
+                    break;
+                case 56:
+                    upgradeToVersion56(db);
+                    break;
                 default:
                     break;
             }
@@ -1427,6 +1442,61 @@ public class ChwRepositoryFlv {
             com.bluecodeltd.chimwemwe.chw.dao.SessionAttendanceDao.migrateToV51(db);
         } catch (Exception e) {
             Timber.e(e, "upgradeToVersion51 SessionAttendanceDao");
+        }
+    }
+
+    private static void upgradeToVersion52(SQLiteDatabase db) {
+        // Mandatory supervisor sign-off (signature + GPS) columns on the session attendance table.
+        try {
+            com.bluecodeltd.chimwemwe.chw.dao.SessionAttendanceDao.migrateToV52(db);
+        } catch (Exception e) {
+            Timber.e(e, "upgradeToVersion52 SessionAttendanceDao");
+        }
+    }
+
+    private static void upgradeToVersion53(SQLiteDatabase db) {
+        // Date of enrollment column on the participant table (Add Participant form).
+        try {
+            com.bluecodeltd.chimwemwe.chw.dao.ParticipantDao.migrateToV53(db);
+        } catch (Exception e) {
+            Timber.e(e, "upgradeToVersion53 ParticipantDao");
+        }
+    }
+
+    private static void upgradeToVersion54(SQLiteDatabase db) {
+        // Mandatory supervisor sign-off columns on the monthly/group review table.
+        try {
+            com.bluecodeltd.chimwemwe.chw.dao.MonthlyReviewDao.migrateToV54(db);
+        } catch (Exception e) {
+            Timber.e(e, "upgradeToVersion54 MonthlyReviewDao");
+        }
+        try {
+            com.bluecodeltd.chimwemwe.chw.dao.ChimwemweReferralDao.migrateToV54(db);
+        } catch (Exception e) {
+            Timber.e(e, "upgradeToVersion54 ChimwemweReferralDao");
+        }
+    }
+
+    private static void upgradeToVersion55(SQLiteDatabase db) {
+        // Repair devices that reached v54 before these idempotent migrations were shipped.
+        try {
+            com.bluecodeltd.chimwemwe.chw.dao.MonthlyReviewDao.migrateToV54(db);
+        } catch (Exception e) {
+            Timber.e(e, "upgradeToVersion55 MonthlyReviewDao");
+        }
+        try {
+            com.bluecodeltd.chimwemwe.chw.dao.ChimwemweReferralDao.migrateToV54(db);
+        } catch (Exception e) {
+            Timber.e(e, "upgradeToVersion55 ChimwemweReferralDao");
+        }
+    }
+
+    private static void upgradeToVersion56(SQLiteDatabase db) {
+        // Per-participant GPS captured with the caregiver signature on the session attendance lines.
+        try {
+            com.bluecodeltd.chimwemwe.chw.dao.SessionAttendanceParticipantDao.migrateToV56(db);
+        } catch (Exception e) {
+            Timber.e(e, "upgradeToVersion56 SessionAttendanceParticipantDao");
         }
     }
 

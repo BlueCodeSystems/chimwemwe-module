@@ -22,6 +22,7 @@ public class AttendanceModel {
     private String caregiverAttendance;
     private String childAttendance;
     private String caregiverSignature;
+    private String caregiverGps;
 
     public long getId() { return id; }
     public void setId(long id) { this.id = id; }
@@ -46,4 +47,7 @@ public class AttendanceModel {
 
     public String getCaregiverSignature() { return caregiverSignature; }
     public void setCaregiverSignature(String caregiverSignature) { this.caregiverSignature = caregiverSignature; }
+
+    public String getCaregiverGps() { return caregiverGps; }
+    public void setCaregiverGps(String caregiverGps) { this.caregiverGps = caregiverGps; }
 }

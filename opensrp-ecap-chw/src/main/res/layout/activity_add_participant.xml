@@ -136,11 +136,19 @@
                         android:background="@drawable/rounded_corner_edit_text_bg"
                         android:padding="10dp" />
 
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:text="Date of Birth *"
+                        android:textSize="12sp"
+                        android:textColor="@color/chimwemwe_text_secondary" />
+
                     <EditText
                         android:id="@+id/et_child_dob"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
+                        android:layout_marginTop="4dp"
                         android:hint="Date of Birth (DD/MM/YY)"
                         android:inputType="text"
                         android:textSize="15sp"
@@ -180,12 +188,21 @@
                         android:background="@drawable/rounded_corner_edit_text_bg"
                         android:padding="4dp" />
 
+                    <TextView
+                        android:id="@+id/tv_vca_id_label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:text="Child ID"
+                        android:textSize="12sp"
+                        android:textColor="@color/chimwemwe_text_secondary" />
+
                     <EditText
                         android:id="@+id/et_vca_id"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:hint="VCA ID (if enrolled)"
+                        android:layout_marginTop="4dp"
+                        android:hint="Child ID"
                         android:inputType="text"
                         android:textSize="15sp"
                         android:textColor="@color/chimwemwe_text_primary"

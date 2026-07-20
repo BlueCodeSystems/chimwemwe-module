@@ -1,0 +1,39 @@
+*** Begin Patch
+*** Update File: C:\Users\malie\Documents\Chimwemwe\opensrp-ecap-chw\src\main\java\com\bluecodeltd\chimwemwe\chw\activity\HotspotGroupDetailActivity.java
+@@
+                 if (participantIdCode == null || participantIdCode.isEmpty()) {
+                     participantIdCode = participantId == -1L
+                             ? "CHIM-" + System.currentTimeMillis()
+                             : "CHIM-" + participantId;
+                 }
+                 m.setParticipantId(participantIdCode);
++
++                if (participantId == -1L) {
++                    if (m.getChildSurname() == null || m.getChildSurname().trim().isEmpty()) {
++                        Threading.main(() -> Toast.makeText(this,
++                                "Child surname is required",
++                                Toast.LENGTH_LONG).show());
++                        return;
++                    }
++                    if (m.getChildDob() == null || m.getChildDob().trim().isEmpty()) {
++                        Threading.main(() -> Toast.makeText(this,
++                                "Child date of birth is required",
++                                Toast.LENGTH_LONG).show());
++                        return;
++                    }
++                }
+ 
+                 if (participantId == -1L) {
+                     ParticipantModel existingByVca = ParticipantDao.getParticipantByVcaId(m.getVcaId());
+                     if (existingByVca != null) {
+                         String existingGroupId = existingByVca.getGroupId();
+*** Update File: C:\Users\malie\Documents\Chimwemwe\opensrp-ecap-chw\src\main\java\com\bluecodeltd\chimwemwe\chw\activity\ChimwemweSearchActivity.java
+@@
+-            timber.log.Timber.d("PMP %s raw keys: %s", type, obj.keys().toString());
+-            timber.log.Timber.d("PMP %s raw JSON: %s", type, obj.toString());
+-            timber.log.Timber.d("PMP %s extracted birthdate: '%s'", type, m.getBirthdate());
+-
+             // CA unique ID
+             m.setUniqueId(firstNonEmpty(obj, "uid", "unique_id", "uniqueId", "vca_id",
+                     "child_unique_id", "national_id"));
+*** End Patch

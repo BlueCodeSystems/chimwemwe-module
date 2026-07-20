@@ -28,14 +28,19 @@ public class ParticipantDao extends AbstractDao {
             "  child_surname        TEXT," +
             "  child_dob            TEXT," +
             "  child_sex            TEXT," +
+            "  enrollment_date      TEXT," +
             "  is_enrolled_ovc      TEXT," +
             "  caregiver_id         TEXT," +
             "  vca_id               TEXT," +
-            "  who_referred         TEXT," +
-            "  service_referred_for TEXT," +
+            "  referral_id          TEXT," +
+            "  who_is_referred      TEXT," +
+            "  provider             TEXT," +
+            "  service_being_referred TEXT," +
             "  referral_date        TEXT," +
-            "  receiving_org        TEXT," +
+            "  recieving_organisation TEXT," +
             "  job_title            TEXT," +
+            "  full_name_providing_services TEXT," +
+            "  referral_status      TEXT," +
             "  service_date         TEXT" +
             ")";
 
@@ -59,11 +64,15 @@ public class ParticipantDao extends AbstractDao {
 
     /** Columns added in DB version 31 (referral fields). */
     private static final String[] ALTER_V31 = {
-            "ALTER TABLE " + TABLE + " ADD COLUMN who_referred         TEXT",
-            "ALTER TABLE " + TABLE + " ADD COLUMN service_referred_for TEXT",
+            "ALTER TABLE " + TABLE + " ADD COLUMN referral_id          TEXT",
+            "ALTER TABLE " + TABLE + " ADD COLUMN who_is_referred      TEXT",
+            "ALTER TABLE " + TABLE + " ADD COLUMN provider             TEXT",
+            "ALTER TABLE " + TABLE + " ADD COLUMN service_being_referred TEXT",
             "ALTER TABLE " + TABLE + " ADD COLUMN referral_date        TEXT",
-            "ALTER TABLE " + TABLE + " ADD COLUMN receiving_org        TEXT",
+            "ALTER TABLE " + TABLE + " ADD COLUMN recieving_organisation TEXT",
             "ALTER TABLE " + TABLE + " ADD COLUMN job_title            TEXT",
+            "ALTER TABLE " + TABLE + " ADD COLUMN full_name_providing_services TEXT",
+            "ALTER TABLE " + TABLE + " ADD COLUMN referral_status      TEXT",
             "ALTER TABLE " + TABLE + " ADD COLUMN service_date         TEXT"
     };
 
@@ -94,6 +103,11 @@ public class ParticipantDao extends AbstractDao {
         } catch (Exception ignored) {}
     }
 
+    /** Date of enrollment captured on the Add Participant form (DB v53). */
+    public static void migrateToV53(SQLiteDatabase db) {
+        try { db.execSQL("ALTER TABLE " + TABLE + " ADD COLUMN enrollment_date TEXT"); } catch (Exception ignored) {}
+    }
+
     public static void migrateToV50(SQLiteDatabase db) {
         // Backfill participant_id for rows that were inserted without one (via AddParticipantActivity).
         // Use base_entity_id if already set, otherwise generate a stable id from the row id.
@@ -110,10 +124,10 @@ public class ParticipantDao extends AbstractDao {
         }
         String sql = "INSERT INTO " + TABLE +
                 " (participant_id, group_id, sn, caregiver_first_name, caregiver_surname," +
-                "  child_first_name, child_surname, child_dob, child_sex," +
+                "  child_first_name, child_surname, child_dob, child_sex, enrollment_date," +
                 "  is_enrolled_ovc, caregiver_id, vca_id," +
-                "  who_referred, service_referred_for, referral_date," +
-                "  receiving_org, job_title, service_date) VALUES (" +
+                "  referral_id, who_is_referred, provider, service_being_referred, referral_date," +
+                "  recieving_organisation, job_title, full_name_providing_services, referral_status, service_date) VALUES (" +
                 q(m.getParticipantId()) + "," +
                 q(m.getGroupId()) + "," +
                 m.getSn() + "," +
@@ -123,14 +137,19 @@ public class ParticipantDao extends AbstractDao {
                 q(m.getChildSurname()) + "," +
                 q(m.getChildDob()) + "," +
                 q(m.getChildSex()) + "," +
+                q(m.getEnrollmentDate()) + "," +
                 q(m.getIsEnrolledOvc()) + "," +
                 q(m.getCaregiverId()) + "," +
                 q(m.getVcaId()) + "," +
+                q(m.getReferralId()) + "," +
                 q(m.getWhoReferred()) + "," +
+                q(m.getProvider()) + "," +
                 q(m.getServiceReferredFor()) + "," +
                 q(m.getReferralDate()) + "," +
                 q(m.getReceivingOrg()) + "," +
                 q(m.getJobTitle()) + "," +
+                q(m.getFullNameProvidingServices()) + "," +
+                q(m.getReferralStatus()) + "," +
                 q(m.getServiceDate()) + ")";
         AbstractDao.updateDB(sql);
         List<Long> ids = AbstractDao.readData(
@@ -151,6 +170,7 @@ public class ParticipantDao extends AbstractDao {
                 "child_surname="        + q(m.getChildSurname()) + "," +
                 "child_dob="            + q(m.getChildDob()) + "," +
                 "child_sex="            + q(m.getChildSex()) + "," +
+                "enrollment_date="      + q(m.getEnrollmentDate()) + "," +
                 "is_enrolled_ovc="      + q(m.getIsEnrolledOvc()) + "," +
                 "caregiver_id="         + q(m.getCaregiverId()) + "," +
                 "vca_id="               + q(m.getVcaId()) + "," +
@@ -175,6 +195,7 @@ public class ParticipantDao extends AbstractDao {
                 "child_surname="        + q(m.getChildSurname()) + "," +
                 "child_dob="            + q(m.getChildDob()) + "," +
                 "child_sex="            + q(m.getChildSex()) + "," +
+                "enrollment_date="      + q(m.getEnrollmentDate()) + "," +
                 "is_enrolled_ovc="      + q(m.getIsEnrolledOvc()) + "," +
                 "caregiver_id="         + q(m.getCaregiverId()) + "," +
                 "vca_id="               + q(m.getVcaId()) + "," +
@@ -194,14 +215,14 @@ public class ParticipantDao extends AbstractDao {
                 "  p.child_first_name, p.child_surname, p.child_dob, p.child_sex," +
                 "  p.is_enrolled_ovc, p.caregiver_id, p.vca_id," +
                 "  p.who_referred, p.service_referred_for, p.referral_date," +
-                "  p.receiving_org, p.job_title, p.service_date," +
+                "  p.receiving_org, p.job_title, p.service_date, p.enrollment_date," +
                 sessionsDoneSelect() +
                 " FROM " + TABLE + " p WHERE p.group_id=" + q(groupId) +
                 " AND (p.delete_status IS NULL OR p.delete_status <> '1')" +
                 " ORDER BY p.sn ASC";
         return AbstractDao.readData(sql, cursor -> {
             ParticipantModel m = mapParticipant(cursor);
-            int done = cursor.getInt(19);
+            int done = cursor.getInt(20);
             m.setSessionsCompleted(done);
             m.setCompletedProgram(done >= 14);
             return m;
@@ -213,13 +234,13 @@ public class ParticipantDao extends AbstractDao {
                 " p.child_first_name, p.child_surname, p.child_dob, p.child_sex," +
                 " p.is_enrolled_ovc, p.caregiver_id, p.vca_id," +
                 " p.who_referred, p.service_referred_for, p.referral_date," +
-                " p.receiving_org, p.job_title, p.service_date," +
+                " p.receiving_org, p.job_title, p.service_date, p.enrollment_date," +
                 sessionsDoneSelect() +
                 " FROM " + TABLE + " p WHERE p.id=" + id +
                 " AND (p.delete_status IS NULL OR p.delete_status <> '1')";
         List<ParticipantModel> list = AbstractDao.readData(sql, cursor -> {
             ParticipantModel m = mapParticipant(cursor);
-            int done = cursor.getInt(19);
+            int done = cursor.getInt(20);
             m.setSessionsCompleted(done);
             m.setCompletedProgram(done >= 14);
             return m;
@@ -234,14 +255,34 @@ public class ParticipantDao extends AbstractDao {
                 " p.child_first_name, p.child_surname, p.child_dob, p.child_sex," +
                 " p.is_enrolled_ovc, p.caregiver_id, p.vca_id," +
                 " p.who_referred, p.service_referred_for, p.referral_date," +
-                " p.receiving_org, p.job_title, p.service_date," +
+                " p.receiving_org, p.job_title, p.service_date, p.enrollment_date," +
                 sessionsDoneSelect() +
                 " FROM " + TABLE + " p WHERE p.participant_id=" + q(code) +
                 " AND (p.delete_status IS NULL OR p.delete_status <> '1')" +
                 " ORDER BY p.id DESC LIMIT 1";
         List<ParticipantModel> list = AbstractDao.readData(sql, cursor -> {
             ParticipantModel m = mapParticipant(cursor);
-            int done = cursor.getInt(19);
+            int done = cursor.getInt(20);
+            m.setSessionsCompleted(done);
+            m.setCompletedProgram(done >= 14);
+            return m;
+        });
+        return (list != null && !list.isEmpty()) ? list.get(0) : null;
+    }
+
+    public static ParticipantModel getParticipantByVcaId(String vcaId) {
+        if (vcaId == null || vcaId.trim().isEmpty()) return null;
+        String sql = "SELECT p.id, p.participant_id, p.group_id, p.sn, p.caregiver_first_name, p.caregiver_surname," +
+                " p.child_first_name, p.child_surname, p.child_dob, p.child_sex," +
+                " p.is_enrolled_ovc, p.caregiver_id, p.vca_id," +
+                " p.who_referred, p.service_referred_for, p.referral_date," +
+                " p.receiving_org, p.job_title, p.service_date, p.enrollment_date," +
+                sessionsDoneSelect() +
+                " FROM " + TABLE + " p WHERE p.vca_id=" + q(vcaId.trim()) +
+                " AND (p.delete_status IS NULL OR p.delete_status <> '1')";
+        List<ParticipantModel> list = AbstractDao.readData(sql, cursor -> {
+            ParticipantModel m = mapParticipant(cursor);
+            int done = cursor.getInt(20);
             m.setSessionsCompleted(done);
             m.setCompletedProgram(done >= 14);
             return m;
@@ -277,6 +318,8 @@ public class ParticipantDao extends AbstractDao {
         m.setChildDob(cursor.getString(8));
         m.setChildSex(cursor.getString(9));
         m.setIsEnrolledOvc(cursor.getString(10));
+        // enrollment_date is appended after service_date (index 19); sessions_done follows at 20.
+        m.setEnrollmentDate(cursor.getString(19));
         m.setCaregiverId(cursor.getString(11));
         m.setVcaId(cursor.getString(12));
         m.setWhoReferred(cursor.getString(13));
@@ -296,6 +339,34 @@ public class ParticipantDao extends AbstractDao {
         return (res != null && !res.isEmpty()) ? res.get(0) : 0;
     }
 
+    /**
+     * Child gender tally for the homepage dashboard.
+     * Returns a 3-slot array: [0] = male, [1] = female, [2] = unspecified/other (blank or any
+     * value that isn't male/female). Soft-deleted participants are excluded.
+     */
+    public static int[] getChildGenderCounts() {
+        int[] counts = new int[3];
+        String sql = "SELECT LOWER(TRIM(IFNULL(child_sex,''))) AS g, COUNT(*) AS c FROM " + TABLE +
+                " WHERE (delete_status IS NULL OR delete_status <> '1') GROUP BY g";
+        List<int[]> rows = AbstractDao.readData(sql, cursor -> {
+            String g = cursor.getString(0);
+            int c = cursor.getInt(1);
+            int bucket = "male".equals(g) ? 0 : ("female".equals(g) ? 1 : 2);
+            int[] r = new int[3];
+            r[bucket] = c;
+            return r;
+        });
+        if (rows != null) {
+            for (int[] r : rows) {
+                if (r == null) continue;
+                counts[0] += r[0];
+                counts[1] += r[1];
+                counts[2] += r[2];
+            }
+        }
+        return counts;
+    }
+
     public static int countAllParticipants() {
         List<Integer> res = AbstractDao.readData(
                 "SELECT COUNT(*) FROM " + TABLE + " WHERE (delete_status IS NULL OR delete_status <> '1')",
@@ -309,13 +380,13 @@ public class ParticipantDao extends AbstractDao {
                 "  p.child_first_name, p.child_surname, p.child_dob, p.child_sex," +
                 "  p.is_enrolled_ovc, p.caregiver_id, p.vca_id," +
                 "  p.who_referred, p.service_referred_for, p.referral_date," +
-                "  p.receiving_org, p.job_title, p.service_date," +
+                "  p.receiving_org, p.job_title, p.service_date, p.enrollment_date," +
                 sessionsDoneSelect() +
                 " FROM " + TABLE + " p WHERE (p.delete_status IS NULL OR p.delete_status <> '1')" +
                 " ORDER BY p.caregiver_surname ASC, p.caregiver_first_name ASC";
         return AbstractDao.readData(sql, cursor -> {
             ParticipantModel m = mapParticipant(cursor);
-            int done = cursor.getInt(19);
+            int done = cursor.getInt(20);
             m.setSessionsCompleted(done);
             m.setCompletedProgram(done >= 14);
             return m;
@@ -328,7 +399,7 @@ public class ParticipantDao extends AbstractDao {
                 "  p.child_first_name, p.child_surname, p.child_dob, p.child_sex," +
                 "  p.is_enrolled_ovc, p.caregiver_id, p.vca_id," +
                 "  p.who_referred, p.service_referred_for, p.referral_date," +
-                "  p.receiving_org, p.job_title, p.service_date," +
+                "  p.receiving_org, p.job_title, p.service_date, p.enrollment_date," +
                 sessionsDoneSelect() +
                 " FROM " + TABLE + " p WHERE (p.delete_status IS NULL OR p.delete_status <> '1')";
         String sql = "SELECT * FROM (" + inner + ") WHERE sessions_done >= 14" +
@@ -336,7 +407,7 @@ public class ParticipantDao extends AbstractDao {
         try {
             return AbstractDao.readData(sql, cursor -> {
                 ParticipantModel m = mapParticipant(cursor);
-                int done = cursor.getInt(19);
+                int done = cursor.getInt(20);
                 m.setSessionsCompleted(done);
                 m.setCompletedProgram(true);
                 return m;

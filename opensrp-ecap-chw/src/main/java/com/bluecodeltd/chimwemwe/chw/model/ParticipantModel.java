@@ -12,16 +12,21 @@ public class ParticipantModel {
     private String childSurname;
     private String childDob;
     private String childSex;
+    private String enrollmentDate;
     private String isEnrolledOvc;
     private String caregiverId;
     private String vcaId;
 
     // Referral fields
-    private String whoReferred;
-    private String serviceReferredFor;
+    private String referralId;
+    private String whoIsReferred;
+    private String provider;
+    private String serviceBeingReferred;
     private String referralDate;
-    private String receivingOrg;
+    private String recievingOrganisation;
     private String jobTitle;
+    private String fullNameProvidingServices;
+    private String referralStatus;
     private String serviceDate;
 
     // Computed
@@ -58,6 +63,9 @@ public class ParticipantModel {
     public String getChildSex() { return childSex; }
     public void setChildSex(String v) { this.childSex = v; }
 
+    public String getEnrollmentDate() { return enrollmentDate; }
+    public void setEnrollmentDate(String v) { this.enrollmentDate = v; }
+
     public String getIsEnrolledOvc() { return isEnrolledOvc; }
     public void setIsEnrolledOvc(String v) { this.isEnrolledOvc = v; }
 
@@ -67,20 +75,41 @@ public class ParticipantModel {
     public String getVcaId() { return vcaId; }
     public void setVcaId(String v) { this.vcaId = v; }
 
-    public String getWhoReferred()                    { return whoReferred; }
-    public void   setWhoReferred(String v)             { this.whoReferred = v; }
+    public String getReferralId()                     { return referralId; }
+    public void   setReferralId(String v)              { this.referralId = v; }
 
-    public String getServiceReferredFor()             { return serviceReferredFor; }
-    public void   setServiceReferredFor(String v)      { this.serviceReferredFor = v; }
+    public String getWhoIsReferred()                  { return whoIsReferred; }
+    public void   setWhoIsReferred(String v)           { this.whoIsReferred = v; }
+
+    public String getProvider()                       { return provider; }
+    public void   setProvider(String v)                { this.provider = v; }
+
+    public String getServiceBeingReferred()           { return serviceBeingReferred; }
+    public void   setServiceBeingReferred(String v)    { this.serviceBeingReferred = v; }
+
+    public String getWhoReferred()                    { return whoIsReferred; }
+    public void   setWhoReferred(String v)             { this.whoIsReferred = v; }
+
+    public String getServiceReferredFor()             { return serviceBeingReferred; }
+    public void   setServiceReferredFor(String v)      { this.serviceBeingReferred = v; }
 
     public String getReferralDate()                   { return referralDate; }
     public void   setReferralDate(String v)            { this.referralDate = v; }
 
-    public String getReceivingOrg()                   { return receivingOrg; }
-    public void   setReceivingOrg(String v)            { this.receivingOrg = v; }
+    public String getRecievingOrganisation()          { return recievingOrganisation; }
+    public void   setRecievingOrganisation(String v)   { this.recievingOrganisation = v; }
+
+    public String getReceivingOrg()                   { return recievingOrganisation; }
+    public void   setReceivingOrg(String v)            { this.recievingOrganisation = v; }
+
+    public String getReferralStatus()                 { return referralStatus; }
+    public void   setReferralStatus(String v)         { this.referralStatus = v; }
 
     public String getJobTitle()                       { return jobTitle; }
     public void   setJobTitle(String v)                { this.jobTitle = v; }
+
+    public String getFullNameProvidingServices()      { return fullNameProvidingServices; }
+    public void   setFullNameProvidingServices(String v){ this.fullNameProvidingServices = v; }
 
     public String getServiceDate()                    { return serviceDate; }
     public void   setServiceDate(String v)             { this.serviceDate = v; }

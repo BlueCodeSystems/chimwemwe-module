@@ -31,7 +31,8 @@ public class SessionAttendanceParticipantDao extends AbstractDao {
                     "  session_date         TEXT," +
                     "  caregiver_attendance TEXT DEFAULT ''," +
                     "  child_attendance     TEXT DEFAULT ''," +
-                    "  caregiver_signature   TEXT DEFAULT ''" +
+                    "  caregiver_signature   TEXT DEFAULT ''," +
+                    "  caregiver_gps         TEXT DEFAULT ''" +
                     ")";
 
     public static void createTable(SQLiteDatabase db) {
@@ -90,6 +91,11 @@ public class SessionAttendanceParticipantDao extends AbstractDao {
         try { db.execSQL("ALTER TABLE " + TABLE + " ADD COLUMN caregiver_signature TEXT DEFAULT ''"); } catch (Exception ignored) {}
     }
 
+    /** Add per-participant GPS captured alongside the caregiver signature (DB v56). */
+    public static void migrateToV56(SQLiteDatabase db) {
+        try { db.execSQL("ALTER TABLE " + TABLE + " ADD COLUMN caregiver_gps TEXT DEFAULT ''"); } catch (Exception ignored) {}
+    }
+
     /**
      * Returns a map keyed by participant business code (ec_chimwemwe_participant.participant_id,
      * e.g. "CHIM-1234567890") for a given session (unlimited participants). Keyed by code rather
@@ -99,7 +105,7 @@ public class SessionAttendanceParticipantDao extends AbstractDao {
     public static Map<String, AttendanceModel> getSessionAttendanceMap(String groupId, int sessionNumber) {
         Map<String, AttendanceModel> out = new HashMap<>();
         try {
-            String sql = "SELECT participant_id, session_date, caregiver_attendance, child_attendance, caregiver_signature FROM " + TABLE +
+            String sql = "SELECT participant_id, session_date, caregiver_attendance, child_attendance, caregiver_signature, caregiver_gps FROM " + TABLE +
                     " WHERE group_id=" + q(groupId) + " AND session_number=" + sessionNumber +
                     " AND (delete_status IS NULL OR delete_status <> '1')";
             List<Map<String, AttendanceModel>> rows = AbstractDao.readData(sql, cursor -> {
@@ -116,6 +122,7 @@ public class SessionAttendanceParticipantDao extends AbstractDao {
                 a.setCaregiverAttendance(cursor.getString(2) != null ? cursor.getString(2) : "");
                 a.setChildAttendance(cursor.getString(3) != null ? cursor.getString(3) : "");
                 a.setCaregiverSignature(cursor.getString(4) != null ? cursor.getString(4) : "");
+                a.setCaregiverGps(cursor.getString(5) != null ? cursor.getString(5) : "");
                 map.put(pid, a);
                 return map;
             });
@@ -179,10 +186,70 @@ public class SessionAttendanceParticipantDao extends AbstractDao {
         AbstractDao.updateDB(update);
     }
 
+    /**
+     * Sequential eligibility check. Returns the earliest session in 1..sessionNumber-1 in which this
+     * participant was explicitly marked absent (a row exists for that session with BOTH caregiver and
+     * child attendance empty). Returns 0 when the participant missed no earlier session — i.e. eligible.
+     *
+     * "Attended" = caregiver OR child present, so only a full no-show (both empty) blocks the next
+     * session. Sessions with no row at all (never recorded, or the participant hadn't joined yet) are
+     * ignored, so late-joiners are not blocked.
+     *
+     * Computed live from stored attendance — no cached flag — so correcting an earlier session's
+     * attendance automatically re-opens later sessions on the next screen load.
+     */
+    public static int firstMissedSessionBefore(String groupId, int sessionNumber, String participantCode) {
+        if (sessionNumber <= 1) return 0;
+        if (groupId == null || groupId.trim().isEmpty()) return 0;
+        if (participantCode == null || participantCode.trim().isEmpty()) return 0;
+
+        String sql = "SELECT MIN(session_number) FROM " + TABLE +
+                " WHERE group_id=" + q(groupId.trim()) +
+                " AND participant_id=" + q(participantCode.trim()) +
+                " AND session_number < " + sessionNumber +
+                " AND (delete_status IS NULL OR delete_status <> '1')" +
+                " AND TRIM(IFNULL(caregiver_attendance,'')) = ''" +
+                " AND TRIM(IFNULL(child_attendance,'')) = ''";
+
+        List<Integer> res = AbstractDao.readData(sql, cursor -> cursor.getInt(0));
+        return (res != null && !res.isEmpty() && res.get(0) != null) ? res.get(0) : 0;
+    }
+
+    /**
+     * Session progression gate. A session is "complete" once at least one participant in it has an
+     * attendance of "Group" or "Home Visit" (stored as a non-empty caregiver OR child attendance;
+     * "Absent" is the empty string). A session where every participant is Absent — or where nothing
+     * was recorded at all — is NOT complete, so the next session stays locked.
+     *
+     * Computed live from stored attendance so correcting a session's attendance immediately unlocks
+     * or re-locks the following session on the next screen load.
+     */
+    public static boolean isSessionComplete(String groupId, int sessionNumber) {
+        if (groupId == null || groupId.trim().isEmpty()) return false;
+
+        String sql = "SELECT COUNT(*) FROM " + TABLE +
+                " WHERE group_id=" + q(groupId.trim()) +
+                " AND session_number=" + sessionNumber +
+                " AND (delete_status IS NULL OR delete_status <> '1')" +
+                " AND (TRIM(IFNULL(caregiver_attendance,'')) <> ''" +
+                "   OR TRIM(IFNULL(child_attendance,'')) <> '')";
+
+        List<Integer> res = AbstractDao.readData(sql, cursor -> cursor.getInt(0));
+        return res != null && !res.isEmpty() && res.get(0) != null && res.get(0) > 0;
+    }
+
     public static void updateSignature(String groupId, int sessionNumber, String participantCode, String signature) {
         if (groupId == null || participantCode == null || participantCode.trim().isEmpty()) return;
         String baseEntityId = "chimwemwe-session-attendance-" + groupId.trim() + "-" + sessionNumber + "-" + participantCode.trim();
         AbstractDao.updateDB("UPDATE " + TABLE + " SET caregiver_signature=" + q(signature) +
+                " WHERE base_entity_id=" + q(baseEntityId));
+    }
+
+    /** Per-participant GPS ("lat,lng") captured alongside the caregiver signature. */
+    public static void updateGps(String groupId, int sessionNumber, String participantCode, String gps) {
+        if (groupId == null || participantCode == null || participantCode.trim().isEmpty()) return;
+        String baseEntityId = "chimwemwe-session-attendance-" + groupId.trim() + "-" + sessionNumber + "-" + participantCode.trim();
+        AbstractDao.updateDB("UPDATE " + TABLE + " SET caregiver_gps=" + q(gps != null ? gps : "") +
                 " WHERE base_entity_id=" + q(baseEntityId));
     }
 
