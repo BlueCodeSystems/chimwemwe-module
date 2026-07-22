@@ -718,7 +718,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
-                android:text="These charts explain the gender composition of the children and parents/caregivers reached by the programme."
+                android:text="These charts explain who is enrolled and how children are attending sessions with their caregivers."
                 android:textSize="12sp"
                 android:textColor="@color/chimwemwe_text_secondary" />
 
@@ -783,25 +783,33 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Parents and caregivers by gender"
+                        android:text="Child attendance by session"
                         android:textColor="@color/chimwemwe_text_primary"
                         android:textSize="15sp"
                         android:textStyle="bold" />
 
-                    <com.github.mikephil.charting.charts.PieChart
-                        android:id="@+id/chart_parent_gender"
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="Each stacked bar shows complete caregiver-child pairs, partial attendance, and absent pairs recorded for Sessions 1-14."
+                        android:textColor="@color/chimwemwe_text_secondary"
+                        android:textSize="11sp" />
+
+                    <com.github.mikephil.charting.charts.BarChart
+                        android:id="@+id/chart_child_session_attendance"
                         android:layout_width="match_parent"
-                        android:layout_height="300dp"
+                        android:layout_height="320dp"
                         android:layout_marginTop="8dp" />
 
                     <TextView
-                        android:id="@+id/tv_parent_gender_empty"
+                        android:id="@+id/tv_child_session_attendance_empty"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center"
                         android:paddingTop="24dp"
                         android:paddingBottom="24dp"
-                        android:text="No caregiver gender data yet."
+                        android:text="No child session attendance data yet."
                         android:textColor="@color/chimwemwe_text_secondary"
                         android:textSize="13sp"
                         android:visibility="gone" />
