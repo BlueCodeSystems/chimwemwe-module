@@ -34,8 +34,8 @@ import com.bluecodeltd.chimwemwe.chw.actionhelper.CSVGeneratorHelper;
 import com.bluecodeltd.chimwemwe.chw.application.ChwApplication;
 import com.bluecodeltd.chimwemwe.chw.contract.GenerateCSVContract;
 import com.bluecodeltd.chimwemwe.chw.dao.HotspotGroupDao;
-import com.bluecodeltd.chimwemwe.chw.dao.HouseholdDao;
 import com.bluecodeltd.chimwemwe.chw.dao.ParticipantDao;
+import com.bluecodeltd.chimwemwe.chw.dao.SessionAttendanceParticipantDao;
 import com.bluecodeltd.chimwemwe.chw.model.HotspotGroupModel;
 import com.bluecodeltd.chimwemwe.chw.presenter.GenerateCSVPresenter;
 import com.bluecodeltd.chimwemwe.chw.util.CsvFormImportService;
@@ -45,6 +45,7 @@ import com.bluecodeltd.chimwemwe.chw.util.Threading;
 import com.bluecodeltd.chimwemwe.chw.util.UpdateManager;
 import com.bluecodeltd.chimwemwe.chw.viewmodel.DashboardViewModel;
 import com.github.javiersantos.appupdater.AppUpdater;
+import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.HorizontalBarChart;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.XAxis;
@@ -263,27 +264,15 @@ public class DashboardActivity extends AppCompatActivity
     private void loadHomepageCharts() {
         Threading.io(() -> {
             int[] childGenderCounts = ParticipantDao.getChildGenderCounts();
-            int[] parentGenderCounts = new int[]{
-                    parseCount(HouseholdDao.countMaleCaregivers()),
-                    parseCount(HouseholdDao.countFemaleCaregivers()),
-                    0
-            };
+            int[][] childAttendanceBySession = SessionAttendanceParticipantDao.getChildAttendanceBySession();
             List<HotspotGroupModel> groups = HotspotGroupDao.getAllGroups();
             Threading.main(() -> {
                 if (isFinishing() || isDestroyed()) return;
                 renderGenderPie(R.id.chart_child_gender, R.id.tv_child_gender_empty, childGenderCounts, "Children");
-                renderGenderPie(R.id.chart_parent_gender, R.id.tv_parent_gender_empty, parentGenderCounts, "Parents");
+                renderChildSessionAttendance(childAttendanceBySession);
                 renderGroupSessions(groups);
             });
         });
-    }
-
-    private int parseCount(String value) {
-        try {
-            return Integer.parseInt(value == null ? "0" : value.trim());
-        } catch (Exception e) {
-            return 0;
-        }
     }
 
     private void renderGenderPie(int chartId, int emptyId, int[] counts, String centerLabel) {
@@ -328,6 +317,76 @@ public class DashboardActivity extends AppCompatActivity
         chart.setCenterText(centerLabel + "\n" + total);
         chart.setCenterTextSize(13f);
         chart.getLegend().setWordWrapEnabled(true);
+        chart.animateY(500);
+        chart.invalidate();
+    }
+
+    private void renderChildSessionAttendance(int[][] counts) {
+        BarChart chart = findViewById(R.id.chart_child_session_attendance);
+        TextView empty = findViewById(R.id.tv_child_session_attendance_empty);
+        if (chart == null || empty == null) return;
+
+        int total = 0;
+        if (counts != null) {
+            for (int i = 0; i < Math.min(counts.length, 14); i++) {
+                if (counts[i] == null || counts[i].length < 3) continue;
+                total += counts[i][0] + counts[i][1] + counts[i][2];
+            }
+        }
+        if (total == 0) {
+            chart.setVisibility(View.GONE);
+            empty.setVisibility(View.VISIBLE);
+            return;
+        }
+        chart.setVisibility(View.VISIBLE);
+        empty.setVisibility(View.GONE);
+
+        List<BarEntry> entries = new ArrayList<>();
+        List<String> labels = new ArrayList<>();
+        int maxStack = 0;
+        for (int i = 0; i < 14; i++) {
+            int full = counts != null && i < counts.length && counts[i] != null && counts[i].length > 0 ? counts[i][0] : 0;
+            int partial = counts != null && i < counts.length && counts[i] != null && counts[i].length > 1 ? counts[i][1] : 0;
+            int absent = counts != null && i < counts.length && counts[i] != null && counts[i].length > 2 ? counts[i][2] : 0;
+            entries.add(new BarEntry(i, new float[]{full, partial, absent}));
+            labels.add("S" + (i + 1));
+            maxStack = Math.max(maxStack, full + partial + absent);
+        }
+
+        BarDataSet set = new BarDataSet(entries, "Child attendance");
+        set.setColors(
+                Color.parseColor("#16A34A"),
+                Color.parseColor("#F59E0B"),
+                Color.parseColor("#DC2626"));
+        set.setStackLabels(new String[]{"Full pair", "Partial", "Absent"});
+        set.setDrawValues(false);
+
+        BarData data = new BarData(set);
+        data.setBarWidth(0.65f);
+        chart.setData(data);
+        chart.getDescription().setEnabled(false);
+        chart.getLegend().setEnabled(true);
+        chart.getLegend().setWordWrapEnabled(true);
+        chart.setFitBars(true);
+        chart.setDrawValueAboveBar(false);
+        chart.setScaleEnabled(false);
+
+        XAxis x = chart.getXAxis();
+        x.setValueFormatter(new IndexAxisValueFormatter(labels));
+        x.setPosition(XAxis.XAxisPosition.BOTTOM);
+        x.setGranularity(1f);
+        x.setGranularityEnabled(true);
+        x.setDrawGridLines(false);
+        x.setLabelCount(labels.size());
+
+        YAxis left = chart.getAxisLeft();
+        left.setAxisMinimum(0f);
+        left.setAxisMaximum(Math.max(1f, maxStack + 1f));
+        left.setGranularity(1f);
+
+        YAxis right = chart.getAxisRight();
+        right.setEnabled(false);
+
         chart.animateY(500);
         chart.invalidate();
     }
@@ -459,14 +518,14 @@ public class DashboardActivity extends AppCompatActivity
         if (isFinishing() || isDestroyed()) return;
         String message;
         if (fetchStatus == FetchStatus.fetched) {
-            message = "Sync complete ? your data is up to date.";
+            message = "Sync complete: your data is up to date.";
         } else if (fetchStatus == FetchStatus.nothingFetched) {
-            message = "Sync complete ? you are already up to date.";
+            message = "Sync complete: you are already up to date.";
         } else {
             String reason = fetchStatus != null && fetchStatus.displayValue() != null
                     ? fetchStatus.displayValue()
                     : "Please check your connection and try again.";
-            message = "Sync failed ? " + reason;
+            message = "Sync failed: " + reason;
         }
 
         try {

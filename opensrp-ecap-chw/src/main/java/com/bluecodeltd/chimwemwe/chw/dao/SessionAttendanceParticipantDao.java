@@ -147,7 +147,7 @@ public class SessionAttendanceParticipantDao extends AbstractDao {
     /**
      * Direct write of one (group, session, participant) row. Bypasses the OpenSRP form processor
      * because its edit-mode JsonFormUtils.merge() preserves existing non-empty attribute values
-     * when the new value is empty — so flipping a participant's attendance from "Group" or
+     * when the new value is empty - so flipping a participant's attendance from "Group" or
      * "Home Visit" to "Absent" (which encodes as "") through saveRegistration alone does NOT
      * land. The OpenSRP Client/Event records used for sync are still created by the caller via
      * saveRegistration; this only patches the bind_type table columns to whatever the caller
@@ -187,16 +187,12 @@ public class SessionAttendanceParticipantDao extends AbstractDao {
     }
 
     /**
-     * Sequential eligibility check. Returns the earliest session in 1..sessionNumber-1 in which this
-     * participant was explicitly marked absent (a row exists for that session with BOTH caregiver and
-     * child attendance empty). Returns 0 when the participant missed no earlier session — i.e. eligible.
+     * Sequential eligibility check. Returns the earliest earlier session where this participant was
+     * not recorded as a complete caregiver-child pair. Returns 0 when eligible.
      *
-     * "Attended" = caregiver OR child present, so only a full no-show (both empty) blocks the next
-     * session. Sessions with no row at all (never recorded, or the participant hadn't joined yet) are
-     * ignored, so late-joiners are not blocked.
-     *
-     * Computed live from stored attendance — no cached flag — so correcting an earlier session's
-     * attendance automatically re-opens later sessions on the next screen load.
+     * "Attended" = caregiver AND child present. If either member is absent, the entire pair is
+     * ineligible for later sessions. Sessions with no row at all are ignored, so late-joiners are not
+     * blocked.
      */
     public static int firstMissedSessionBefore(String groupId, int sessionNumber, String participantCode) {
         if (sessionNumber <= 1) return 0;
@@ -208,21 +204,45 @@ public class SessionAttendanceParticipantDao extends AbstractDao {
                 " AND participant_id=" + q(participantCode.trim()) +
                 " AND session_number < " + sessionNumber +
                 " AND (delete_status IS NULL OR delete_status <> '1')" +
-                " AND TRIM(IFNULL(caregiver_attendance,'')) = ''" +
-                " AND TRIM(IFNULL(child_attendance,'')) = ''";
+                " AND NOT (" +
+                "   LOWER(TRIM(IFNULL(caregiver_attendance,''))) IN ('group','home visit')" +
+                "   AND LOWER(TRIM(IFNULL(child_attendance,''))) IN ('group','home visit')" +
+                " )";
 
         List<Integer> res = AbstractDao.readData(sql, cursor -> cursor.getInt(0));
         return (res != null && !res.isEmpty() && res.get(0) != null) ? res.get(0) : 0;
     }
 
+    public static String firstIneligibleReasonBefore(String groupId, int sessionNumber, String participantCode) {
+        int missed = firstMissedSessionBefore(groupId, sessionNumber, participantCode);
+        if (missed <= 0) return "";
+
+        String sql = "SELECT caregiver_attendance, child_attendance FROM " + TABLE +
+                " WHERE group_id=" + q(groupId != null ? groupId.trim() : "") +
+                " AND participant_id=" + q(participantCode != null ? participantCode.trim() : "") +
+                " AND session_number=" + missed +
+                " AND (delete_status IS NULL OR delete_status <> '1')" +
+                " LIMIT 1";
+
+        List<String> res = AbstractDao.readData(sql, cursor -> {
+            String cg = cursor.getString(0) != null ? cursor.getString(0).trim() : "";
+            String ch = cursor.getString(1) != null ? cursor.getString(1).trim() : "";
+            boolean caregiverPresent = "Group".equalsIgnoreCase(cg) || "Home Visit".equalsIgnoreCase(cg);
+            boolean childPresent = "Group".equalsIgnoreCase(ch) || "Home Visit".equalsIgnoreCase(ch);
+            if (caregiverPresent && !childPresent) {
+                return "Caregiver attended Session " + missed + " but child did not attend; this pair is not eligible for this session.";
+            }
+            if (!caregiverPresent && childPresent) {
+                return "Child attended Session " + missed + " but caregiver did not attend; this pair is not eligible for this session.";
+            }
+            return "Caregiver and child did not attend Session " + missed + "; this pair is not eligible for this session.";
+        });
+        return res != null && !res.isEmpty() && res.get(0) != null ? res.get(0) : "";
+    }
+
     /**
-     * Session progression gate. A session is "complete" once at least one participant in it has an
-     * attendance of "Group" or "Home Visit" (stored as a non-empty caregiver OR child attendance;
-     * "Absent" is the empty string). A session where every participant is Absent — or where nothing
-     * was recorded at all — is NOT complete, so the next session stays locked.
-     *
-     * Computed live from stored attendance so correcting a session's attendance immediately unlocks
-     * or re-locks the following session on the next screen load.
+     * Session progression gate. A session is complete once at least one participant pair has both
+     * caregiver and child recorded as "Group" or "Home Visit".
      */
     public static boolean isSessionComplete(String groupId, int sessionNumber) {
         if (groupId == null || groupId.trim().isEmpty()) return false;
@@ -231,11 +251,53 @@ public class SessionAttendanceParticipantDao extends AbstractDao {
                 " WHERE group_id=" + q(groupId.trim()) +
                 " AND session_number=" + sessionNumber +
                 " AND (delete_status IS NULL OR delete_status <> '1')" +
-                " AND (TRIM(IFNULL(caregiver_attendance,'')) <> ''" +
-                "   OR TRIM(IFNULL(child_attendance,'')) <> '')";
+                " AND LOWER(TRIM(IFNULL(caregiver_attendance,''))) IN ('group','home visit')" +
+                " AND LOWER(TRIM(IFNULL(child_attendance,''))) IN ('group','home visit')";
 
         List<Integer> res = AbstractDao.readData(sql, cursor -> cursor.getInt(0));
         return res != null && !res.isEmpty() && res.get(0) != null && res.get(0) > 0;
+    }
+
+    /**
+     * Child attendance summary by session for the dashboard stacked bar chart.
+     * Returns [sessionIndex][0 full pair, 1 partial pair, 2 absent pair].
+     */
+    public static int[][] getChildAttendanceBySession() {
+        int[][] counts = new int[14][3];
+        String sql = "SELECT session_number," +
+                " SUM(CASE WHEN " +
+                "   LOWER(TRIM(IFNULL(caregiver_attendance,''))) IN ('group','home visit')" +
+                "   AND LOWER(TRIM(IFNULL(child_attendance,''))) IN ('group','home visit')" +
+                " THEN 1 ELSE 0 END) AS full_pairs," +
+                " SUM(CASE WHEN " +
+                "   (LOWER(TRIM(IFNULL(caregiver_attendance,''))) IN ('group','home visit')" +
+                "    OR LOWER(TRIM(IFNULL(child_attendance,''))) IN ('group','home visit'))" +
+                "   AND NOT (LOWER(TRIM(IFNULL(caregiver_attendance,''))) IN ('group','home visit')" +
+                "    AND LOWER(TRIM(IFNULL(child_attendance,''))) IN ('group','home visit'))" +
+                " THEN 1 ELSE 0 END) AS partial_pairs," +
+                " SUM(CASE WHEN " +
+                "   LOWER(TRIM(IFNULL(caregiver_attendance,''))) NOT IN ('group','home visit')" +
+                "   AND LOWER(TRIM(IFNULL(child_attendance,''))) NOT IN ('group','home visit')" +
+                " THEN 1 ELSE 0 END) AS absent_pairs" +
+                " FROM " + TABLE +
+                " WHERE session_number BETWEEN 1 AND 14" +
+                " AND (delete_status IS NULL OR delete_status <> '1')" +
+                " GROUP BY session_number";
+
+        List<int[]> rows = AbstractDao.readData(sql, cursor -> new int[]{
+                cursor.getInt(0), cursor.getInt(1), cursor.getInt(2), cursor.getInt(3)
+        });
+        if (rows != null) {
+            for (int[] row : rows) {
+                if (row == null || row.length < 4) continue;
+                int session = row[0];
+                if (session < 1 || session > 14) continue;
+                counts[session - 1][0] = row[1];
+                counts[session - 1][1] = row[2];
+                counts[session - 1][2] = row[3];
+            }
+        }
+        return counts;
     }
 
     public static void updateSignature(String groupId, int sessionNumber, String participantCode, String signature) {

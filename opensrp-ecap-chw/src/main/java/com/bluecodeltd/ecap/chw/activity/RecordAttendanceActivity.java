@@ -60,6 +60,7 @@ public class RecordAttendanceActivity extends AppCompatActivity {
     // the user grants ACCESS_FINE_LOCATION.
     private Runnable    pendingLocationCallback;
     private AttendanceAdapter adapter;
+    private TextView tvSessionAttendanceCount;
 
     /** Receives the captured "lat,lng" string so a single capture routine can feed
      *  the participant/session GPS fields. */
@@ -80,6 +81,7 @@ public class RecordAttendanceActivity extends AppCompatActivity {
 
         TextView tvSession = findViewById(R.id.tv_session_label);
         tvSession.setText("Session " + sessionNumber);
+        tvSessionAttendanceCount = findViewById(R.id.tv_session_attendance_count);
 
         etDate = findViewById(R.id.et_session_date);
 
@@ -134,6 +136,8 @@ public class RecordAttendanceActivity extends AppCompatActivity {
                 // block, even if a recycled/stale spinner reports a present value.
                 item.missedSession = SessionAttendanceParticipantDao
                         .firstMissedSessionBefore(groupId, sessionNumber, p.getParticipantId());
+                item.ineligibleReason = SessionAttendanceParticipantDao
+                        .firstIneligibleReasonBefore(groupId, sessionNumber, p.getParticipantId());
                 if (item.isBlocked()) {
                     item.caregiverAttendance = "";
                     item.childAttendance     = "";
@@ -187,7 +191,7 @@ public class RecordAttendanceActivity extends AppCompatActivity {
             return;
         }
 
-        boolean needsSignature = isPresentAttendance(row.caregiverAttendance);
+        boolean needsSignature = isPairPresent(row);
         if (!needsSignature) {
             // Absent (or not present): no signature required.
             signatures.put(row.participant.getParticipantId(), "");
@@ -196,7 +200,7 @@ public class RecordAttendanceActivity extends AppCompatActivity {
         }
 
         if (row.hasSignature()) {
-            // Option A: this present participant already signed in a prior save — reuse it and don't
+            // Option A: this present participant already signed in a prior save - reuse it and don't
             // re-prompt. Editing another (e.g. previously-absent) participant no longer forces
             // everyone who was Group/Home Visit to sign again.
             signatures.put(row.participant.getParticipantId(), row.caregiverSignature);
@@ -274,7 +278,7 @@ public class RecordAttendanceActivity extends AppCompatActivity {
 
 
     /**
-     * GPS capture for the session attendance — mirrors what the type:gps
+     * GPS capture for the session attendance - mirrors what the type:gps
      * widget on the household service form does. User-initiated: only fires
      * when the worker taps "Get location" in the signature dialog. Reads
      * last-known fix from GPS first, NETWORK_PROVIDER as fallback. Hands the
@@ -381,7 +385,7 @@ public class RecordAttendanceActivity extends AppCompatActivity {
             pendingLocationCallback = null;
             if (granted && cb != null) cb.run();
             else if (!granted) Toast.makeText(this,
-                    "Location permission denied — session will save without GPS.",
+                    "Location permission denied - session will save without GPS.",
                     Toast.LENGTH_SHORT).show();
         }
     }
@@ -395,7 +399,7 @@ public class RecordAttendanceActivity extends AppCompatActivity {
         // Blocks accidental re-taps and tells the user the form is being saved after they
         // tapped Save on the signature dialog.
         final android.app.ProgressDialog saving = new android.app.ProgressDialog(this);
-        saving.setMessage("Saving attendance…");
+        saving.setMessage("Saving attendance...");
         saving.setIndeterminate(true);
         saving.setCancelable(false);
         saving.show();
@@ -412,7 +416,7 @@ public class RecordAttendanceActivity extends AppCompatActivity {
         });
     }
 
-    // ── Client processing ─────────────────────────────────────
+    // Client processing
 
     private void saveFormEvent(String date, List<AttendanceRowItem> rows, boolean isEditMode) {
         saveFormEvent(date, rows, new HashMap<>(), isEditMode);
@@ -453,8 +457,8 @@ public class RecordAttendanceActivity extends AppCompatActivity {
 
             String sessionType = "Group Session";
             for (AttendanceRowItem row : rows) {
-                if ("Home Visit".equalsIgnoreCase(row.caregiverAttendance) ||
-                        "Home Visit".equalsIgnoreCase(row.childAttendance)) {
+                if (isPairPresent(row) && ("Home Visit".equalsIgnoreCase(row.caregiverAttendance) ||
+                        "Home Visit".equalsIgnoreCase(row.childAttendance))) {
                     sessionType = "Home Visit";
                     break;
                 }
@@ -462,7 +466,7 @@ public class RecordAttendanceActivity extends AppCompatActivity {
             ChimwemweFormUtils.ensureFieldValue(sessionForm, "session_type", sessionType);
             ChimwemweFormUtils.ensureFieldValue(sessionForm, "caregiver_signature", "");
             // session_gps captured via the dialog's "Get location" button.
-            // Empty string is fine — the column accepts NULL/blank.
+            // Empty string is fine - the column accepts NULL/blank.
             ChimwemweFormUtils.ensureFieldValue(sessionForm, "session_gps", capturedGps);
 
             for (int i = 0; i < rows.size() && i < 20; i++) {
@@ -488,7 +492,7 @@ public class RecordAttendanceActivity extends AppCompatActivity {
             // Persist normalized per-participant lines (unlimited participants per session).
             // entity_id and participant_id use the stable "CHIM-..." business code, NOT the row PK
             // (OpenSRP's CONFLICT_REPLACE corrupts the participant row's INTEGER id with a string,
-            // so String.valueOf(participant.getId()) returns "0" for every participant — which
+            // so String.valueOf(participant.getId()) returns "0" for every participant - which
             // would make all line entity_ids collide and overwrite each other).
             JSONObject lineTemplate = formUtils.getFormJson("chimwemwe_session_attendance_participant");
             if (lineTemplate == null) return;
@@ -507,7 +511,7 @@ public class RecordAttendanceActivity extends AppCompatActivity {
                 String signature = signatures != null ? signatures.get(pid) : "";
                 // Per-participant GPS: only a present participant carries a location; absent/blocked
                 // rows are forced empty so a stale fix can't linger after they're marked Absent.
-                String gps = isPresentAttendance(row.caregiverAttendance)
+                String gps = isPairPresent(row)
                         ? (row.caregiverGps != null ? row.caregiverGps : "") : "";
                 ChimwemweFormUtils.ensureFieldValue(lineForm, "caregiver_attendance", row.caregiverAttendance);
                 ChimwemweFormUtils.ensureFieldValue(lineForm, "child_attendance", row.childAttendance);
@@ -523,7 +527,7 @@ public class RecordAttendanceActivity extends AppCompatActivity {
 
                 // Force the bind_type table columns to the values the user actually picked.
                 // The OpenSRP saveRegistration above runs Client merge in edit mode, which
-                // preserves existing non-empty attribute values when the new value is empty —
+                // preserves existing non-empty attribute values when the new value is empty -
                 // so toggling a participant from Group/Home Visit to Absent ('') would silently
                 // be discarded. upsertLine writes the columns directly to bypass that.
                 SessionAttendanceParticipantDao.upsertLine(
@@ -537,7 +541,7 @@ public class RecordAttendanceActivity extends AppCompatActivity {
         }
     }
 
-    // ── Data holder ──────────────────────────────────────────
+    // Data holder
 
     static class AttendanceRowItem {
         ParticipantModel participant;
@@ -552,6 +556,7 @@ public class RecordAttendanceActivity extends AppCompatActivity {
         // Sequential eligibility: >0 means this participant was absent in that earlier session and
         // is hard-blocked for the current session until the earlier absence is corrected. 0 = eligible.
         int missedSession;
+        String ineligibleReason = "";
 
         AttendanceRowItem(ParticipantModel p, String cg, String ch) {
             this.participant         = p;
@@ -570,13 +575,32 @@ public class RecordAttendanceActivity extends AppCompatActivity {
         return "Group".equalsIgnoreCase(value) || "Home Visit".equalsIgnoreCase(value);
     }
 
+    private static boolean isPairPresent(AttendanceRowItem row) {
+        return row != null
+                && isPresentAttendance(row.caregiverAttendance)
+                && isPresentAttendance(row.childAttendance);
+    }
+
+    private void updateAttendanceCounter() {
+        if (tvSessionAttendanceCount == null || adapter == null) return;
+        List<AttendanceRowItem> rows = adapter.getRows();
+        int total = rows != null ? rows.size() : 0;
+        int attended = 0;
+        if (rows != null) {
+            for (AttendanceRowItem row : rows) {
+                if (isPairPresent(row)) attended++;
+            }
+        }
+        tvSessionAttendanceCount.setText(attended + "/" + total + " pairs attended");
+    }
+
     private static String normalizeAttendance(String value) {
         if ("Group".equalsIgnoreCase(value)) return "Group";
         if ("Home Visit".equalsIgnoreCase(value)) return "Home Visit";
         return "";
     }
 
-    // ── Adapter ──────────────────────────────────────────────
+    // Adapter
 
     class AttendanceAdapter extends RecyclerView.Adapter<AttendanceAdapter.VH> {
         private List<AttendanceRowItem> allRows      = new ArrayList<>();
@@ -586,6 +610,7 @@ public class RecordAttendanceActivity extends AppCompatActivity {
             allRows      = data != null ? new ArrayList<>(data) : new ArrayList<>();
             filteredRows = new ArrayList<>(allRows);
             notifyDataSetChanged();
+            updateAttendanceCounter();
         }
 
         void filter(String query) {
@@ -603,7 +628,7 @@ public class RecordAttendanceActivity extends AppCompatActivity {
             notifyDataSetChanged();
         }
 
-        /** Always return all rows for saving — filtered view is display-only. */
+        /** Always return all rows for saving - filtered view is display-only. */
         List<AttendanceRowItem> getRows() {
             return allRows;
         }
@@ -621,10 +646,12 @@ public class RecordAttendanceActivity extends AppCompatActivity {
             h.tvCaregiverName.setText(row.participant.getCaregiverFullName());
             h.tvChildName.setText(row.participant.getChildFullName());
 
-            // Sequential eligibility gate. Reset both ways every bind — ViewHolders are recycled.
+            // Sequential eligibility gate. Reset both ways every bind - ViewHolders are recycled.
             boolean blocked = row.isBlocked();
             if (blocked) {
-                h.tvIneligibleReason.setText("Ineligible: missed Session " + row.missedSession);
+                h.tvIneligibleReason.setText(row.ineligibleReason != null && !row.ineligibleReason.trim().isEmpty()
+                        ? row.ineligibleReason
+                        : "Ineligible: missed Session " + row.missedSession);
                 h.tvIneligibleReason.setVisibility(View.VISIBLE);
             } else {
                 h.tvIneligibleReason.setVisibility(View.GONE);
@@ -634,8 +661,8 @@ public class RecordAttendanceActivity extends AppCompatActivity {
 
             // Option B: per-row signature status + "tap to re-sign". Only meaningful for a present,
             // already-signed, eligible participant. Reset every bind (ViewHolders are recycled).
-            if (!blocked && isPresentAttendance(row.caregiverAttendance) && row.hasSignature()) {
-                h.tvSignatureStatus.setText("✓ Signed · tap to re-sign");
+            if (!blocked && isPairPresent(row) && row.hasSignature()) {
+                h.tvSignatureStatus.setText("Signed - tap to re-sign");
                 h.tvSignatureStatus.setVisibility(View.VISIBLE);
                 h.tvSignatureStatus.setOnClickListener(v -> showCaregiverSignatureDialog(row, (signature, gps) -> {
                     row.caregiverSignature = signature;
@@ -681,7 +708,7 @@ public class RecordAttendanceActivity extends AppCompatActivity {
             h.spinnerCaregiver.setAdapter(adapter);
             h.spinnerChild.setAdapter(adapter2);
 
-            // Restore selections (programmatic — guarded by the touch flags above)
+            // Restore selections (programmatic - guarded by the touch flags above)
             setSpinnerValue(h.spinnerCaregiver, row.caregiverAttendance);
             setSpinnerValue(h.spinnerChild, row.childAttendance);
 
@@ -694,9 +721,12 @@ public class RecordAttendanceActivity extends AppCompatActivity {
                 public void onItemSelected(android.widget.AdapterView<?> parent, View view, int position, long id) {
                     if (!h.userTouchedCaregiver) return; // ignore programmatic selection during (re)bind
                     int adapterPos = h.getAdapterPosition();
-                    if (adapterPos != RecyclerView.NO_POSITION && adapterPos < filteredRows.size())
+                    if (adapterPos != RecyclerView.NO_POSITION && adapterPos < filteredRows.size()) {
                         filteredRows.get(adapterPos).caregiverAttendance =
                                 position == 0 ? "" : ATTENDANCE_OPTIONS[position];
+                        updateAttendanceCounter();
+                        notifyItemChanged(adapterPos);
+                    }
                 }
                 @Override public void onNothingSelected(android.widget.AdapterView<?> parent) {}
             });
@@ -706,9 +736,12 @@ public class RecordAttendanceActivity extends AppCompatActivity {
                 public void onItemSelected(android.widget.AdapterView<?> parent, View view, int position, long id) {
                     if (!h.userTouchedChild) return; // ignore programmatic selection during (re)bind
                     int adapterPos = h.getAdapterPosition();
-                    if (adapterPos != RecyclerView.NO_POSITION && adapterPos < filteredRows.size())
+                    if (adapterPos != RecyclerView.NO_POSITION && adapterPos < filteredRows.size()) {
                         filteredRows.get(adapterPos).childAttendance =
                                 position == 0 ? "" : ATTENDANCE_OPTIONS[position];
+                        updateAttendanceCounter();
+                        notifyItemChanged(adapterPos);
+                    }
                 }
                 @Override public void onNothingSelected(android.widget.AdapterView<?> parent) {}
             });
