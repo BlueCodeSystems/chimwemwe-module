@@ -7,7 +7,7 @@
     android:orientation="vertical"
     android:background="@color/chimwemwe_surface">
 
-    <!-- ── Toolbar ── -->
+    <!-- Toolbar -->
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -24,7 +24,7 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <!-- ── Session info card ── -->
+    <!-- Session info card -->
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -75,6 +75,15 @@
                         android:text="Record who attended this session"
                         android:textSize="11sp"
                         android:textColor="@color/chimwemwe_text_secondary" />
+                    <TextView
+                        android:id="@+id/tv_session_attendance_count"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="0/0 pairs attended"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/chimwemwe_primary" />
 
                 </LinearLayout>
 
@@ -118,7 +127,7 @@
 
     </androidx.cardview.widget.CardView>
 
-    <!-- ── Search bar ── -->
+    <!-- Search bar -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -144,7 +153,7 @@
             android:layout_width="0dp"
             android:layout_height="36dp"
             android:layout_weight="1"
-            android:hint="Search participant…"
+            android:hint="Search participant..."
             android:textSize="13sp"
             android:textColor="@color/chimwemwe_text_primary"
             android:textColorHint="#A8B2BB"
@@ -157,7 +166,7 @@
 
     </LinearLayout>
 
-    <!-- ── Column headers ── -->
+    <!-- Column headers -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -204,7 +213,7 @@
 
     </LinearLayout>
 
-    <!-- ── Attendance list ── -->
+    <!-- Attendance list -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_attendance"
         android:layout_width="match_parent"
@@ -213,7 +222,7 @@
         android:clipToPadding="false"
         android:paddingBottom="8dp" />
 
-    <!-- ── Save button ── -->
+    <!-- Save button -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
