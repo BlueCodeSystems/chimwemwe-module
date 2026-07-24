@@ -16,7 +16,10 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -45,19 +48,24 @@ import com.bluecodeltd.chimwemwe.chw.util.Threading;
 import com.bluecodeltd.chimwemwe.chw.util.UpdateManager;
 import com.bluecodeltd.chimwemwe.chw.viewmodel.DashboardViewModel;
 import com.github.javiersantos.appupdater.AppUpdater;
-import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.HorizontalBarChart;
+import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.github.mikephil.charting.formatter.ValueFormatter;
+import com.github.mikephil.charting.highlight.Highlight;
+import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -72,6 +80,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import timber.log.Timber;
 
@@ -88,6 +97,22 @@ public class DashboardActivity extends AppCompatActivity
     private static final int COLOR_MALE = Color.parseColor("#2563EB");
     private static final int COLOR_FEMALE = Color.parseColor("#DB2777");
     private static final int COLOR_UNSPECIFIED = Color.parseColor("#9CA3AF");
+
+    private static final int COLOR_RETENTION = Color.parseColor("#2563EB");
+
+    /** All non-deleted groups, used to (re)build the facility and group filters. */
+    private final List<HotspotGroupModel> allChartGroups = new ArrayList<>();
+    /** Groups backing the group spinner for the current facility scope (index 0 = sentinel). */
+    private final List<HotspotGroupModel> attendanceGroups = new ArrayList<>();
+    /** Facility labels backing the facility spinner (index 0 = "All facilities"). */
+    private final List<String> attendanceFacilities = new ArrayList<>();
+    /** Facility currently selected; null means "All facilities". */
+    private String selectedAttendanceFacility = null;
+    /** group_id currently selected; null means "all groups in the current facility scope". */
+    private String selectedAttendanceGroupId = null;
+    /** Guards the spinner listeners while we programmatically restore selections. */
+    private boolean suppressFacilitySpinnerCallback = false;
+    private boolean suppressGroupSpinnerCallback = false;
 
     private final Handler handler = new Handler();
     private Runnable runnable;
@@ -236,6 +261,19 @@ public class DashboardActivity extends AppCompatActivity
         tabOverview.setOnClickListener(showOverview);
         tabCharts.setOnClickListener(showCharts);
         setDashboardTab(true, tabOverview, tabCharts, overview, charts);
+        setupAttendanceHelp();
+    }
+
+    /** Wires the collapsible "How to read these charts" helper above the attendance charts. */
+    private void setupAttendanceHelp() {
+        TextView toggle = findViewById(R.id.tv_attendance_help_toggle);
+        View body = findViewById(R.id.tv_attendance_help_body);
+        if (toggle == null || body == null) return;
+        toggle.setOnClickListener(v -> {
+            boolean show = body.getVisibility() != View.VISIBLE;
+            body.setVisibility(show ? View.VISIBLE : View.GONE);
+            toggle.setText(show ? "ⓘ  Hide chart help" : "ⓘ  How to read these charts");
+        });
     }
 
     private void setDashboardTab(boolean overviewSelected, TextView tabOverview, TextView tabCharts, View overview, View charts) {
@@ -264,15 +302,189 @@ public class DashboardActivity extends AppCompatActivity
     private void loadHomepageCharts() {
         Threading.io(() -> {
             int[] childGenderCounts = ParticipantDao.getChildGenderCounts();
-            int[][] childAttendanceBySession = SessionAttendanceParticipantDao.getChildAttendanceBySession();
             List<HotspotGroupModel> groups = HotspotGroupDao.getAllGroups();
             Threading.main(() -> {
                 if (isFinishing() || isDestroyed()) return;
                 renderGenderPie(R.id.chart_child_gender, R.id.tv_child_gender_empty, childGenderCounts, "Children");
-                renderChildSessionAttendance(childAttendanceBySession);
+                setupAttendanceFilters(groups);
                 renderGroupSessions(groups);
             });
         });
+    }
+
+    /**
+     * Builds the facility + group filters for the attendance charts. The facility spinner narrows
+     * which groups appear in the group spinner; the group spinner narrows to a single group. Both
+     * selections are preserved across refreshes (and reset gracefully when their target disappears).
+     */
+    private void setupAttendanceFilters(List<HotspotGroupModel> groups) {
+        Spinner facilitySpinner = findViewById(R.id.spinner_attendance_facility);
+        if (facilitySpinner == null) return;
+
+        allChartGroups.clear();
+        if (groups != null) {
+            for (HotspotGroupModel g : groups) {
+                if (g == null || g.getGroupId() == null || g.getGroupId().trim().isEmpty()) continue;
+                allChartGroups.add(g);
+            }
+        }
+
+        // Distinct facilities (case-insensitive), sorted for a stable dropdown order.
+        TreeMap<String, String> facilityByKey = new TreeMap<>();
+        for (HotspotGroupModel g : allChartGroups) {
+            String f = g.getNearestHealthFacility();
+            if (f == null || f.trim().isEmpty()) continue;
+            facilityByKey.putIfAbsent(f.trim().toLowerCase(), f.trim());
+        }
+
+        attendanceFacilities.clear();
+        List<String> facilityLabels = new ArrayList<>();
+        facilityLabels.add("All facilities");
+        attendanceFacilities.add(null); // index 0 sentinel
+        for (String display : facilityByKey.values()) {
+            facilityLabels.add(display);
+            attendanceFacilities.add(display);
+        }
+
+        // Restore facility selection if it still exists.
+        int facilityIndex = 0;
+        if (selectedAttendanceFacility != null) {
+            for (int i = 1; i < attendanceFacilities.size(); i++) {
+                if (selectedAttendanceFacility.equalsIgnoreCase(attendanceFacilities.get(i))) {
+                    facilityIndex = i;
+                    selectedAttendanceFacility = attendanceFacilities.get(i);
+                    break;
+                }
+            }
+            if (facilityIndex == 0) selectedAttendanceFacility = null; // facility gone
+        }
+
+        ArrayAdapter<String> facilityAdapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item, facilityLabels);
+        facilityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        suppressFacilitySpinnerCallback = true;
+        facilitySpinner.setAdapter(facilityAdapter);
+        facilitySpinner.setSelection(facilityIndex, false);
+        facilitySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (suppressFacilitySpinnerCallback) {
+                    suppressFacilitySpinnerCallback = false;
+                    return;
+                }
+                selectedAttendanceFacility = position > 0 && position < attendanceFacilities.size()
+                        ? attendanceFacilities.get(position) : null;
+                selectedAttendanceGroupId = null; // group list changes with facility
+                rebuildGroupSpinner();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) { }
+        });
+
+        rebuildGroupSpinner();
+    }
+
+    /** (Re)builds the group spinner for the currently selected facility scope. */
+    private void rebuildGroupSpinner() {
+        Spinner groupSpinner = findViewById(R.id.spinner_attendance_group);
+        if (groupSpinner == null) return;
+
+        attendanceGroups.clear();
+        List<String> labels = new ArrayList<>();
+        labels.add(selectedAttendanceFacility == null ? "All groups" : "All groups at this facility");
+        attendanceGroups.add(null); // index 0 sentinel = all groups in scope
+
+        for (HotspotGroupModel g : allChartGroups) {
+            if (selectedAttendanceFacility != null
+                    && !selectedAttendanceFacility.equalsIgnoreCase(
+                            g.getNearestHealthFacility() != null ? g.getNearestHealthFacility().trim() : "")) {
+                continue;
+            }
+            String name = g.getGroupName() != null && !g.getGroupName().trim().isEmpty()
+                    ? g.getGroupName().trim() : "(unnamed group)";
+            labels.add(name);
+            attendanceGroups.add(g);
+        }
+
+        // Restore group selection if it still exists in the current scope.
+        int groupIndex = 0;
+        if (selectedAttendanceGroupId != null) {
+            for (int i = 1; i < attendanceGroups.size(); i++) {
+                HotspotGroupModel g = attendanceGroups.get(i);
+                if (g != null && selectedAttendanceGroupId.equals(g.getGroupId())) {
+                    groupIndex = i;
+                    break;
+                }
+            }
+            if (groupIndex == 0) selectedAttendanceGroupId = null;
+        }
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item, labels);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        suppressGroupSpinnerCallback = true;
+        groupSpinner.setAdapter(adapter);
+        groupSpinner.setSelection(groupIndex, false);
+        groupSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (suppressGroupSpinnerCallback) {
+                    suppressGroupSpinnerCallback = false;
+                    loadAttendanceForSelection();
+                    return;
+                }
+                HotspotGroupModel g = position >= 0 && position < attendanceGroups.size()
+                        ? attendanceGroups.get(position) : null;
+                selectedAttendanceGroupId = g != null ? g.getGroupId() : null;
+                loadAttendanceForSelection();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) { }
+        });
+
+        // setSelection(..., false) does not reliably fire the listener; render explicitly.
+        loadAttendanceForSelection();
+    }
+
+    private void loadAttendanceForSelection() {
+        final String groupId = selectedAttendanceGroupId;
+        final String facility = selectedAttendanceFacility;
+        final String scope = computeScopeLabel(groupId, facility);
+        Threading.io(() -> {
+            int[][] counts;
+            if (groupId != null && !groupId.trim().isEmpty()) {
+                counts = SessionAttendanceParticipantDao.getChildAttendanceBySession(groupId);
+            } else if (facility != null && !facility.trim().isEmpty()) {
+                counts = SessionAttendanceParticipantDao.getChildAttendanceBySessionForFacility(facility);
+            } else {
+                counts = SessionAttendanceParticipantDao.getChildAttendanceBySession((String) null);
+            }
+            Threading.main(() -> {
+                if (isFinishing() || isDestroyed()) return;
+                renderAttendanceCharts(counts, scope);
+            });
+        });
+    }
+
+    /** Human-readable scope for the attendance subtitle, reflecting both filters. */
+    private String computeScopeLabel(String groupId, String facility) {
+        if (groupId != null && !groupId.trim().isEmpty()) {
+            for (HotspotGroupModel g : attendanceGroups) {
+                if (g != null && groupId.equals(g.getGroupId())) {
+                    return g.getGroupName() != null && !g.getGroupName().trim().isEmpty()
+                            ? g.getGroupName().trim() : "Selected group";
+                }
+            }
+            return "Selected group";
+        }
+        if (facility != null && !facility.trim().isEmpty()) {
+            return facility.trim() + " · all groups";
+        }
+        return "All groups";
     }
 
     private void renderGenderPie(int chartId, int emptyId, int[] counts, String centerLabel) {
@@ -321,55 +533,132 @@ public class DashboardActivity extends AppCompatActivity
         chart.invalidate();
     }
 
-    private void renderChildSessionAttendance(int[][] counts) {
-        BarChart chart = findViewById(R.id.chart_child_session_attendance);
+    /**
+     * Renders the child session-attendance card for the given (null = all groups) scope:
+     *  - A headline: overall complete-pair attendance (% of all recorded pairs that were complete).
+     *  - One bar chart: number of complete caregiver-child pairs attending each session (1–14).
+     * Tapping a bar shows that session's exact numbers. Sessions not yet held have no bar, but
+     * their number still shows on the axis so the 1–14 sequence is always complete and in order.
+     */
+    private void renderAttendanceCharts(int[][] counts, String scope) {
+        LineChart chart = findViewById(R.id.chart_child_attendance_retention);
         TextView empty = findViewById(R.id.tv_child_session_attendance_empty);
+        TextView subtitle = findViewById(R.id.tv_child_session_attendance_subtitle);
+        TextView headlinePct = findViewById(R.id.tv_attendance_headline_pct);
+        TextView headlineSub = findViewById(R.id.tv_attendance_headline_sub);
+        View headline = findViewById(R.id.attendance_headline);
+        TextView detail = findViewById(R.id.tv_attendance_detail);
         if (chart == null || empty == null) return;
 
-        int total = 0;
-        if (counts != null) {
-            for (int i = 0; i < Math.min(counts.length, 14); i++) {
-                if (counts[i] == null || counts[i].length < 3) continue;
-                total += counts[i][0] + counts[i][1] + counts[i][2];
-            }
-        }
-        if (total == 0) {
-            chart.setVisibility(View.GONE);
-            empty.setVisibility(View.VISIBLE);
-            return;
-        }
-        chart.setVisibility(View.VISIBLE);
-        empty.setVisibility(View.GONE);
-
-        List<BarEntry> entries = new ArrayList<>();
+        // Per-session tallies, kept for the tap-to-inspect detail line.
+        final int[] fullBySession = new int[14];
+        final int[] recordedBySession = new int[14];
+        List<Entry> entries = new ArrayList<>();
         List<String> labels = new ArrayList<>();
-        int maxStack = 0;
+        int totalComplete = 0;
+        int totalRecorded = 0;
+        int maxFull = 0;
+        int sessionsRecorded = 0;
         for (int i = 0; i < 14; i++) {
+            labels.add(String.valueOf(i + 1)); // full 1..14 axis, always
             int full = counts != null && i < counts.length && counts[i] != null && counts[i].length > 0 ? counts[i][0] : 0;
             int partial = counts != null && i < counts.length && counts[i] != null && counts[i].length > 1 ? counts[i][1] : 0;
             int absent = counts != null && i < counts.length && counts[i] != null && counts[i].length > 2 ? counts[i][2] : 0;
-            entries.add(new BarEntry(i, new float[]{full, partial, absent}));
-            labels.add("S" + (i + 1));
-            maxStack = Math.max(maxStack, full + partial + absent);
+            int recorded = full + partial + absent;
+            fullBySession[i] = full;
+            recordedBySession[i] = recorded;
+            if (recorded == 0) continue; // session not held yet: no bar, axis number stays
+
+            entries.add(new Entry(i, full));
+            totalComplete += full;
+            totalRecorded += recorded;
+            maxFull = Math.max(maxFull, full);
+            sessionsRecorded++;
         }
 
-        BarDataSet set = new BarDataSet(entries, "Child attendance");
-        set.setColors(
-                Color.parseColor("#16A34A"),
-                Color.parseColor("#F59E0B"),
-                Color.parseColor("#DC2626"));
-        set.setStackLabels(new String[]{"Full pair", "Partial", "Absent"});
-        set.setDrawValues(false);
+        if (sessionsRecorded == 0) {
+            chart.setVisibility(View.GONE);
+            if (headline != null) headline.setVisibility(View.GONE);
+            if (detail != null) detail.setVisibility(View.GONE);
+            empty.setVisibility(View.VISIBLE);
+            if (headlinePct != null) headlinePct.setText("—");
+            if (headlineSub != null) headlineSub.setText("No sessions recorded yet.");
+            if (subtitle != null) subtitle.setText(scope + " · no sessions recorded yet.");
+            return;
+        }
 
-        BarData data = new BarData(set);
-        data.setBarWidth(0.65f);
+        chart.setVisibility(View.VISIBLE);
+        if (headline != null) headline.setVisibility(View.VISIBLE);
+        if (detail != null) detail.setVisibility(View.VISIBLE);
+        empty.setVisibility(View.GONE);
+
+        // ── Headline: overall complete-pair attendance ────────────
+        int overallPct = totalRecorded > 0 ? Math.round((totalComplete * 100f) / totalRecorded) : 0;
+        if (headlinePct != null) {
+            headlinePct.setText(overallPct + "%");
+            headlinePct.setTextColor(COLOR_RETENTION);
+        }
+        if (headlineSub != null) {
+            headlineSub.setText(sessionsRecorded + (sessionsRecorded == 1 ? " session held · " : " sessions held · ")
+                    + totalComplete + (totalComplete == 1 ? " complete pair" : " complete pairs"));
+        }
+        if (subtitle != null) {
+            subtitle.setText(scope + " · " + sessionsRecorded
+                    + (sessionsRecorded == 1 ? " session held" : " sessions held"));
+        }
+        if (detail != null) detail.setText("Tap a point to see that session’s numbers.");
+
+        // ── Line chart: complete pairs attending each session ─────
+        LineDataSet set = new LineDataSet(entries, "Complete pairs");
+        set.setColor(COLOR_RETENTION);
+        set.setLineWidth(2.5f);
+        set.setCircleColor(COLOR_RETENTION);
+        set.setCircleRadius(4.5f);
+        set.setDrawCircleHole(true);
+        set.setCircleHoleColor(Color.WHITE);
+        set.setValueTextSize(10f);
+        set.setValueTextColor(COLOR_RETENTION);
+        set.setMode(LineDataSet.Mode.LINEAR);
+        set.setValueFormatter(new ValueFormatter() {
+            @Override public String getFormattedValue(float value) {
+                return String.valueOf((int) value);
+            }
+        });
+        LineData data = new LineData(set);
+        styleLineChart(chart, data, labels);
+        YAxis left = chart.getAxisLeft();
+        left.setAxisMinimum(0f);
+        left.setAxisMaximum(Math.max(1f, maxFull + 1f));
+        left.setGranularity(1f);
+
+        // Tap a bar → show that session's complete pairs and % of recorded.
+        chart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
+            @Override public void onValueSelected(Entry e, Highlight h) {
+                if (detail == null || e == null) return;
+                int s = Math.round(e.getX());
+                if (s < 0 || s >= 14) return;
+                int full = fullBySession[s];
+                int recorded = recordedBySession[s];
+                int pct = recorded > 0 ? Math.round((full * 100f) / recorded) : 0;
+                detail.setText("Session " + (s + 1) + ": " + full
+                        + (full == 1 ? " complete pair" : " complete pairs")
+                        + " · " + pct + "% of " + recorded + " recorded");
+            }
+            @Override public void onNothingSelected() {
+                if (detail != null) detail.setText("Tap a point to see that session’s numbers.");
+            }
+        });
+        chart.invalidate();
+    }
+
+    /** Shared axis/legend styling for the per-session attendance line chart. */
+    private void styleLineChart(LineChart chart, LineData data, List<String> labels) {
         chart.setData(data);
         chart.getDescription().setEnabled(false);
-        chart.getLegend().setEnabled(true);
-        chart.getLegend().setWordWrapEnabled(true);
-        chart.setFitBars(true);
-        chart.setDrawValueAboveBar(false);
+        chart.getLegend().setEnabled(false);
         chart.setScaleEnabled(false);
+        chart.setDoubleTapToZoomEnabled(false);
+        chart.setExtraBottomOffset(6f);
 
         XAxis x = chart.getXAxis();
         x.setValueFormatter(new IndexAxisValueFormatter(labels));
@@ -377,18 +666,13 @@ public class DashboardActivity extends AppCompatActivity
         x.setGranularity(1f);
         x.setGranularityEnabled(true);
         x.setDrawGridLines(false);
-        x.setLabelCount(labels.size());
+        x.setLabelCount(labels.size(), false);
+        x.setAxisMinimum(-0.5f);
+        x.setAxisMaximum(labels.size() - 0.5f);
 
-        YAxis left = chart.getAxisLeft();
-        left.setAxisMinimum(0f);
-        left.setAxisMaximum(Math.max(1f, maxStack + 1f));
-        left.setGranularity(1f);
-
-        YAxis right = chart.getAxisRight();
-        right.setEnabled(false);
-
-        chart.animateY(500);
-        chart.invalidate();
+        chart.getAxisLeft().setDrawGridLines(true);
+        chart.getAxisRight().setEnabled(false);
+        chart.animateX(500);
     }
 
     private void renderGroupSessions(List<HotspotGroupModel> groups) {

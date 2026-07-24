@@ -259,34 +259,109 @@ public class SessionAttendanceParticipantDao extends AbstractDao {
     }
 
     /**
-     * Child attendance summary by session for the dashboard stacked bar chart.
+     * Child attendance summary by session, pooled across all groups.
      * Returns [sessionIndex][0 full pair, 1 partial pair, 2 absent pair].
      */
     public static int[][] getChildAttendanceBySession() {
+        return getChildAttendanceBySession(null);
+    }
+
+    /**
+     * Child attendance summary by session for the dashboard charts.
+     * When {@code groupId} is null/blank the counts are pooled across every group;
+     * otherwise they are scoped to that single group.
+     * Returns [sessionIndex][0 full pair, 1 partial pair, 2 absent pair].
+     */
+    public static int[][] getChildAttendanceBySession(String groupId) {
+        String groupFilter = (groupId != null && !groupId.trim().isEmpty())
+                ? " AND group_id=" + q(groupId.trim())
+                : "";
+        return aggregateBySession(groupFilter);
+    }
+
+    /**
+     * Child attendance summary by session for every group attached to {@code facility}
+     * (matched against ec_chimwemwe_group.nearest_health_facility, case-insensitive).
+     * A blank facility falls back to the all-groups total.
+     */
+    public static int[][] getChildAttendanceBySessionForFacility(String facility) {
+        if (facility == null || facility.trim().isEmpty()) return aggregateBySession("");
+        String facilityFilter = " AND group_id IN (" +
+                "SELECT group_id FROM ec_chimwemwe_group" +
+                " WHERE LOWER(TRIM(IFNULL(nearest_health_facility,'')))=" + q(facility.trim().toLowerCase()) +
+                " AND (delete_status IS NULL OR delete_status <> '1'))";
+        return aggregateBySession(facilityFilter);
+    }
+
+    /**
+     * Shared aggregation; {@code extraFilter} is appended to the outer WHERE clause (may be empty,
+     * otherwise begins with " AND ..." and references group_id).
+     *
+     * Reads from BOTH attendance sources and merges them so the dashboard never under-reports:
+     *  - the normalized per-participant table (this class) holds unlimited participants and is the
+     *    source of truth for anything recorded on this device or synced as per-participant clients;
+     *  - the legacy 20-slot snapshot table ({@link SessionAttendanceDao#TABLE}) holds attendance
+     *    that was recorded before the normalized table existed or synced from older app versions.
+     * A participant that appears in BOTH (same group + session + participant_id) is counted once,
+     * preferring the normalized row, so nothing is double-counted.
+     */
+    private static int[][] aggregateBySession(String extraFilter) {
         int[][] counts = new int[14][3];
-        String sql = "SELECT session_number," +
-                " SUM(CASE WHEN " +
-                "   LOWER(TRIM(IFNULL(caregiver_attendance,''))) IN ('group','home visit')" +
-                "   AND LOWER(TRIM(IFNULL(child_attendance,''))) IN ('group','home visit')" +
-                " THEN 1 ELSE 0 END) AS full_pairs," +
-                " SUM(CASE WHEN " +
-                "   (LOWER(TRIM(IFNULL(caregiver_attendance,''))) IN ('group','home visit')" +
-                "    OR LOWER(TRIM(IFNULL(child_attendance,''))) IN ('group','home visit'))" +
-                "   AND NOT (LOWER(TRIM(IFNULL(caregiver_attendance,''))) IN ('group','home visit')" +
-                "    AND LOWER(TRIM(IFNULL(child_attendance,''))) IN ('group','home visit'))" +
-                " THEN 1 ELSE 0 END) AS partial_pairs," +
-                " SUM(CASE WHEN " +
-                "   LOWER(TRIM(IFNULL(caregiver_attendance,''))) NOT IN ('group','home visit')" +
-                "   AND LOWER(TRIM(IFNULL(child_attendance,''))) NOT IN ('group','home visit')" +
-                " THEN 1 ELSE 0 END) AS absent_pairs" +
+        String groupFilter = extraFilter != null ? extraFilter : "";
+
+        // One row per (group, session, participant) from the normalized table.
+        String normSelect = "SELECT group_id, session_number, participant_id AS pid," +
+                " LOWER(TRIM(IFNULL(caregiver_attendance,''))) AS cg," +
+                " LOWER(TRIM(IFNULL(child_attendance,''))) AS ch" +
                 " FROM " + TABLE +
                 " WHERE session_number BETWEEN 1 AND 14" +
                 " AND (delete_status IS NULL OR delete_status <> '1')" +
+                " AND participant_id IS NOT NULL AND TRIM(participant_id) <> ''";
+
+        // Unpivot the 20 snapshot slots into the same (group, session, participant) shape.
+        StringBuilder snap = new StringBuilder();
+        for (int i = 1; i <= 20; i++) {
+            if (i > 1) snap.append(" UNION ALL ");
+            snap.append("SELECT group_id, session_number, p").append(i).append("_participant_id AS pid,")
+                    .append(" LOWER(TRIM(IFNULL(p").append(i).append("_cg_attendance,''))) AS cg,")
+                    .append(" LOWER(TRIM(IFNULL(p").append(i).append("_child_attendance,''))) AS ch")
+                    .append(" FROM ").append(SessionAttendanceDao.TABLE)
+                    .append(" WHERE session_number BETWEEN 1 AND 14")
+                    .append(" AND (delete_status IS NULL OR delete_status <> '1')")
+                    .append(" AND p").append(i).append("_participant_id IS NOT NULL")
+                    .append(" AND TRIM(p").append(i).append("_participant_id) <> ''");
+        }
+
+        // Merge, preferring normalized: a snapshot slot is kept only when no normalized row exists
+        // for that same (group, session, participant).
+        String merged = "SELECT group_id, session_number, cg, ch FROM (" + normSelect + ")" +
+                " UNION ALL " +
+                "SELECT s.group_id, s.session_number, s.cg, s.ch FROM (" + snap + ") s" +
+                " WHERE NOT EXISTS (SELECT 1 FROM (" + normSelect + ") n" +
+                " WHERE n.group_id = s.group_id AND n.session_number = s.session_number AND n.pid = s.pid)";
+
+        String pres = "('group','home visit')";
+        String sql = "SELECT session_number," +
+                " SUM(CASE WHEN cg IN " + pres + " AND ch IN " + pres + " THEN 1 ELSE 0 END) AS full_pairs," +
+                " SUM(CASE WHEN (cg IN " + pres + " OR ch IN " + pres + ")" +
+                "   AND NOT (cg IN " + pres + " AND ch IN " + pres + ") THEN 1 ELSE 0 END) AS partial_pairs," +
+                " SUM(CASE WHEN cg NOT IN " + pres + " AND ch NOT IN " + pres + " THEN 1 ELSE 0 END) AS absent_pairs" +
+                " FROM (" + merged + ")" +
+                " WHERE 1=1" + groupFilter +
                 " GROUP BY session_number";
 
-        List<int[]> rows = AbstractDao.readData(sql, cursor -> new int[]{
-                cursor.getInt(0), cursor.getInt(1), cursor.getInt(2), cursor.getInt(3)
-        });
+        List<int[]> rows;
+        try {
+            rows = AbstractDao.readData(sql, cursor -> new int[]{
+                    cursor.getInt(0), cursor.getInt(1), cursor.getInt(2), cursor.getInt(3)
+            });
+        } catch (Exception e) {
+            // Older installs may not have the legacy snapshot table yet; fall back to the
+            // normalized table alone so the chart still renders what it can.
+            rows = AbstractDao.readData(normalizedOnlySql(groupFilter), cursor -> new int[]{
+                    cursor.getInt(0), cursor.getInt(1), cursor.getInt(2), cursor.getInt(3)
+            });
+        }
         if (rows != null) {
             for (int[] row : rows) {
                 if (row == null || row.length < 4) continue;
@@ -298,6 +373,25 @@ public class SessionAttendanceParticipantDao extends AbstractDao {
             }
         }
         return counts;
+    }
+
+    /** Fallback aggregation over the normalized table only (used if the merged read fails). */
+    private static String normalizedOnlySql(String groupFilter) {
+        String pres = "('group','home visit')";
+        return "SELECT session_number," +
+                " SUM(CASE WHEN LOWER(TRIM(IFNULL(caregiver_attendance,''))) IN " + pres +
+                "   AND LOWER(TRIM(IFNULL(child_attendance,''))) IN " + pres + " THEN 1 ELSE 0 END)," +
+                " SUM(CASE WHEN (LOWER(TRIM(IFNULL(caregiver_attendance,''))) IN " + pres +
+                "   OR LOWER(TRIM(IFNULL(child_attendance,''))) IN " + pres + ")" +
+                "   AND NOT (LOWER(TRIM(IFNULL(caregiver_attendance,''))) IN " + pres +
+                "   AND LOWER(TRIM(IFNULL(child_attendance,''))) IN " + pres + ") THEN 1 ELSE 0 END)," +
+                " SUM(CASE WHEN LOWER(TRIM(IFNULL(caregiver_attendance,''))) NOT IN " + pres +
+                "   AND LOWER(TRIM(IFNULL(child_attendance,''))) NOT IN " + pres + " THEN 1 ELSE 0 END)" +
+                " FROM " + TABLE +
+                " WHERE session_number BETWEEN 1 AND 14" +
+                " AND (delete_status IS NULL OR delete_status <> '1')" +
+                groupFilter +
+                " GROUP BY session_number";
     }
 
     public static void updateSignature(String groupId, int sessionNumber, String participantCode, String signature) {
