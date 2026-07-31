@@ -1,5 +1,4 @@
 <resources>
-    <string name="authenticator_name">org.smartregister.chw.ecap.chimwemwe</string>
     <string name="app_name">Chimwemwe Parenting Program</string>
     <string name="login_title">Chimwemwe Parenting Program</string>
     <string name="nav_logo">ECAP II</string>
